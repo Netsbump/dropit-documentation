@@ -1,34 +1,73 @@
-# Starlight Starter Kit: Basics
+<a name="readme-top"></a>
 
-[![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
+<!-- LOGO DU PROJET -->
+<br />
+<div align="center">
+  <a href="https://github.com/Netsbump/dropit-documentation">
+    <img src="chemin-vers-votre-logo-si-disponible" alt="Logo" width="80" height="80">
+  </a>
 
-```
-npm create astro@latest -- --template starlight
-```
+<h3 align="center">DropIt Documentation : Application de Club d'Haltérophilie</h3>
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/starlight/tree/main/examples/basics)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/starlight/tree/main/examples/basics)
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/withastro/starlight&create_from_path=examples/basics)
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fwithastro%2Fstarlight%2Ftree%2Fmain%2Fexamples%2Fbasics&project-name=my-starlight-docs&repository-name=my-starlight-docs)
+  <p align="center">
+    La documentation officielle du projet DropIt, une application web dédiée à la gestion des clubs d'haltérophilie.
+    Ce projet est développé dans le cadre de la préparation du titre professionnel
+    "Concepteur Développeur d'Applications" (RNCP Niveau 6).
+    <br />
+    <br />
+    <a href="https://docs-dropit.pages.dev/">Voir la Documentation</a>
+    ·
+    <a href="https://github.com/Netsbump/dropit-documentation/issues">Signaler un Bug</a>
+    ·
+    <a href="https://github.com/Netsbump/dropit-documentation/pulls">Demander une Fonctionnalité</a>
+  </p>
+</div>
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+---
 
-## 🚀 Project Structure
+## 📖 À propos
 
-Inside of your Astro + Starlight project, you'll see the following folders and files:
+DropIt est une application web conçue pour simplifier la gestion des clubs d'haltérophilie. 
+Ce projet s'inscrit dans le cadre de la formation "Concepteur Développeur d'Applications" et vise à répondre 
+aux besoins réels des clubs sportifs en matière de suivi des athlètes et organisation des entraînements.
 
-```
-.
-├── public/
-├── src/
-│   ├── assets/
-│   ├── content/
-│   │   ├── docs/
-│   └── content.config.ts
-├── astro.config.mjs
-├── package.json
-└── tsconfig.json
-```
+Cette documentation détaille l'ensemble du processus de développement, depuis l'analyse des besoins jusqu'au 
+déploiement, en passant par la conception technique et les choix d'architecture.
+
+## 📁 Structure du Projet
+
+ ```
+ src/content/docs/
+ ├── introduction/
+ │   ├── presentation.md     # Présentation du projet
+ │   └── contexte.md        # Contexte et enjeux
+ ├── environnement/
+ │   ├── installation.md    # Guide d'installation
+ │   └── outils.md         # Technologies utilisées
+ ├── conception/
+ │   ├── analyse.md        # Analyse des besoins
+ │   ├── architecture.md   # Architecture logicielle
+ │   ├── interfaces.md     # Interfaces utilisateur
+ │   ├── composants.md     # Composants métier
+ │   ├── base-donnees.md   # Structure BDD
+ │   └── acces-donnees.md  # Accès aux données
+ ├── securite/
+ │   ├── conception.md     # Sécurité générale
+ │   └── acces.md         # Gestion des accès
+ ├── tests/
+ │   ├── plans.md         # Plans de tests
+ │   └── validation.md    # Validation
+ ├── deploiement/
+ │   ├── preparation.md   # Préparation
+ │   └── production.md    # Mise en production
+ ├── gestion/
+ │   ├── contribution.md  # Contribution
+ │   └── documentation.md # Documentation
+ └── annexes/
+     ├── glossaire.md     # Glossaire
+     └── references.md    # Références
+ ```
+
 
 Starlight looks for `.md` or `.mdx` files in the `src/content/docs/` directory. Each file is exposed as a route based on its file name.
 
@@ -51,4 +90,4 @@ All commands are run from the root of the project, from a terminal:
 
 ## 👀 Want to learn more?
 
-Check out [Starlight’s docs](https://starlight.astro.build/), read [the Astro documentation](https://docs.astro.build), or jump into the [Astro Discord server](https://astro.build/chat).
+Check out [Starlight's docs](https://starlight.astro.build/), read [the Astro documentation](https://docs.astro.build), or jump into the [Astro Discord server](https://astro.build/chat).

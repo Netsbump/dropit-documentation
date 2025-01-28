@@ -1,36 +1,53 @@
 ---
-title: Welcome to Starlight
-description: Get started building your docs site with Starlight.
+title: Bienvenue sur DropIt
+description: Documentation complète de l'application de gestion de club d'haltérophilie.
 template: splash
 hero:
-  tagline: Congrats on setting up a new Starlight project!
+  tagline: Gérez votre club d'haltérophilie de manière simple et efficace
   image:
     file: ../../assets/houston.webp
   actions:
-    - text: Example Guide
-      link: /guides/example/
+    - text: Découvrir le projet
+      link: /introduction/presentation/
       icon: right-arrow
-    - text: Read the Starlight docs
-      link: https://starlight.astro.build
+    - text: Voir l'application
+      link: https://dropit.dev
       icon: external
       variant: minimal
 ---
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
 
-## Next steps
+## Fonctionnalités principales
 
 <CardGrid stagger>
-	<Card title="Update content" icon="pencil">
-		Edit `src/content/docs/index.mdx` to see this page change.
+	<Card title="Gestion des Athlètes" icon="user">
+		Suivez les progrès de vos athlètes, leurs performances et leurs objectifs.
 	</Card>
-	<Card title="Add new content" icon="add-document">
-		Add Markdown or MDX files to `src/content/docs` to create new pages.
+	<Card title="Planification des Entraînements" icon="calendar">
+		Organisez les sessions d'entraînement et gérez les présences.
 	</Card>
-	<Card title="Configure your site" icon="setting">
-		Edit your `sidebar` and other config in `astro.config.mjs`.
+	<Card title="Analyse des Performances" icon="chart">
+		Visualisez les progrès et analysez les données d'entraînement.
 	</Card>
-	<Card title="Read the docs" icon="open-book">
-		Learn more in [the Starlight Docs](https://starlight.astro.build/).
+	<Card title="Documentation Technique" icon="document">
+		Explorez la documentation technique complète du projet.
+	</Card>
+</CardGrid>
+
+## Technologies utilisées
+
+<CardGrid stagger>
+	<Card title="Frontend" icon="laptop">
+		React, TypeScript et TailwindCSS pour une interface moderne et responsive.
+	</Card>
+	<Card title="Backend" icon="server">
+		Node.js avec NestJS pour une API REST performante.
+	</Card>
+	<Card title="Base de données" icon="database">
+		PostgreSQL pour une gestion robuste des données.
+	</Card>
+	<Card title="Déploiement" icon="rocket">
+		Docker et CI/CD pour un déploiement automatisé.
 	</Card>
 </CardGrid>
