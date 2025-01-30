@@ -3,69 +3,58 @@ title: Contexte et enjeux
 description: Analyse du contexte, des enjeux et des choix stratégiques du projet
 ---
 
-# Contexte et enjeux
+Au sein de mon club d'haltérophilie, la gestion des entraînements repose actuellement sur l'utilisation d'une application de messagerie instantanée. Cette solution, bien que pratique à première vue, montre des limites au quotidien. Les programmes d'entraînement se retrouvent rapidement noyés dans le flux des conversations, rendant leur consultation difficile. Les annonces importantes, comme les dates de compétition ou les changements d'horaires, peuvent facilement être manquées.
 
-## Contexte du projet
+Cette situation impacte particulièrement le travail des coachs, qui doivent consacrer un temps considérable à la gestion et à la communication des programmes d'entraînement. L'absence d'un outil dédié complique le suivi personnalisé des athlètes et la planification des cycles d'entraînement.
 
-Dans le cadre de la préparation du titre professionnel "Concepteur Développeur d'Applications", j'ai entrepris de résoudre une problématique observée au sein de mon club d'haltérophilie. La communication et la gestion des programmes d'entraînement s'effectuent actuellement via une application de messagerie instantanée, une solution qui montre aujourd'hui quelques limites pour les adhérents du club.
+## Objectifs techniques
 
-Au quotidien, les programmes d'entraînement se retrouvent noyés dans un flux continu de messages. La forte activité de la conversation rend difficile l'accès aux informations essentielles, qu'il s'agisse des détails techniques des entraînements ou des annonces importantes comme les dates de compétition. Face à ces défis, le projet DropIt est né avec l'ambition de transformer et professionnaliser la gestion des entraînements.
+Le développement de ce projet s'inscrit dans le cadre des compétences attendues pour l'obtention du titre professionnel "Concepteur Développeur d'Applications". Il couvre l'ensemble des aspects techniques suivants :
 
-## Analyse des besoins
+- Conception et développement d'une application multicouche
+- Mise en place d'une architecture moderne et évolutive
+- Développement d'interfaces utilisateur responsive et accessibles
+- Création et gestion d'une base de données
+- Développement de fonctionnalités back-end sécurisées
+- Déploiement et maintenance d'une application en production
 
-### Situation actuelle
+## Public cible et besoins
 
-L'utilisation actuelle de Messenger comme outil principal de gestion des entraînements révèle plusieurs limitations significatives dans le fonctionnement quotidien du club. Cette solution, initialement choisie pour sa simplicité, montre aujourd'hui ses limites :
+L'application s'adresse à deux types d'utilisateurs aux besoins distincts :
 
-La transmission des programmes d'entraînement se perd rapidement dans l'historique des conversations, rendant leur consultation ultérieure fastidieuse. L'absence d'un système de personnalisation empêche l'adaptation des programmes aux besoins spécifiques de chaque athlète. De plus, le suivi des progressions devient complexe sans centralisation des données, limitant ainsi l'analyse de l'évolution des performances.
+### Les pratiquants
+Les membres du club pourront accéder facilement à leurs programmes d'entraînement personnalisés, suivre leurs progressions et rester informés des actualités importantes du club.
 
-### Opportunités identifiées
+Les membres du club ont besoin de :
+- Consulter facilement leur programme d'entraînement du jour
+- Suivre leur progression dans le temps
+- Recevoir les informations importantes du club
 
-L'analyse approfondie de ces limitations a permis d'identifier des opportunités d'amélioration. La création d'une plateforme dédiée permettrait non seulement de structurer la communication entre coachs et athlètes, mais aussi d'enrichir considérablement l'expérience d'entraînement. La numérisation des programmes offrirait de nouvelles possibilités en termes de personnalisation, de suivi et d'analyse des performances.
+### Les coachs
+Les entraîneurs recherchent des outils pour :
+- Créer et gérer efficacement les programmes d'entraînement
+- Suivre les performances de leurs athlètes
+- Communiquer facilement avec l'ensemble du groupe
 
-Cette transformation numérique représente une opportunité de modernisation majeure pour le club, permettant d'optimiser le temps des coachs, d'améliorer l'engagement des athlètes et de faciliter le suivi des progressions. La centralisation des données d'entraînement ouvrirait également la voie à des analyses plus poussées et à un accompagnement plus personnalisé des athlètes.
+## Approche et méthodologie
 
-## Enjeux du projet
+Le développement de l'application est envisagé de manière progressive, en commençant par les fonctionnalités essentielles. La première version se concentrera sur la gestion des programmes d'entraînement pour les coachs et leur consultation par les athlètes via l'application mobile, ainsi que sur la mise en place d'un système de communication basique.
 
-### Enjeux techniques
+Dans un second temps, l'application évoluera en fonction des retours des utilisateurs. Cette phase permettra d'intégrer le suivi des progressions, un mode hors ligne pour l'application mobile, et diverses améliorations de l'expérience utilisateur.
 
-Le développement de DropIt présente plusieurs défis techniques. Le choix de l'architecture technique s'est porté sur NestJS pour le backend et React pour le frontend, répondant aux besoins suivants :
+## Enjeux et exigences
 
-L'architecture choisie vise à permettre une évolution progressive des fonctionnalités tout en maintenant de bonnes performances. La sécurité des données personnelles et la conformité RGPD ont également guidé les choix techniques dès la conception du projet.
+Le développement de cette application présente plusieurs défis techniques et organisationnels. L'interface doit être accessible sur différents supports, avec une version mobile pour les athlètes et une interface web complète pour les coachs. 
 
-### Enjeux professionnels
+La protection des données personnelles constitue un enjeu majeur. L'application devra respecter les normes RGPD et intégrer des mesures de sécurité robustes. Les performances sont également cruciales, avec une attention particulière portée aux temps de chargement et à l'optimisation pour les connexions internet limitées.
 
-Ce projet s'inscrit dans une double démarche d'apprentissage et de réponse à un besoin concret :
+L'accessibilité est un autre aspect important du projet, avec la volonté de respecter les normes WCAG pour garantir une utilisation inclusive de l'application.
 
-Pour le club :
-- Simplification de la gestion des entraînements
-- Amélioration du suivi des athlètes
-- Optimisation du temps des coachs
+## Perspectives d'évolution
 
-Pour le développement personnel :
-- Mise en pratique des compétences acquises
-- Expérience de gestion de projet
-- Application des méthodologies de développement
-- Apprentissage continu
-
-## Choix stratégiques
-
-### Approche de développement
-
-La méthodologie de développement adoptée suit une approche itérative :
-
-1. Phase initiale focalisée sur les fonctionnalités essentielles
-2. Intégration continue et déploiement automatisé
-3. Cycles de développement courts avec feedback utilisateur
-4. Tests réguliers et ajustements basés sur les retours
-
-### Perspectives d'évolution
-
-Le projet est conçu avec une vision à long terme :
-
-La structure modulaire de l'application permet d'envisager des évolutions futures, comme l'extension à d'autres clubs ou l'ajout de fonctionnalités avancées d'analyse de performances. L'architecture choisie facilite ces évolutions tout en maintenant la stabilité du système.
+La conception modulaire de l'application permettra son évolution future. Des fonctionnalités plus avancées pourront être ajoutées progressivement, comme des outils d'analyse de performance détaillés ou une possible extension à d'autres clubs. L'architecture choisie devra faciliter ces évolutions tout en maintenant la stabilité du système.
 
 ## Conclusion
 
-Ce projet de gestion d'entraînements répond à un besoin concret identifié au sein du club d'haltérophilie. Il représente une opportunité de mettre en pratique les compétences acquises durant la formation de Concepteur Développeur d'Applications, tout en apportant une solution utile aux utilisateurs finaux. Les choix techniques et méthodologiques ont été guidés par la volonté de créer une application fonctionnelle et évolutive.
+Ce projet répond à un besoin concret observé dans mon club d'haltérophilie. Il représente une opportunité d'appliquer les compétences acquises durant ma formation tout en développant une solution utile pour ma communauté sportive. Dans la suite de ce document, je présenterai les choix techniques et les solutions adoptées pour répondre à ces différents enjeux.
 

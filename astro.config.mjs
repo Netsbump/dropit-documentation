@@ -20,13 +20,6 @@ export default defineConfig({
 					],
 				},
 				{
-					label: 'Environnement de travail',
-					items: [
-						{ label: 'Installation et configuration', link: '/environnement/installation/' },
-						{ label: 'Outils et technologies', link: '/environnement/outils/' },
-					],
-				},
-				{
 					label: 'Conception et développement',
 					items: [
 						{ label: 'Analyse des besoins', link: '/conception/analyse/' },
@@ -63,6 +56,13 @@ export default defineConfig({
 					items: [
 						{ label: 'Contribution au projet', link: '/gestion/contribution/' },
 						{ label: 'Documentation et rapports', link: '/gestion/documentation/' },
+					],
+				},
+				{
+					label: 'Environnement de travail',
+					items: [
+						{ label: 'Installation et configuration', link: '/environnement/installation/' },
+						{ label: 'Outils et technologies', link: '/environnement/outils/' },
 					],
 				},
 				{
