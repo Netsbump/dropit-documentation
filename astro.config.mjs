@@ -25,7 +25,6 @@ export default defineConfig({
 						{ label: 'Analyse des besoins', link: '/conception/analyse/' },
 						{ label: 'Architecture logicielle', link: '/conception/architecture/' },
 						{ label: 'Interfaces utilisateur', link: '/conception/interfaces/' },
-						{ label: 'Composants métier', link: '/conception/composants/' },
 						{ label: 'Base de données', link: '/conception/base-donnees/' },
 						{ label: 'Accès aux données', link: '/conception/acces-donnees/' },
 					],
