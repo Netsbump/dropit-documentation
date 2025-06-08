@@ -1,16 +1,33 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import { rehypeMermaid } from "@beoe/rehype-mermaid";
 
 // https://astro.build/config
 export default defineConfig({
 	site: 'https://docs-dropit.pages.devf',
+	markdown: {
+		rehypePlugins: [
+			[
+				rehypeMermaid,
+				{
+					strategy: "file",
+					fsPath: "public/beoe",
+					webPath: "/beoe",
+					darkScheme: "class",
+				},
+			],
+		],
+	},
 	integrations: [
 		starlight({
 			title: 'DropIt Docs',
 			social: {
 				github: 'https://github.com/withastro/starlight',
 			},
+			customCss: [
+				'./src/styles/mermaid.css',
+			],
 			sidebar: [
 				{
 					label: 'Introduction',
@@ -33,7 +50,9 @@ export default defineConfig({
 					label: 'Sécurité',
 					items: [
 						{ label: 'Conception sécurisée', link: '/securite/conception/' },
-						{ label: 'Gestion des accès', link: '/securite/acces/' },
+						{ label: 'Authentification', link: '/securite/authentification/' },
+						{ label: 'Gestion des roles', link: '/securite/permissions/' },
+						{ label: 'OWASP', link: '/securite/owasp/' },
 					],
 				},
 				{
@@ -48,6 +67,7 @@ export default defineConfig({
 					items: [
 						{ label: 'Préparation au déploiement', link: '/deploiement/preparation/' },
 						{ label: 'Mise en production', link: '/deploiement/production/' },
+						{ label: 'Performances globales', link: '/deploiement/performances/' },
 					],
 				},
 				{
@@ -55,6 +75,7 @@ export default defineConfig({
 					items: [
 						{ label: 'Contribution au projet', link: '/gestion/contribution/' },
 						{ label: 'Documentation et rapports', link: '/gestion/documentation/' },
+						{ label: 'FAQ & Support', link: '/gestion/support/' },
 					],
 				},
 				{
@@ -69,6 +90,7 @@ export default defineConfig({
 					items: [
 						{ label: 'Glossaire', link: '/annexes/glossaire/' },
 						{ label: 'Références', link: '/annexes/references/' },
+						{ label: 'Roadmap', link: '/annexes/roadmap/' },
 					],
 				},
 			],

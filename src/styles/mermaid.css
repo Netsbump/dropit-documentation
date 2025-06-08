@@ -1,0 +1,21 @@
+/* CSS pour la gestion dark/light mode des diagrammes Mermaid avec Starlight */
+html[data-theme="light"] .beoe-dark {
+  display: none;
+}
+
+html[data-theme="dark"] .beoe-light {
+  display: none;
+}
+
+/* Auto-detect si pas de thème spécifique */
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) .beoe-light {
+    display: none;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  html:not([data-theme]) .beoe-dark {
+    display: none;
+  }
+} 

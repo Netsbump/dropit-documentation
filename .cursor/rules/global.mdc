@@ -1,0 +1,133 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# CURSOR RULES - PROJET DROPIT DOCUMENTATION
+# Documentation technique pour mémoire professionnel "Concepteur Développeur d'Applications"
+
+## CONTEXTE DU PROJET
+- Projet : DropIt - Application de gestion de club d'haltérophilie
+- Framework : Astro avec template Starlight
+- Objectif : Mémoire/rapport de stage pour titre professionnel RNCP Niveau 6
+- Public cible : Jury professionnel, formateurs, pairs développeurs
+
+## RÈGLES RÉDACTIONNELLES
+
+### 1. TON ET STYLE
+- **TOUJOURS** adopter un ton rédactionnel professionnel et personnel
+- **RESTER HUMBLE** : posture d'étudiant en apprentissage, pas d'expert confirmé
+- **ÉVITER** absolument les listes à puces style "IA" (bullet points génériques)
+- **UTILISER** la première personne pour montrer l'implication personnelle ("j'ai choisi", "ma démarche", "dans mon contexte")
+- **STRUCTURER** en paragraphes narratifs qui racontent la démarche de développement
+- **JUSTIFIER** systématiquement chaque choix technique avec une argumentation réfléchie
+- **MONTRER** l'apprentissage, les découvertes, les questionnements plutôt que des certitudes absolues
+
+### 2. STRUCTURE DES DOCUMENTS
+- **COMMENCER** chaque section par une introduction contextuelle
+- **DÉVELOPPER** les arguments avec des exemples concrets du projet
+- **CONCLURE** par une ouverture sur les perspectives ou apprentissages
+- **RESPECTER** la hiérarchie logique : H2 pour les sections principales, H3 pour les sous-sections
+
+### 3. JUSTIFICATION TECHNIQUE
+- **EXPLIQUER** le pourquoi avant le comment pour chaque choix technique
+- **COMPARER** les alternatives envisagées et argumenter le choix final
+- **MENTIONNER** les contraintes du projet (temps, compétences, ressources)
+- **INTÉGRER** les aspects d'apprentissage et de montée en compétences
+
+### 4. UTILISATION DES DIAGRAMMES MERMAID
+- **CRÉER** des diagrammes pour illustrer les concepts complexes :
+  * Diagrammes de séquence pour les interactions
+  * Diagrammes de flux pour les processus métier
+  * Diagrammes d'architecture pour la structure technique
+  * Diagrammes ER pour les modèles de données
+- **PLACER** les diagrammes au bon moment dans la narration
+- **EXPLIQUER** chaque diagramme dans le texte qui l'accompagne
+
+## RÈGLES TECHNIQUES
+
+### 1. ORGANISATION DES FICHIERS
+- **RESPECTER** la structure définie dans `/src/content/docs/`
+- **UTILISER** les frontmatter YAML appropriés pour Starlight
+- **NOMMER** les fichiers en français avec des noms explicites
+- **MAINTENIR** la cohérence de navigation définie dans `astro.config.mjs`
+
+### 2. RÉFÉRENCES ET LIENS
+- **CRÉER** des liens internes entre les sections liées
+- **RÉFÉRENCER** les sources externes de manière académique
+- **UTILISER** les composants Starlight (Card, CardGrid, etc.) avec modération
+- **ÉVITER** les liens externes non essentiels
+
+### 3. IMAGES ET MÉDIAS
+- **PLACER** les images dans `/src/assets/`
+- **OPTIMISER** les images pour le web
+- **AJOUTER** des descriptions alt pertinentes
+- **PRÉFÉRER** les diagrammes Mermaid aux images statiques
+
+## SECTIONS SPÉCIFIQUES
+
+### Introduction
+- Contextualiser le parcours personnel et professionnel
+- Présenter la problématique métier identifiée
+- Expliquer la démarche de conception adoptée
+
+### Conception
+- Détailler l'analyse des besoins utilisateurs
+- Justifier les choix d'architecture avec des arguments techniques
+- Présenter les modèles de données avec diagrammes ER
+- Expliquer la logique métier avec des diagrammes de séquence
+
+### Sécurité
+- Analyser les risques identifiés
+- Présenter les mesures de protection mises en place
+- Justifier les choix de sécurité par rapport au contexte
+
+### Tests
+- Décrire la stratégie de test adoptée
+- Présenter les résultats et leur analyse
+- Expliquer les limites et améliorations possibles
+
+### Déploiement
+- Détailler la stratégie de déploiement choisie
+- Présenter les outils et processus mis en place
+- Analyser les défis rencontrés et solutions apportées
+
+## MOTS-CLÉS À ÉVITER
+- "Simplement", "facilement", "rapidement" (sans justification)
+- Formulations impersonnelles sans contexte
+- Jargon technique non expliqué
+- Affirmations non argumentées
+
+## MOTS-CLÉS À PRIVILÉGIER
+- "Dans le contexte de ce projet"
+- "Cette approche permet de"
+- "J'ai choisi cette solution car"
+- "Cette décision s'appuie sur"
+- "L'analyse révèle que"
+- "Cette expérience m'a permis de"
+- "J'ai découvert que", "J'apprends que", "Je commence à comprendre"
+- "Cette démarche me permet d'explorer", "Cela constitue pour moi un apprentissage"
+
+## VALIDATION AVANT PUBLICATION
+- ✅ Chaque choix technique est-il justifié ?
+- ✅ La progression logique est-elle respectée ?
+- ✅ Les diagrammes éclairent-ils le propos ?
+- ✅ Le ton personnel et professionnel est-il maintenu ?
+- ✅ Les liens internes fonctionnent-ils ?
+- ✅ Les apprentissages sont-ils valorisés ?
+
+## EXEMPLES DE FORMULATIONS CORRECTES
+
+❌ **À éviter :** "J'ai utilisé React parce que c'est populaire"
+✅ **Correct :** "J'ai choisi React pour le front-end en m'appuyant sur mon expérience de deux ans avec cette technologie, ce qui m'a permis de me concentrer sur les défis métier plutôt que sur l'apprentissage d'un nouveau framework"
+
+❌ **À éviter :** "PostgreSQL est une bonne base de données"
+✅ **Correct :** "PostgreSQL s'est imposé comme choix de base de données principale en raison de sa fiabilité éprouvée dans des contextes de production, de ma familiarité avec cet outil acquise lors de projets précédents, et de ses capacités avancées de gestion des relations complexes nécessaires pour modéliser les données d'entraînement"
+
+Cette documentation constitue un élément central de l'évaluation du titre professionnel. Chaque contribution doit refléter une démarche réfléchie et professionnelle. 
