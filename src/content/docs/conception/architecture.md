@@ -3,11 +3,9 @@ title: Architecture logicielle et choix technologiques
 description: Conception technique de DropIt - justifications et mise en œuvre de l'architecture
 ---
 
-## Introduction : de l'analyse fonctionnelle aux choix techniques
+## Introduction
 
-La conception de l'architecture logicielle de DropIt constitue pour moi une étape charnière où les besoins fonctionnels identifiés se traduisent en décisions techniques concrètes. Cette démarche m'amène à confronter mes connaissances théoriques aux contraintes pratiques du développement, tout en explorant de nouvelles technologies dans un contexte d'apprentissage contrôlé.
-
-Ma stratégie architecturale s'appuie sur un équilibre entre familiarité technique et découverte de nouveaux outils. J'ai privilégié des technologies que je maîtrise déjà pour les composants critiques, tout en intégrant des solutions nouvelles pour enrichir mon apprentissage sans compromettre la viabilité du projet.
+Ma stratégie architecturale de l'application s'appuie sur un équilibre entre familiarité technique et découverte de nouveaux outils. J'ai privilégié des technologies que je maîtrise déjà pour les composants critiques, tout en intégrant des solutions nouvelles pour enrichir mon apprentissage sans compromettre la viabilité du projet.
 
 Cette approche me permet d'approfondir ma compréhension des enjeux d'architecture distribuée tout en maintenant un niveau de risque technique maîtrisable dans le cadre de ma formation.
 
@@ -25,29 +23,27 @@ Cette architecture répond aux contraintes identifiées lors de l'analyse des be
 
 ### Client Web (Back Office) : React et TypeScript
 
-Pour le back office destiné aux coachs, j'ai choisi React associé à TypeScript. Ce choix s'appuie sur plusieurs facteurs que j'ai soigneusement évalués : la maturité de l'écosystème React, la fiabilité apportée par le typage statique de TypeScript, et ma propre expérience de deux ans avec ces technologies.
+Pour le back office destiné aux coachs, j'ai choisi React associé à TypeScript. Ce choix s'appuie sur ma maîtrise de ces technologies et la maturité de leur écosystème.
 
-Cette familiarité me permet de me concentrer sur les enjeux métier spécifiques à l'haltérophilie plutôt que sur l'apprentissage des fondamentaux du framework. L'écosystème React offre également une richesse de composants et d'outils (React Router, React Hook Form, Material-UI) qui accélèrent le développement d'interfaces complexes comme celles nécessaires à la gestion des programmes d'entraînement.
-
-L'interface a été pensée pour être responsive et intuitive, permettant aux coachs de gérer efficacement les programmes d'entraînement et le suivi des athlètes. TypeScript apporte une sécurité supplémentaire particulièrement appréciable lors de la manipulation des données d'entraînement où les erreurs de typage pourraient avoir des conséquences sur la sécurité des pratiquants.
+Cette familiarité me permet de me concentrer sur les enjeux métier spécifiques à l'haltérophilie. L'écosystème React offre des outils adaptés (Tanstack Router, React Hook Form, Shadcn) qui accélèrent le développement d'interfaces de gestion complexes.
 
 ### Application Mobile (Front Office) : React Native et Expo
 
 L'application mobile, développée avec React Native et Expo, constitue le point d'accès principal pour les athlètes. N'ayant aucune expérience en développement mobile natif, React Native s'est présenté comme une solution pertinente pour transposer mes compétences React vers le développement mobile.
 
-Cette technologie me permet de produire des applications natives pour iOS et Android à partir d'une base de code unique, tout en capitalisant sur mes connaissances existantes de React. Ce choix représente également une opportunité d'apprentissage du développement mobile dans un contexte réel, élargissant significativement mon champ de compétences.
+Cette technologie me permet de produire des applications natives pour iOS et Android à partir d'une base de code unique, tout en capitalisant sur mes connaissances existantes de React. Ce choix représente également une opportunité d'apprentissage du développement mobile dans un contexte réel, élargissant mon champ de compétences.
 
-Expo simplifie considérablement le processus de développement et de déploiement en automatisant de nombreuses tâches complexes (gestion des certificats, build automatisés, over-the-air updates). Cette plateforme me permet de me concentrer sur le développement des fonctionnalités plutôt que sur la configuration de l'environnement de développement mobile.
+Expo simplifie le processus de développement et de déploiement en automatisant de nombreuses tâches complexes (gestion des certificats, build automatisés, over-the-air updates). Cette plateforme me permet de me concentrer sur le développement des fonctionnalités plutôt que sur la configuration de l'environnement de développement mobile.
 
 L'architecture React Native facilite également le partage de logique métier avec l'application web via des modules TypeScript communs, optimisant ainsi le temps de développement et garantissant la cohérence des règles de calcul entre les plateformes.
 
-### API REST (NestJS) : Architecture modulaire et robustesse
+### API REST : NestJS
 
-Le backend repose sur NestJS, un framework Node.js que j'ai déjà eu l'occasion d'utiliser dans des projets précédents. Cette familiarité avec l'outil permet un développement plus efficace tout en m'offrant l'opportunité d'explorer des fonctionnalités plus avancées que je n'avais pas encore maîtrisées.
+Le backend repose sur NestJS, un framework Node.js que j'ai déjà eu l'occasion d'utiliser dans des projets précédents ainsi qu'en entreprise. Cette familiarité avec l'outil permet un développement plus efficace tout en m'offrant l'opportunité d'explorer des fonctionnalités plus avancées que je n'avais pas encore maîtrisées.
 
-Son architecture modulaire inspirée d'Angular et sa documentation complète en font un excellent choix pour structurer une API REST complexe. La philosophie de NestJS, qui privilégie la séparation des responsabilités et l'injection de dépendances, correspond parfaitement aux besoins d'une application métier comme DropIt où la logique de gestion des entraînements nécessite une organisation rigoureuse du code.
+Son architecture modulaire inspirée d'Angular et sa documentation complète en font un bon choix pour structurer une API REST. La philosophie de NestJS, qui privilégie la séparation des responsabilités et l'injection de dépendances, correspond parfaitement aux besoins d'une application métier comme DropIt où la logique de gestion des entraînements nécessite une organisation rigoureuse du code.
 
-#### Choix de l'ORM : MikroORM pour la performance et la sécurité de type
+#### Choix de l'ORM : MikroORM
 
 Pour la couche d'accès aux données, j'ai choisi MikroORM plutôt que TypeORM, plus couramment utilisé avec NestJS. Ce choix s'explique par plusieurs avantages techniques que j'ai identifiés lors de mes recherches :
 
@@ -61,33 +57,33 @@ L'API est documentée automatiquement via Swagger, facilitant ainsi son utilisat
 
 ## Écosystème de services spécialisés
 
-### Stratégie de cache et gestion de sessions : Redis
+### Stratégie de cache : Redis
 
-Redis constitue la pierre angulaire de ma stratégie de performance et de gestion des sessions. Ce choix repose sur plusieurs considérations techniques spécifiques aux besoins de DropIt :
+Redis, bien que non implémenté pour l'instant, est envisagé dans mon application pour la stratégie de performance.
 
-**Performance en environnement mobile** : Les athlètes consultent fréquemment leurs programmes pendant l'entraînement, souvent dans des conditions de réseau instables. Redis me permet de mettre en cache les données d'entraînement les plus consultées, réduisant significativement les temps de réponse et améliorant l'expérience utilisateur en salle de sport.
+Les athlètes consultent fréquemment leurs programmes pendant l'entraînement, souvent dans des conditions de réseau instables. Redis me permet de mettre en cache les données d'entraînement les plus consultées, réduisant significativement les temps de réponse et améliorant l'expérience utilisateur en salle de sport.
 
-**Gestion des sessions d'authentification** : L'architecture d'authentification hybride choisie (JWT + sessions révocables) nécessite un stockage performant pour les métadonnées de sessions. Redis excelle dans ce domaine grâce à ses structures de données spécialisées et ses capacités d'expiration automatique.
+Sa simplicité d'utilisation et ses performances éprouvées en font un excellent choix pour le stockage temporaire des données fréquemment accédées. L'intégration avec NestJS est native et bien documentée, facilitant l'implémentation.
 
-**Simplicité d'intégration** : Sa simplicité d'utilisation et ses performances éprouvées en font un excellent choix pour le stockage temporaire des données fréquemment accédées. L'intégration avec NestJS est native et bien documentée, facilitant l'implémentation.
+Cette exploration de Redis me permet également d'acquérir une compétence sur les bases de données NoSQL et les stratégies de cache, aspects essentiels du développement d'applications modernes.
 
-Cette exploration de Redis me permet également d'acquérir une compétence précieuse sur les bases de données NoSQL et les stratégies de cache, aspects essentiels du développement d'applications modernes.
+### Recherche: Typesense
 
-### Stockage de médias : MinIO et stratégie S3-compatible
+Typesense est envisagé afin de persister certaines recherches, notamment si le catalogue d'exercices et d'entraînement d'un coach grossit dans le temps. Ce ne sera pas implémenté dans le MVP mais la solution est déjà envisagée selon le besoin.
 
-Pour le stockage des médias, notamment les vidéos de démonstration d'exercices, j'ai opté pour MinIO, une alternative open-source compatible avec l'API S3 d'Amazon. Cette décision s'appuie sur une analyse coût-bénéfice adaptée au contexte du projet :
+### Stockage de médias : MinIO 
 
-**Flexibilité de déploiement** : MinIO peut être déployé localement en développement et facilement migré vers des solutions cloud en production, offrant une transition progressive selon l'évolution du projet.
+Pour le stockage des médias, notamment les vidéos de démonstration d'exercices, j'ai opté pour MinIO, une alternative open-source compatible avec l'API S3 d'Amazon.
 
-**Compatibilité S3** : L'API compatible S3 garantit la portabilité vers AWS, Google Cloud Storage ou Azure si les besoins de scalabilité l'exigent, évitant le vendor lock-in.
+L'API compatible S3 garantit la portabilité vers AWS, Google Cloud Storage ou Azure si les besoins de scalabilité l'exigent, évitant le vendor lock-in.
 
-**Solution économique** : Pour un projet de formation avec des contraintes budgétaires, MinIO offre une solution complète sans coûts de stockage externes, tout en me permettant d'apprendre les principes du stockage objet.
+MinIO me permet d'implémenter une solution complète sans coûts de stockage externes localement pendant le développement, tout en me permettant d'apprendre les principes du stockage objet.
 
 En production, cette architecture facilite l'évolution vers des solutions managées (AWS S3, Cloudflare R2) sans modification du code applicatif, grâce à la standardisation de l'API S3.
 
-### Base de données principale : PostgreSQL et fiabilité éprouvée
+### Base de données : PostgreSQL
 
-PostgreSQL a été choisi comme base de données principale pour plusieurs raisons que j'ai soigneusement évaluées :
+PostgreSQL a été choisi comme base de données principale pour plusieurs raisons :
 
 **Fiabilité dans le contexte métier** : Les données d'entraînement et de progression des athlètes nécessitent une fiabilité absolue. PostgreSQL offre des garanties ACID strictes et une robustesse éprouvée dans des contextes de production critiques.
 
@@ -97,9 +93,7 @@ PostgreSQL a été choisi comme base de données principale pour plusieurs raiso
 
 **Écosystème et performances** : L'excellent support de PostgreSQL dans l'écosystème Node.js et ses performances pour les applications transactionnelles en font un choix sûr pour l'infrastructure de données.
 
-## Architecture de déploiement et monitoring
-
-### Stratégie de déploiement : Dokploy et containerisation
+### Stratégie de déploiement : Dokploy
 
 Pour le déploiement, j'ai choisi Dokploy sur un VPS personnel, solution qui répond aux contraintes budgétaires du projet tout en m'offrant une expérience complète de déploiement d'applications modernes :
 
@@ -111,17 +105,17 @@ Pour le déploiement, j'ai choisi Dokploy sur un VPS personnel, solution qui ré
 
 ### Monitoring et observabilité : Sentry
 
-L'intégration de Sentry pour le monitoring répond à un besoin crucial de visibilité sur le comportement de l'application en production :
+L'intégration de Sentry pour le monitoring répond à un besoin de visibilité sur le comportement de l'application en production :
 
-**Détection proactive des erreurs** : Sentry permet d'identifier rapidement les problèmes rencontrés par les utilisateurs, aspect particulièrement important pour une application mobile utilisée en conditions réelles d'entraînement.
+**Détection proactive des erreurs** : Sentry permet d'identifier rapidement les problèmes rencontrés par les utilisateurs
 
-**Apprentissage de l'observabilité** : Cette intégration me familiarise avec les concepts d'observabilité et de monitoring, compétences essentielles pour le développement d'applications professionnelles.
+**Apprentissage de l'observabilité** : Cette intégration me familiarise avec les concepts d'observabilité et de monitoring
 
 **Tableaux de bord et métriques** : Les capacités de reporting de Sentry m'aident à comprendre les patterns d'usage et à identifier les axes d'amélioration de l'application.
 
 ## Communication inter-composants et protocoles
 
-La communication entre les différents composants s'effectue via des protocoles standardisés que j'ai choisis pour leur fiabilité et leur simplicité d'implémentation :
+La communication entre les différents composants s'effectue via des protocoles standardisés, le diagramme suivant représente les interactions entre les différentes couches de l'application. 
 
 ```mermaid
 sequenceDiagram
@@ -145,17 +139,34 @@ sequenceDiagram
     API-->>Web: JSON Response
 ```
 
-**HTTP/HTTPS pour les interactions client-serveur** : Ce protocole standardisé assure une communication fiable et sécurisée entre les applications frontend et l'API. Le chiffrement HTTPS garantit la confidentialité des données d'entraînement et d'authentification.
+**HTTP/HTTPS pour les interactions client-serveur** : Ce protocole standardisé assure une communication fiable et sécurisée entre les applications frontend et l'API. Le chiffrement HTTPS garantit la confidentialité des échanges de données.
 
-**Protocoles natifs pour les bases de données** : PostgreSQL utilise son protocole optimisé construit sur TCP/IP, tandis que Redis communique via son protocole spécifique également basé sur TCP. Cette standardisation garantit une interopérabilité et une maintenance simplifiée de l'ensemble du système.
+**Protocoles natifs pour les bases de données** : PostgreSQL utilise son protocole optimisé construit sur TCP/IP, tandis que Redis communique via son protocole spécifique également basé sur TCP.
 
 **Format JSON pour les échanges de données** : Le format JSON assure une interopérabilité maximale entre les différents clients et facilite le débogage et la maintenance.
 
-## Sécurité architecturale intégrée
+## Structure de projet monorepo
 
-La sécurité a été intégrée dès la conception de l'architecture plutôt que d'être ajoutée a posteriori. Cette approche "security by design" influence tous les choix techniques :
+Le projet a été conçu selon une architecture monorepo facilitant le partage de code et la cohérence entre les différentes applications :
 
-**Authentification hybride** : L'authentification repose sur une architecture hybride combinant les avantages des tokens JWT (performance, stateless) avec la sécurité des sessions révocables (contrôle granulaire, révocation immédiate).
+**Applications principales :**
+- `apps/webapp` - Interface web pour les coachs
+- `apps/mobileapp` - Application mobile pour les athlètes  
+- `apps/api` - API REST centralisée
+
+**Packages partagés :**
+- `packages/contract` - Contrats d'API typés avec tsrest
+- `packages/schema` - Schémas Zod pour la validation de données
+- `packages/permissions` - Règles d'accès par rôles utilisateur
+- `packages/i18n` - Gestion de l'internationalisation
+
+Cette organisation optimise la réutilisabilité du code métier et garantit la cohérence des types entre frontend et backend. 
+
+## Sécurité architecturale
+
+La sécurité a été intégrée dès la conception de l'architecture plutôt que d'être ajoutée a posteriori. Elle est composée d'un ensemble de bonnes pratiques sur toutes les couches de l'application, dont les exemples les plus significatifs sont les suivants :
+
+**Authentification** : L'authentification repose sur une architecture hybride combinant les avantages des tokens JWT avec la sécurité des sessions révocables.
 
 **Chiffrement bout en bout** : Toutes les communications sont chiffrées via HTTPS, et un système d'autorisation granulaire contrôle l'accès aux différentes fonctionnalités selon le rôle utilisateur.
 
@@ -165,26 +176,27 @@ Une description détaillée des mécanismes de sécurité mis en place est dispo
 
 ## Perspectives d'évolution et scalabilité
 
-### Architecture évolutive et patterns de croissance
+### Architecture évolutive
 
-La séparation des différentes parties de l'application facilite l'évolution future selon plusieurs axes que j'ai anticipés :
+La séparation des différentes parties de l'application facilite l'évolution future selon plusieurs axes que j'ai envisagé :
 
 **Évolution fonctionnelle** : Il sera possible d'enrichir l'application mobile avec de nouvelles fonctionnalités sans modifier le back office des coachs, et vice versa. Cette indépendance des clients facilite l'innovation sur chaque plateforme.
 
-**Scalabilité horizontale** : L'architecture stateless de l'API facilite l'ajout de nouvelles instances selon les besoins de charge. Redis et PostgreSQL supportent nativement les configurations haute disponibilité.
+**Scalabilité horizontale** :  L'API peut être repliqué et deployer facilement avec l'ajout de nouvelles instances selon les besoins de charge.
 
 **Migration cloud progressive** : Les choix technologiques (protocoles standardisés, API S3-compatible, containerisation) facilitent une migration progressive vers des solutions cloud managées selon l'évolution des besoins.
 
 ### Intégration de nouvelles technologies
 
-L'utilisation de services indépendants comme Redis ou MinIO permet d'étendre les capacités de l'application selon les besoins qui émergeront avec l'usage :
+Grâce à cette architecture globale, l'intégration de nouveaux modules est facilitée, voici certaines idées :
 
-- **Intelligence artificielle** : L'accumulation de données d'entraînement ouvre des perspectives d'analyse prédictive et d'optimisation automatique des programmes
-- **IoT et objets connectés** : L'architecture API-first facilite l'intégration future de capteurs ou d'équipements connectés
-- **Collaboration étendue** : La modularité architecturale permet d'envisager l'extension à d'autres clubs ou disciplines sportives
+- **Outils d'extraction pdf/excel** : Les coachs ont parfois des entraînements au format excel ou pdf, il serait intéressant d'intégrer un import et extraction de ces programmes pour les ajouter automatiquement dans DropIt
+- **Chronomètre** : Module chronomètre que j'ai déjà développé lors d'un projet précédent et qui pourrait être ajouté dans la visualisation d'exercice afin de permettre aux athlètes de lancer ce chronomètre si l'exercice le nécessite
+- **Dashboard de statistiques avancés** : Pour le coach afin d'optimiser la performance de ses athlètes
 
-## Conclusion : une architecture d'apprentissage et de production
+## Conclusion
 
-Cette architecture répond aux exigences contradictoires de mon projet : servir d'outil d'apprentissage tout en constituant une solution viable pour mon club d'haltérophilie. Les choix techniques reflètent cette double contrainte en combinant des technologies maîtrisées pour les aspects critiques et des explorations encadrées pour enrichir mes compétences.
+L'architecture choisie s'appuie sur des technologies que je maîtrise (React, NestJS, PostgreSQL) tout en intégrant de nouveaux outils pour enrichir mon apprentissage (MikroORM, React Native). Cette approche me permet de me concentrer sur les enjeux métier tout en découvrant des solutions modernes.
 
-La progression de cette conception technique vers l'implémentation d'interfaces utilisateur concrètes constitue la prochaine étape de ce mémoire, où ces choix architecturaux se concrétiseront en expériences utilisateur tangibles pour les coachs et les athlètes.
+La structure monorepo et la séparation des responsabilités facilitent l'évolution future de l'application selon les retours d'usage de mon club.
+
