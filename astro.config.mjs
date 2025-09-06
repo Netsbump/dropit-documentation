@@ -41,9 +41,9 @@ export default defineConfig({
 					items: [
 						{ label: 'Analyse des besoins', link: '/conception/analyse/' },
 						{ label: 'Architecture logicielle', link: '/conception/architecture/' },
-						{ label: 'Interfaces utilisateur', link: '/conception/interfaces/' },
 						{ label: 'Base de données', link: '/conception/base-donnees/' },
 						{ label: 'Accès aux données', link: '/conception/acces-donnees/' },
+						{ label: 'Interfaces utilisateur', link: '/conception/interfaces/' },
 					],
 				},
 				{

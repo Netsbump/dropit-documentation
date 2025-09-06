@@ -5,8 +5,6 @@ description: Analyse détaillée des besoins utilisateurs et conception des inte
 
 ## Introduction
 
-L'analyse des besoins constitue une étape qui transforme les observations terrain en spécifications fonctionnelles exploitables.
-
 Ma position d'utilisateur final présente l'avantage de faciliter cette analyse, mais elle comporte aussi le risque de projeter mes propres habitudes sur l'ensemble des utilisateurs. J'ai donc veillé à multiplier les échanges avec les autres membres du club pour valider mes hypothèses et enrichir ma compréhension des besoins diversifiés selon les profils d'utilisateurs.
 
 ## Méthodologie d'analyse et validation des besoins
