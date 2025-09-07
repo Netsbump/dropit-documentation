@@ -5,6 +5,8 @@ description: Implémentation de la couche d'accès aux données
 
 ## Approche générale
 
+Nous avons vu la méthode de modélisation Merise, je pourrai créer chacune des tables en SQL directement dans le cadre Dropit, j'ai choisi l'approche code first => justifier pourquoi et évoquer les autres possibilité qu'il y avait.
+
 Pour implémenter l'accès aux données, j'utilise MikroORM comme ORM (Object-Relational Mapping). Ce choix, comme expliqué dans la section architecture, permet de bénéficier du pattern Unit of Work et d'un typage fort avec TypeScript.
 
 ## Entités et Repositories
