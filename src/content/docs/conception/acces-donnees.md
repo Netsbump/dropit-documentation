@@ -50,9 +50,9 @@ Cette méthode traditionnelle offre un contrôle total sur la structure de la ba
 
 La synchronisation entre le schéma de base de données et le code applicatif devient rapidement problématique. Chaque modification de table nécessite une mise à jour manuelle de l'interface TypeScript correspondante. Si j'ajoute une colonne `difficulty_level` à la table `workout`, je dois manuellement créer la propriété dans l'interface `WorkoutEntity`, avec le risque d'oublier cette étape ou de mal typer la propriété.
 
-La maintenance des migrations peuvent représenter également un défi considérable. Les évolutions de schéma doivent être gérées via des scripts SQL écrits à la main, avec toute la complexité que cela implique. Par exemple, l'ajout d'une contrainte NOT NULL sur une colonne existante nécessite de vérifier que toutes les données respectent cette contrainte, nettoyer les valeurs nulles existantes, puis appliquer la contrainte - le tout en préservant la cohérence des données pendant la migration.
+La maintenance des migrations peut représenter également un défi considérable. Les évolutions de schéma doivent être gérées via des scripts SQL écrits à la main, avec toute la complexité que cela implique. Par exemple, l'ajout d'une contrainte NOT NULL sur une colonne existante nécessite de vérifier que toutes les données respectent cette contrainte, nettoyer les valeurs nulles existantes, puis appliquer la contrainte - le tout en préservant la cohérence des données pendant la migration.
 
-Sans outil d'orchestration approprié, les différents environnements peuvent facilement diverger. Un développeur qui applique manuellement un script SQL sur sa base locale mais oublie de le commiter dans le système de versioning créé une divergence silencieuse qui ne se révèle qu'au moment du déploiement en production.
+Sans outil d'orchestration approprié, les différents environnements peuvent facilement diverger. Un développeur qui applique manuellement un script SQL sur sa base locale mais oublie de le commiter dans le système de versioning crée une divergence silencieuse qui ne se révèle qu'au moment du déploiement en production.
 
 ### Schema First
 
@@ -70,8 +70,9 @@ J'ai donc finalement retenu l'approche Code First qui définit les entités dire
 
 La génération automatique des migrations à partir des modifications d'entités élimine les risques de désynchronisation tout en préservant un contrôle précis sur la structure de données. Cette approche tire également parti de l'auto-complétion et de la vérification de types native de TypeScript, facilitant le développement et réduisant les erreurs de compilation.
 
-
 ## Définition des entités MikroORM
+
+Après avoir justifié le choix de l'approche Code First, il convient maintenant d'examiner concrètement comment les entités MikroORM traduisent le modèle conceptuel en implémentation TypeScript.
 
 Les entités constituent la traduction directe du modèle logique de données en classes TypeScript annotées. Chaque entité encapsule à la fois la structure des données et les relations métier.
 
@@ -151,10 +152,11 @@ export class WorkoutElement {
 
 Le décorateur `@Check` traduit la contrainte logique en contrainte PostgreSQL, garantissant l'intégrité des données même en cas d'accès direct à la base. Cette approche combine la flexibilité du polymorphisme avec la rigueur des contraintes relationnelles.
 
+Pour optimiser les performances futures des requêtes sur cette table polymorphe, un index composite sur `(type, exercise_id, complex_id)` pourrait s'avérer nécessaire selon l'évolution des volumes. Actuellement, PostgreSQL utilise les index automatiques des clés étrangères, mais si les requêtes de filtrage par type deviennent fréquentes, cet index spécialisé accélérerait significativement les recherches d'éléments par discriminant.
 
 ## Architecture en couches et pattern Repository
 
-L'accès aux données dans DropIt respecte une séparation stricte des responsabilités via le pattern Repository et l'architecture hexagonale adoptée dans l'API NestJS.
+Les entités MikroORM définissent la structure des données, mais leur utilisation dans l'application nécessite une architecture bien organisée pour séparer les responsabilités et faciliter la maintenance. L'accès aux données dans DropIt respecte une séparation stricte des responsabilités via le pattern Repository et l'architecture hexagonale adoptée dans l'API NestJS.
 
 ### Séparation des responsabilités
 
@@ -384,7 +386,7 @@ export class WorkoutElement {
 
 Chaque décorateur MikroORM a un rôle spécifique dans le mapping objet-relationnel :
 
-Le décorateur `@Entity()` indique à MikroORM que cette classe TypeScript correspond à une table en base de données. Il déclenche la génération automatique du schéma et la gestion des migrations.
+Le décorateur `@Entity()` indique à MikroORM que cette classe TypeScript correspond à une table en base de données. La façon dont le schéma sera généré sera détaillée dans la partie configuration MikroORM et Migration.
 
 Les décorateurs `@Property()` mappent les propriétés simples vers des colonnes de base de données. MikroORM infère automatiquement le type SQL approprié (VARCHAR, INTEGER, TIMESTAMP) selon le type TypeScript déclaré.
 
@@ -400,32 +402,91 @@ Cette séparation permettrait une indépendance complète vis-à-vis de l'ORM ch
 
 #### Infrastructure Layer : accès aux données
 
-**Repositories** abstraient l'accès aux données et implémentent les contrats définis par les ports :
+L'Infrastructure Layer contient les **Repositories** qui assurent la persistance des données. MikroORM propose nativement des repositories automatiques pour chaque entité annotée `@Entity()`, accessibles directement via l'injection de dépendance. Ces repositories par défaut offrent les opérations CRUD basiques (`findOne`, `find`, `save`, `remove`) sans configuration supplémentaire.
+
+Pour certains cas spécifiques, il peut être intéressant d'étendre ces repositories automatiques. Par exemple, la méthode `getOneWithDetails` nécessite un populate profond sur plusieurs niveaux de relations (workout → elements → exercise/complex → categories) avec des conditions de filtrage organisationnel. Cette requête spécialisée justifie la création d'un repository personnalisé qui respecte les contrats définis par l'Application Layer :
 
 ```typescript
-async getOneWithDetails(id: string, coachFilterConditions: CoachFilterConditions): Promise<Workout | null> {
-  return await this.em.findOne(Workout, { id, $or: coachFilterConditions.$or }, {
-    populate: [
-      'category', 'elements', 'elements.exercise', 'elements.complex',
-      'elements.complex.exercises', 'createdBy'
-    ],
-  });
+@Injectable()
+export class MikroWorkoutRepository extends EntityRepository<Workout> implements IWorkoutRepository {
+  constructor(public readonly em: EntityManager) {
+    super(em, Workout);
+  }
+
+  // Méthode spécialisée avec populate profond et filtrage organisationnel
+  async getOneWithDetails(id: string, coachFilterConditions: CoachFilterConditions): Promise<Workout | null> {
+    return await this.em.findOne(
+      Workout,
+      { id, $or: coachFilterConditions.$or },
+      {
+        populate: [
+          'category',
+          'elements',
+          'elements.exercise',
+          'elements.exercise.exerciseCategory',
+          'elements.complex',
+          'elements.complex.complexCategory',
+          'elements.complex.exercises',
+          'elements.complex.exercises.exercise',
+          'elements.complex.exercises.exercise.exerciseCategory',
+          'createdBy'
+        ],
+      }
+    );
+  }
 }
 ```
 
-Cette couche isole complètement la logique métier des détails techniques de persistence. Je peux changer d'ORM ou de base de données sans impacter les Use Cases.
+Cette approche hybride me donne le meilleur des deux mondes. L'héritage d'`EntityRepository<Workout>` conserve l'accès aux méthodes MikroORM optimisées (comme `findOne`, `save`), tandis que l'implémentation de `IWorkoutRepository` garantit le respect du contrat métier défini dans l'Application Layer. L'`EntityManager` injecté donne accès à toutes les opérations de persistence avancées, mais le Repository n'expose aux Use Cases que les méthodes strictement nécessaires comme cette requête spécialisée `getOneWithDetails` impossible à réaliser avec les repositories automatiques.
 
-#### Justification de cette architecture
+#### Gestion du multi-tenancy
 
-Cette séparation en couches résout plusieurs problèmes que j'ai identifiés dans des architectures plus simples :
+La gestion du multi-tenancy au sein de DropIt présente une particularité importante : chaque coach possède son propre catalogue d'exercices personnalisés qu'il développe au fil du temps. Cette approche répond à un besoin métier spécifique de l'haltérophilie où les coachs construisent leur méthode et leurs variantes d'exercices sur le long terme. Si un coach change de club, il doit pouvoir conserver son catalogue personnel sans emporter les athlètes de l'ancien club.
 
-**Testabilité** : Chaque couche peut être testée indépendamment en mockant ses dépendances. Les Use Cases se testent sans base de données, les Controllers sans logique métier.
+Cette logique d'appartenance crée une double isolation : les données d'organisation (athlètes) et les données personnelles de coach (catalogue d'exercices, complexes, programmes). Cette exigence fondamentale impacte chaque requête de base de données.
 
-**Évolutivité** : La modification d'une couche n'impacte pas les autres. Je peux faire évoluer le modèle de données sans toucher à l'API REST, ou changer l'interface d'exposition sans modifier la logique métier.
+La solution traditionnelle consisterait à créer une base de données séparée par organisation, mais cette approche pose plusieurs problèmes concrets. D'abord, la **scalabilité** devient problématique : créer 100 clubs nécessiterait 100 bases de données identiques avec 100 connexions séparées à gérer. Ensuite, la **maintenance** se complique énormément : chaque migration de schéma doit être appliquée sur toutes les bases, chaque backup doit être géré individuellement, et la supervision technique devient un cauchemar administratif.
 
-**Réutilisabilité** : Les Use Cases peuvent être réutilisés par différentes interfaces (API REST, GraphQL, CLI) sans duplication de code.
+J'ai opté pour une approche de "row-level security" logicielle : plutôt que d'isoler physiquement les données, j'applique des filtres automatiques à chaque requête pour n'afficher que les lignes (rows) auxquelles l'utilisateur a accès. Cette sécurité au niveau des enregistrements s'intègre directement dans les requêtes via les `CoachFilterConditions`.
 
-### Flux de données : de la requête HTTP à la base de données
+PostgreSQL propose nativement des politiques RLS (Row Level Security) qui pourraient automatiser ce filtrage directement au niveau de la base de données. Cependant, cette approche aurait nécessité une gestion complexe des contextes utilisateur au niveau SQL et une coordination délicate avec l'architecture NestJS. L'implémentation logicielle me donne plus de flexibilité pour adapter les règles d'accès selon l'évolution des besoins métier, tout en conservant une logique centralisée dans les Use Cases.
+
+Chaque entité possède un champ `createdBy` qui référence l'utilisateur créateur. Les conditions de filtrage appliquent automatiquement les règles d'isolation organisationnelle :
+
+```typescript
+export type CoachFilterConditions = {
+  $or: [
+    { createdBy: null }, // Entités publiques (exercices de base, seedings)
+    { createdBy: { id: { $in: string[] } } }, // Entités créées par les coachs de l'organisation
+  ];
+};
+```
+
+Cette structure permet deux niveaux d'accès. Les entités publiques (`createdBy: null`) correspondent aux données de base injectées par les seeders : exercices officiels d'haltérophilie, catégories standard, etc. Ces ressources sont accessibles à tous les clubs. Les entités privées appartiennent à des coachs spécifiques et ne sont accessibles qu'aux membres de la même organisation.
+
+La vérification d'appartenance organisationnelle s'effectue dans l'Application Layer via `MemberUseCases.getCoachFilterConditions(organizationId)`, qui récupère la liste des IDs de tous les coachs de l'organisation courante. Cette liste alimente ensuite le filtre `{ createdBy: { id: { $in: string[] } } }` appliqué systématiquement à chaque opération de Repository.
+
+Cette approche défensive garantit qu'même si un utilisateur tente d'accéder à un workout qui ne lui appartient pas (que ce soit par erreur de requête, bug dans l'interface, ou tentative malveillante), la requête retournera `null` car les conditions de filtrage l'excluront automatiquement. La sécurité est ainsi assurée même en cas de faille potentielle dans la couche de présentation ou d'authentification, créant une défense en profondeur au niveau de la persistance des données.
+
+#### Génération automatique des requêtes
+
+MikroORM s'appuie sur Knex.js, une bibliothèque JavaScript de construction de requêtes SQL (query builder), pour transformer les opérations TypeScript en requêtes PostgreSQL. Cette couche d'abstraction permet à MikroORM de générer automatiquement les requêtes optimisées sans que je doive les écrire manuellement.
+
+Lorsque j'utilise l'option `populate` pour charger les relations d'une entité, MikroORM génère automatiquement toutes les jointures nécessaires en une seule requête plutôt que d'exécuter une requête par relation. Cette optimisation évite le "problème N+1" : au lieu de faire 1 requête pour récupérer un workout puis N requêtes supplémentaires pour récupérer chacun de ses éléments, MikroORM génère une seule requête avec toutes les jointures LEFT nécessaires.
+
+Par exemple, pour récupérer un workout avec tous ses éléments et leurs relations, une approche naïve nécessiterait potentiellement des dizaines de requêtes séparées. Avec le populate, MikroORM génère une seule requête avec toutes les jointures, réduisant drastiquement les aller-retours avec la base de données et améliorant les performances.
+
+Cette couche Infrastructure isole complètement la logique métier des détails techniques de persistence. Je peux changer d'ORM (vers Prisma, TypeORM) ou de base de données (vers MySQL, SQLite) sans impacter les Use Cases, seuls les Repositories devront être réimplémentés en respectant les mêmes interfaces.
+
+#### Bénéfices de l'architecture en couches
+
+Cette séparation en couches résout plusieurs problèmes que j'ai identifiés dans des architectures plus simples. La testabilité s'améliore considérablement car chaque couche peut être testée indépendamment en simulant ses dépendances : les Use Cases se testent sans connexion à la base de données, les Controllers sans logique métier complexe. 
+
+L'évolutivité devient naturelle puisque la modification d'une couche n'impacte pas les autres. Je peux faire évoluer le modèle de données sans toucher à l'API REST, ou changer l'interface d'exposition sans modifier la logique métier. Cette indépendance facilite grandement la maintenance et l'ajout de nouvelles fonctionnalités.
+
+La réutilisabilité constitue également un avantage important. Les Use Cases peuvent être réutilisés par différentes interfaces d'exposition (API REST, GraphQL, interface en ligne de commande) sans duplication de code. Cette architecture modulaire me permet d'envisager sereinement l'évolution technique de DropIt selon les besoins futurs.
+
+### Flux de données
 
 Pour illustrer concrètement cette architecture, voici le trajet d'une requête simple de récupération d'un workout :
 
@@ -463,206 +524,48 @@ sequenceDiagram
 
 Ce diagramme illustre comment chaque couche a sa responsabilité spécifique : le Controller gère le protocole HTTP, le UseCase orchestre la logique métier et les permissions, le Repository abstrait l'accès aux données, et le Mapper/Presenter formatent les données pour le client.
 
-### SQL brut vs MikroORM : comparaison pratique
+Cette approche technique avec MikroORM représente un choix délibéré face aux alternatives que je maîtrise. L'écriture manuelle de requêtes SQL m'aurait permis un contrôle fin sur les performances et l'optimisation, mais au prix d'une complexité de maintenance importante. Les requêtes avec jointures multiples nécessitent une gestion minutieuse du mapping vers les objets TypeScript et une logique de regroupement complexe pour reconstruire les hiérarchies relationnelles.
 
-Commençons par un exemple simple pour illustrer la différence d'approche. Voici comment récupérer la liste des workouts avec leur catégorie en SQL brut :
-
-```sql
--- Requête SQL simple avec jointure
-SELECT 
-    w.id, w.title, w.description, w.created_at,
-    wc.name as category_name
-FROM workout w
-LEFT JOIN workout_category wc ON w.category_id = wc.id
-WHERE (w.created_by = $1 OR wc.created_by = $1 OR wc.created_by IS NULL)
-ORDER BY w.created_at DESC;
-```
-
-Cette requête nécessite un mapping manuel vers les objets TypeScript et une gestion explicite des relations. Avec MikroORM, l'équivalent devient :
-
-```typescript
-// Requête simple avec populate
-async getAll(coachFilterConditions: CoachFilterConditions): Promise<Workout[]> {
-  return await this.em.find(Workout, coachFilterConditions, {
-    populate: ['category', 'createdBy'],
-  });
-}
-```
-
-Le mécanisme de `populate` de MikroORM génère automatiquement les jointures LEFT nécessaires et mappe les résultats vers les entités typées. Cette approche élimine le mapping manuel tout en préservant le typage strict.
-
-La situation se corse rapidement quand les besoins deviennent plus ambitieux. Pour récupérer un workout avec tous ses éléments, exercices et catégories associées, la requête SQL devient :
-
-```sql
--- Requête SQL avec jointures multiples
-SELECT 
-    w.id, w.title, w.description, w.created_at,
-    wc.id as category_id, wc.name as category_name,
-    u.id as created_by_id, u.email as created_by_email,
-    we.id as element_id, we.type as element_type, we.order_position, we.sets, we.reps,
-    e.id as exercise_id, e.name as exercise_name,
-    ec.id as exercise_category_id, ec.name as exercise_category_name,
-    c.id as complex_id, c.description as complex_description,
-    cc.id as complex_category_id, cc.name as complex_category_name
-FROM workout w
-LEFT JOIN workout_category wc ON w.category_id = wc.id
-LEFT JOIN users u ON w.created_by = u.id
-LEFT JOIN workout_element we ON w.id = we.workout_id
-LEFT JOIN exercise e ON we.exercise_id = e.id
-LEFT JOIN exercise_category ec ON e.category_id = ec.id
-LEFT JOIN complex c ON we.complex_id = c.id
-LEFT JOIN complex_category cc ON c.category_id = cc.id
-WHERE w.id = $1
-  AND (w.created_by = $2 OR wc.created_by = $2 OR wc.created_by IS NULL)
-ORDER BY we.order_position;
-```
-
-Cette requête manuelle nécessite une gestion minutieuse des jointures LEFT pour éviter de perdre des données, un mapping manuel vers les objets TypeScript, et une logique de regroupement pour reconstruire la hiérarchie des relations.
-
-Avec MikroORM, cette même opération s'écrit simplement :
-
-```typescript
-// Requête avec populate étendu
-async getOneWithDetails(id: string, coachFilterConditions: CoachFilterConditions): Promise<Workout | null> {
-  return await this.em.findOne(Workout, { id, $or: coachFilterConditions.$or }, {
-    populate: [
-      'category',
-      'elements',
-      'elements.exercise',
-      'elements.exercise.exerciseCategory', 
-      'elements.complex',
-      'elements.complex.complexCategory',
-      'elements.complex.exercises',
-      'elements.complex.exercises.exercise',
-      'createdBy'
-    ],
-  });
-}
-```
-
-Cependant, cette approche populate atteint ses limites sur des relations très profondes ou des cas particuliers. Dans certaines situations, il reste préférable d'écrire des requêtes SQL manuelles via l'EntityManager pour optimiser les performances ou implémenter une logique spécifique.
-
-```typescript
-// Port - Interface du contrat métier
-export const WORKOUT_REPO = 'WORKOUT_REPO';
-
-export interface IWorkoutRepository {
-  getAll(coachFilterConditions: CoachFilterConditions): Promise<Workout[]>;
-  getOne(id: string, coachFilterConditions: CoachFilterConditions): Promise<Workout | null>;
-  getOneWithDetails(id: string, coachFilterConditions: CoachFilterConditions): Promise<Workout | null>;
-  save(workout: Workout): Promise<Workout>;
-  remove(id: string, coachFilterConditions: CoachFilterConditions): Promise<void>;
-}
-
-// Adaptateur - Implémentation MikroORM
-@Injectable()
-export class MikroWorkoutRepository extends EntityRepository<Workout> implements IWorkoutRepository {
-  constructor(public readonly em: EntityManager) {
-    super(em, Workout);
-  }
-
-  // Requête simple pour les listes
-  async getAll(coachFilterConditions: CoachFilterConditions): Promise<Workout[]> {
-    return await this.em.find(Workout, coachFilterConditions, {
-      populate: ['category', 'createdBy'], // Relations légères uniquement
-    });
-  }
-
-  // Requête complexe avec toutes les jointures
-  async getOneWithDetails(id: string, coachFilterConditions: CoachFilterConditions): Promise<Workout | null> {
-    return await this.em.findOne(
-      Workout, 
-      { id, $or: coachFilterConditions.$or },
-      {
-        populate: [
-          'category',
-          'elements',
-          'elements.exercise',
-          'elements.exercise.exerciseCategory',
-          'elements.complex',
-          'elements.complex.complexCategory',
-          'elements.complex.exercises', // Relations imbriquées pour les complexes
-          'elements.complex.exercises.exercise',
-          'elements.complex.exercises.exercise.exerciseCategory',
-          'createdBy'
-        ],
-      }
-    );
-  }
-}
-```
-
-Cette approche MikroORM présente plusieurs avantages décisifs :
-
-- **Typage strict** : TypeScript détecte les erreurs de relations à la compilation
-- **Abstraction des jointures** : MikroORM génère automatiquement les LEFT JOIN nécessaires
-- **Mapping automatique** : Les résultats SQL sont automatiquement transformés en objets typés
-- **Optimisation des requêtes** : L'ORM évite les requêtes N+1 grâce au populate intelligent
-- **Maintenabilité** : Modification d'une relation = mise à jour automatique des requêtes
-
-Cette comparaison illustre pourquoi j'ai privilégié MikroORM malgré ma maîtrise du SQL : la productivité et la sécurité apportées par l'ORM compensent largement la perte de contrôle fin sur les requêtes générées.
+En optant pour MikroORM, j'ai privilégié la productivité de développement et la sécurité du typage strict. L'ORM élimine le mapping manuel, détecte les erreurs de relations à la compilation, et génère automatiquement les jointures optimisées. Cette approche reste flexible : pour des cas particuliers nécessitant des optimisations spécifiques, l'EntityManager permet toujours d'écrire des requêtes SQL manuelles quand le populate atteint ses limites.
 
 ## Pattern Unit of Work et gestion transactionnelle
 
-MikroORM implémente nativement le pattern Unit of Work qui centralise le suivi des modifications d'entités et optimise leur persistance.
+### Le pattern Unit of Work
 
-### Fonctionnement automatique
+Le pattern Unit of Work consiste à maintenir une liste de tous les objets modifiés pendant une transaction et à coordonner leur écriture en base de données en une seule fois. Plutôt que de sauvegarder chaque modification immédiatement, ce pattern accumule les changements en mémoire puis les applique tous ensemble lors d'un "flush".
 
-Dans le contexte de NestJS, chaque requête HTTP bénéficie automatiquement d'une transaction implicite :
+MikroORM implémente nativement ce pattern : lorsque je modifie une entité chargée, elle est automatiquement marquée comme "dirty" sans déclencher immédiatement une requête SQL. C'est seulement lors de l'appel à `flush()` que toutes les modifications sont synchronisées avec la base de données dans l'ordre approprié.
+
+### Transactions et propriétés ACID
+
+Les transactions garantissent les propriétés ACID (Atomicity, Consistency, Isolation, Durability) essentielles pour l'intégrité des données :
+
+- **Atomicité** : Soit toutes les opérations réussissent, soit aucune n'est appliquée
+- **Cohérence** : Les contraintes de base de données sont respectées à la fin de la transaction
+- **Isolation** : Les transactions concurrentes n'interfèrent pas entre elles
+- **Durabilité** : Une fois validée, la transaction persiste même en cas de panne système
+
+Dans le contexte de DropIt, cela signifie qu'un workout ne peut pas être créé avec des éléments orphelins, ou qu'un athlète ne peut pas être supprimé s'il participe encore à des sessions d'entraînement.
+
+### Fonctionnement automatique avec NestJS
+
+MikroORM s'intègre avec le système d'intercepteurs de NestJS pour fournir automatiquement une transaction par requête HTTP. Techniquement, l'intercepteur `RequestContext` de MikroORM encapsule chaque requête HTTP entrante dans un contexte transactionnel : il crée automatiquement un `EntityManager` avec une transaction ouverte, l'associe au thread de traitement de la requête, puis commit automatiquement si tout se passe bien ou rollback en cas d'erreur :
 
 ```typescript
 async save(workout: Workout): Promise<Workout> {
-  await this.em.persistAndFlush(workout); // Persiste et flush automatique
+  await this.em.persistAndFlush(workout); // Persiste et flush dans la transaction courante
   return workout;
 }
 ```
 
-L'`EntityManager` suit automatiquement les modifications apportées aux entités chargées et génère les requêtes SQL optimales lors du flush. Cette approche réduit le nombre de requêtes et garantit la cohérence transactionnelle.
+L'`EntityManager` suit automatiquement les modifications apportées aux entités chargées et génère les requêtes SQL optimales lors du flush. Cette approche réduit le nombre d'aller-retours avec la base de données et garantit la cohérence transactionnelle.
 
-### Transactions explicites pour les opérations complexes
 
-Pour les use cases impliquant plusieurs entités, j'utilise des transactions explicites :
+### Gestion des suppressions en cascade
 
-```typescript
-async createWorkout(workout: CreateWorkout, organizationId: string, userId: string) {
-  try {
-    // Transaction implicite via les use cases NestJS
-    const workoutToCreate = new Workout();
-    workoutToCreate.title = workout.title;
-    workoutToCreate.description = workout.description;
-    
-    // Création des éléments associés
-    for (const element of workout.elements) {
-      const workoutElement = new WorkoutElement();
-      workoutElement.type = element.type;
-      workoutElement.workout = workoutToCreate;
-      
-      if (element.type === WORKOUT_ELEMENT_TYPES.EXERCISE) {
-        const exercise = await this.exerciseRepository.getOne(element.id, coachFilterConditions);
-        workoutElement.exercise = exercise;
-      } else {
-        const complex = await this.complexRepository.getOne(element.id, coachFilterConditions);
-        workoutElement.complex = complex;
-      }
-      
-      await this.workoutElementRepository.save(workoutElement);
-    }
-    
-    // Sauvegarde finale
-    const createdWorkout = await this.workoutRepository.save(workoutToCreate);
-    
-  } catch (error) {
-    // Le rollback automatique préserve la cohérence
-    throw error;
-  }
-}
-```
+La suppression d'entités avec des relations nécessite une gestion particulière pour respecter l'intégrité référentielle. Dans DropIt, un workout possède des éléments liés via une clé étrangère : supprimer le workout sans gérer ces éléments violerait les contraintes de base de données.
 
-Le pattern Unit of Work garantit que toutes ces opérations s'exécutent dans une même transaction, avec rollback automatique en cas d'erreur.
-
-### Gestion des relations bidirectionnelles
-
-MikroORM simplifie la gestion des relations bidirectionnelles complexes. Lors de la suppression d'un workout, les éléments associés sont gérés automatiquement :
+MikroORM propose plusieurs stratégies pour gérer ces suppressions. J'ai opté pour une approche explicite qui me donne le contrôle total sur l'ordre des opérations :
 
 ```typescript
 async remove(id: string, coachFilterConditions: CoachFilterConditions): Promise<void> {
@@ -686,13 +589,17 @@ async remove(id: string, coachFilterConditions: CoachFilterConditions): Promise<
 }
 ```
 
-Cette approche respecte les contraintes d'intégrité référentielle tout en optimisant l'ordre des suppressions.
+Cette gestion manuelle me permet d'éviter les contraintes CASCADE au niveau SQL ou les décorateurs `onDelete: 'cascade'` de MikroORM. Sans cette approche, PostgreSQL rejetterait la suppression du workout avec une erreur de contrainte de clé étrangère, puisque des éléments y font encore référence.
+
+L'alternative serait de définir `onDelete: 'cascade'` sur la relation `@OneToMany`, ce qui déléguerait la suppression en cascade à MikroORM. Cependant, la suppression manuelle me donne plus de contrôle sur le processus : je peux facilement ajouter des logs pour tracer les suppressions, valider des règles métier avant chaque suppression, ou même implémenter une suppression "soft" en marquant les entités comme supprimées sans les effacer physiquement.
+
+Cette flexibilité s'avère particulièrement utile dans un contexte professionnel où les exigences de traçabilité et d'audit sont importantes pour la gestion des données sportives.
 
 ## Configuration et optimisations
 
-### Configuration MikroORM
+### Configuration MikroORM adaptée aux environnements
 
-La configuration centralisée dans `mikro-orm.config.ts` optimise les performances et facilite les environnements multiples :
+La configuration centralisée dans `mikro-orm.config.ts` s'adapte selon l'environnement d'exécution :
 
 ```typescript
 export function createMikroOrmOptions(options?: CreateMikroOrmOptions) {
@@ -707,24 +614,77 @@ export function createMikroOrmOptions(options?: CreateMikroOrmOptions) {
     port: config.database.port,
     user: config.database.user,
     password: config.database.password,
-    metadataProvider: TsMorphMetadataProvider, // Analyse statique du code TypeScript
-    forceUtcTimezone: true, // Cohérence temporelle
-    extensions: [SeedManager, Migrator], // Extensions activées
-    debug: true, // Logs SQL en développement
-    allowGlobalContext: isTestEnvironment, // Contexte global pour les tests
+    metadataProvider: TsMorphMetadataProvider,
+    forceUtcTimezone: true,
+    extensions: [SeedManager, Migrator],
+    debug: config.env === 'development', // Logs SQL uniquement en développement
+    allowGlobalContext: isTestEnvironment,
   });
 }
 ```
 
-Cette configuration unifie les environnements de développement, test et production tout en adaptant les optimisations selon le contexte.
+Cette configuration révèle plusieurs optimisations importantes selon l'environnement :
 
-### TsMorphMetadataProvider et performances
+**Découverte automatique des entités** : La configuration `entities` et `entitiesTs` permet à MikroORM de découvrir automatiquement toutes les classes annotées `@Entity()` via l'analyse des patterns de fichiers. En développement, MikroORM utilise `entitiesTs` pour analyser directement les fichiers TypeScript, tandis qu'en production, il se base sur `entities` pointant vers les fichiers JavaScript compilés.
 
-Le `TsMorphMetadataProvider` analyse statiquement le code TypeScript pour générer les métadonnées, éliminant le besoin de décorateurs runtime coûteux. Cette approche accélère le démarrage de l'application et réduit l'empreinte mémoire.
+**Analyse statique performante** : Le `TsMorphMetadataProvider` analyse le code TypeScript à la compilation plutôt qu'au runtime, éliminant le besoin de décorateurs reflect-metadata coûteux. Cette approche réduit significativement le temps de démarrage de l'application et son empreinte mémoire en production.
+
+**Cohérence temporelle** : `forceUtcTimezone: true` garantit que toutes les dates sont stockées et manipulées en UTC, évitant les problèmes de fuseaux horaires lors des déploiements multi-régions ou des changements d'heure saisonniers.
+
+### Gestion des migrations en production
+
+La stratégie de migration adoptée privilégie la sécurité et la traçabilité en environnement de production :
+
+```typescript
+migrations: {
+  path: './dist/modules/db/migrations',
+  pathTs: './src/modules/db/migrations',
+  allOrNothing: true, // Transactions atomiques
+  disableForeignKeys: false, // Préservation de l'intégrité
+},
+```
+
+**Génération automatique en développement** : Le processus `npm run db:migration:create` génère automatiquement les fichiers de migration en analysant les différences entre les entités TypeScript et le schéma de base de données actuel. Cette automatisation élimine les erreurs humaines dans la création des scripts de migration.
+
+**Application atomique** : Le paramètre `allOrNothing: true` encapsule l'application de toutes les migrations en attente dans une transaction unique. Si une migration échoue, toutes les modifications sont annulées, garantissant que la base de données ne reste jamais dans un état incohérent.
+
+**Préservation des contraintes** : `disableForeignKeys: false` maintient l'intégrité référentielle pendant les migrations. Cette approche plus sûre peut nécessiter un ordre spécifique dans certaines migrations complexes, mais elle prévient toute corruption de données.
+
+**Traçabilité complète** : Chaque migration appliquée est enregistrée dans une table système, permettant de connaître l'état exact du schéma à tout moment. Cette traçabilité s'avère cruciale lors des déploiements en production pour valider l'état de la base de données.
+
+### Stratégie différenciée selon l'environnement
+
+La gestion du schéma de base de données suit une stratégie adaptée aux contraintes de chaque environnement.
+
+En développement, j'ai privilégié une approche de reconstruction complète via les seeders. Cette méthode permet de tester rapidement les modifications de schéma en supprimant et recréant toutes les tables avec des données cohérentes. Cette flexibilité s'avère particulièrement utile lors des phases d'itération rapide sur le modèle de données.
+
+En production, cette approche n'est évidemment pas envisageable car elle détruirait toutes les données utilisateur. Le système de migrations devient alors indispensable pour faire évoluer le schéma tout en préservant l'intégrité et la continuité des données des clubs et de leurs athlètes. 
+
+Les migrations générées automatiquement par MikroORM peuvent être vérifiées avant application, conservant ainsi le contrôle sur les modifications appliquées :
+
+```typescript
+import { Migration } from '@mikro-orm/migrations';
+
+export class Migration20240115000000 extends Migration {
+
+  async up(): Promise<void> {
+    this.addSql('alter table "workout" add column "difficulty_level" int null;');
+    this.addSql('alter table "workout" add constraint "workout_difficulty_level_check" check ("difficulty_level" >= 1 and "difficulty_level" <= 5);');
+  }
+
+  async down(): Promise<void> {
+    this.addSql('alter table "workout" drop constraint "workout_difficulty_level_check";');
+    this.addSql('alter table "workout" drop column "difficulty_level";');
+  }
+
+}
+```
+
+Ce script généré automatiquement révèle plusieurs aspects importants : la méthode `up()` applique les modifications (ajout de colonne et contrainte), tandis que `down()` permet un rollback propre si nécessaire. Cette transparence me permet de valider chaque modification SQL avant de l'appliquer en production, combinant l'automatisation avec le contrôle manuel.
 
 ## Seeders et données de test
 
-Pour faciliter le développement et les tests, j'ai implémenté un système de seeders qui peuple la base avec des données cohérentes :
+Pour faciliter le développement et les tests, j'ai implémenté un système de seeders qui peuple la base avec des données cohérentes. Ces seeders servent un double objectif : fournir un environnement de développement reproductible et créer un catalogue commun d'exercices et de techniques d'haltérophilie accessible à tous les clubs :
 
 ```typescript
 export async function seedComplexes(em: EntityManager): Promise<Complex[]> {
@@ -789,68 +749,13 @@ export async function seedComplexes(em: EntityManager): Promise<Complex[]> {
 
 Ce système de seeders respecte les contraintes d'intégrité référentielle et garantit un environnement de développement reproductible. La structure modulaire permet de réutiliser les données entre différents seeders tout en maintenant la cohérence des relations.
 
-## Stratégies d'optimisation et de mise en cache
-
-### Optimisations au niveau requêtes
-
-J'ai identifié plusieurs optimisations spécifiques aux besoins métier de l'haltérophilie :
-
-**Requêtes avec filtres métier** : Les `CoachFilterConditions` appliquent systématiquement les restrictions d'accès par organisation, évitant les fuites de données entre clubs :
-
-```typescript
-async getAll(coachFilterConditions: CoachFilterConditions): Promise<Workout[]> {
-  return await this.em.find(Workout, coachFilterConditions, {
-    populate: ['category', 'createdBy'],
-  });
-}
-```
-
-**Populate sélectif** : Les requêtes n'chargent que les relations nécessaires selon le contexte d'affichage, réduisant la bande passante et la mémoire utilisée.
-
-### Préparation pour la mise en cache avec Redis
-
-L'architecture actuelle anticipe l'intégration de Redis sans modification des repositories. J'ai identifié les données candidates au cache :
-
-- **Catalogues d'exercices** : Données qui évoluent rarement, consultées fréquemment lors de la création de programmes
-- **Records personnels récents** : Utilisés pour calculer les charges d'entraînement, critiques pour les performances
-- **Compositions de complexes populaires** : Réutilisées souvent par les coachs
-
-Cette stratégie évolutive me permet de commencer avec PostgreSQL seul, puis d'ajouter Redis quand les métriques de performance le justifieront.
-
-## Migration et évolution du schéma
-
-### Stratégie Code First et migrations
-
-L'approche Code First de MikroORM génère automatiquement les migrations à partir des modifications d'entités :
-
-```typescript
-// Configuration des migrations
-migrations: {
-  path: './dist/modules/db/migrations',
-  pathTs: './src/modules/db/migrations',
-  allOrNothing: true, // Transactions atomiques pour les migrations
-  disableForeignKeys: false, // Préservation de l'intégrité référentielle
-},
-```
-
-Cette configuration garantit que les migrations s'appliquent de manière atomique et préservent l'intégrité des données existantes.
-
-### Évolution progressive du modèle
-
-La structure modulaire facilite l'ajout de nouvelles fonctionnalités sans impact sur l'existant. Par exemple, l'ajout futur d'un système de notifications nécessiterait uniquement :
-
-1. Création de l'entité `Notification`
-2. Définition des relations avec `User` et `Organization`
-3. Génération automatique de la migration
-4. Implémentation du repository correspondant
-
-Cette approche évolutive respecte les principes SOLID et facilite la maintenance à long terme.
+L'aspect particulièrement intéressant de ces seeders est leur rôle dans la création de ressources partagées via `createdBy = null`. Ces entités publiques constituent un socle commun d'exercices officiels d'haltérophilie (Arraché, Épaulé-Jeté, Squat) et de complexes techniques que tous les clubs peuvent utiliser. Cette approche évite la duplication des données de base tout en permettant à chaque coach de créer ses propres variantes personnalisées qui lui appartiennent exclusivement.
 
 ## Conclusion
 
-L'implémentation de la couche d'accès aux données avec MikroORM dans DropIt combine les avantages du typage TypeScript, de l'architecture hexagonale, et des patterns éprouvés comme Unit of Work et Repository.
+Cette implémentation de la couche d'accès aux données avec MikroORM m'a permis de résoudre les défis spécifiques de DropIt tout en posant les bases d'une architecture évolutive. La problématique du multi-tenancy, où chaque coach doit pouvoir conserver son catalogue personnel tout en accédant aux ressources communes d'haltérophilie, nécessitait une approche réfléchie que les `CoachFilterConditions` et les seeders publics ont élégamment résolue.
 
-Cette approche Code First m'a permis de rester dans l'écosystème TypeScript du monorepo tout en bénéficiant d'une génération automatique des migrations et d'un typage strict des relations. Le pattern Repository facilite les tests unitaires et l'évolution technique future, tandis que la configuration optimisée de MikroORM garantit des performances adaptées aux besoins d'un club d'haltérophilie.
+Le choix de l'approche Code First s'est avéré particulièrement adapté au contexte du monorepo, permettant une cohérence complète avec les packages partagés et une productivité optimale en développement. La stratégie différenciée entre environnements - reconstruction complète via seeders en développement, migrations contrôlées en production - illustre l'importance d'adapter les outils aux contraintes réelles du projet.
 
-La séparation stricte entre ports et adaptateurs, inspirée de l'architecture hexagonale, isole la logique métier des détails d'implémentation, facilitant la maintenance et l'évolution du code. Cette architecture constitue une base solide pour les développements futurs tout en respectant les bonnes pratiques du développement moderne.
+Cette architecture en couches, inspirée des principes hexagonaux, me donne aujourd'hui la flexibilité nécessaire pour faire évoluer DropIt selon les besoins futurs des clubs d'haltérophilie. Que ce soit pour intégrer de nouveaux types de données sportives, étendre les fonctionnalités de planification d'entraînement, ou migrer vers d'autres technologies, les fondations posées résisteront aux évolutions à venir.
 
