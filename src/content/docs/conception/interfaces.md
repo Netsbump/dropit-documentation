@@ -1,11 +1,13 @@
 ---
-title: Interfaces
-description: Conception d'interfaces - wireframe, design system
+title: Interfaces utilisateur
+description: De l'analyse des besoins aux wireframes - conception centrée utilisateur
 ---
 
-Après avoir défini l'architecture technique de DropIt et détaillé l'accès aux données via l'API NestJS, cette section se concentre sur la traduction concrète des besoins utilisateurs en interfaces fonctionnelles. 
+## Introduction
 
-L'approche que j'ai suivie consiste à partir de l'[analyse des besoins fonctionnels](/conception/analyse) déjà établie, à la synthétiser sous forme de personas pour guider la conception, puis à implémenter les interfaces correspondantes avec React et TypeScript.
+Après avoir posé les fondations techniques avec l'[architecture logicielle](/conception/architecture), la [modélisation de la base de données](/conception/base-donnees) et l'[accès aux données](/conception/acces-donnees), cette étape consiste à traduire les besoins utilisateurs identifiés lors de l'[analyse fonctionnelle](/conception/analyse) en interfaces concrètes.
+
+Ma démarche de conception d'interfaces s'inscrit dans une approche centrée utilisateur que j'ai adaptée aux contraintes de mon projet de formation. N'étant pas designer de formation, j'ai privilégié une méthodologie structurée : partir des personas utilisateurs, concevoir des wireframes basse fidélité pour valider les flux, puis définir un design system cohérent avant l'implémentation technique détaillée dans la [section suivante](/conception/implementation-frontend).
 
 ## Personas utilisateurs
 
@@ -22,15 +24,13 @@ L'analyse fonctionnelle détaillée précédemment m'a permis d'identifier deux 
 - Enregistrer ses records personnels
 - Communiquer avec son coach via des notes sur les entrainements
 
-## Conception des interfaces
+## Conception des wireframes
 
-### Approche wireframes basse fidélité
-
-Mes wireframes se concentrent sur la structure informationnelle et les interactions essentielles, sans considération visuelle. Cette phase me permet de valider l'organisation de l'information et les flux utilisateurs avant de passer aux aspects visuels.
+Pour la conception des interfaces, j'ai choisi de commencer par des wireframes basse fidélité qui se concentrent sur la structure informationnelle et les flux utilisateurs, sans me préoccuper des aspects visuels. Cette phase me permet de valider l'organisation de l'information et les flux utilisateurs avant de passer aux aspects visuels.
 
 L'architecture de DropIt se décline en deux interfaces distinctes : une application web pour les coachs (back office) et une application mobile pour les athlètes (front office), chacune adaptée à son contexte d'usage spécifique.
 
-### Interface web coach (Back office)
+### Wireframe web coach (Back office)
 
 #### Page de bibliothèque d'exercices
 
@@ -77,23 +77,17 @@ L'interface mobile présente les exercices de manière séquentielle, optimisée
 
 ## Design system et cohérence visuelle
 
-### Fondations techniques
+Pour le design system, j'ai choisi Shadcn/ui après avoir analysé les enjeux d'accessibilité et de maintenabilité que présentait DropIt. Cette décision s'appuie sur plusieurs arguments techniques décisifs pour un projet professionnel.
 
-<!-- TODO: Insérer maquette design system (colors, typography, components) -->
+**Accessibilité native (WCAG 2.1 AA)** : Shadcn/ui s'appuie sur Radix UI qui implémente nativement les standards d'accessibilité. Chaque composant respecte les bonnes pratiques ARIA, la navigation clavier, et la compatibilité avec les lecteurs d'écran. Dans le contexte d'une application destinée à des clubs sportifs, cette accessibilité garantit l'inclusion de tous les utilisateurs, y compris ceux en situation de handicap.
 
-Mon design system s'appuie sur les composants Shadcn/ui, eux-mêmes construits sur Radix UI. Cette base garantit plusieurs aspects essentiels :
+**Architecture extensible** : Contrairement aux bibliothèques packagées (Material-UI, Ant Design), Shadcn/ui fournit des composants de base que je peux étendre et personnaliser selon les besoins métier de DropIt. Cette flexibilité m'évite les limitations frustrantes des bibliothèques fermées.
 
-- **Accessibilité native** : Radix UI implémente les standards WCAG AA avec support des lecteurs d'écran, navigation clavier complète, et gestion des focus
-- **Cohérence visuelle** : tokens de design réutilisables pour espacements, couleurs, et typographie via CSS variables
-- **Composants robustes** : states management intégré, animations fluides, et API cohérente
-
-### Adaptation responsive mobile
-
-L'interface mobile utilise Tailwind CSS pour une adaptation fluide aux différentes tailles d'écran, en privilégiant une approche mobile-first pour garantir la performance sur les appareils des athlètes.
+**Intégration native Tailwind** : Les composants utilisent directement Tailwind CSS, s'intégrant parfaitement dans l'écosystème technique que j'ai mis en place. Cette cohérence facilite la maintenance et évite les conflits de styles.
 
 ## Implémentations visuelles finales
 
-Cette section présente le rendu final des interfaces après itération sur les wireframes et intégration du design system. L'évolution de la conception vers l'implémentation révèle les ajustements nécessaires entre les concepts théoriques et la réalité technique.
+Cette section présente le rendu final des interfaces après itération sur les wireframes et intégration du design system.
 
 ### Interface de dashboard coach
 
@@ -127,7 +121,7 @@ L'application mobile présente une navigation optimisée tactile avec :
 
 ### Tests d'utilisabilité avec les coachs
 
-J'ai organisé des sessions de test avec trois coachs de différents clubs pour valider l'interface de création de programme :
+J'ai organisé des sessions de test avec le coach de mon club pour valider l'interface de création de programme :
 
 **Retours positifs** :
 - "C'est pratique de centraliser un catalogue d'entrainement, d'exercices et de pouvoir les réutiliser"
@@ -151,18 +145,62 @@ Les tests de l'application mobile ont révélé :
 - Timer intégré pour les temps de repos
 - Notifications de rappel pour les séances planifiées
 
-## Évolutions futures des interfaces
+## Flow d'interaction : création d'un programme
 
-### Extensions prévues
+Au-delà des wireframes statiques, il est important de comprendre comment ces interfaces s'articulent dans un parcours utilisateur complet. Le diagramme suivant illustre le flow d'interaction pour la création d'un programme d'entraînement, cas d'usage central de l'application :
 
-L'architecture modulaire facilite l'ajout de nouvelles fonctionnalités :
+```mermaid
+sequenceDiagram
+    participant Coach as 👨 Coach
+    participant UI as 🌐 Interface Web
+    participant Form as 📝 Formulaire Multi-étapes
+    participant API as 🔄 API NestJS
+    participant DB as 💾 Base de données
+    
+    Coach->>UI: Accède à "Créer un programme"
+    UI->>Form: Initialise stepper 3 étapes
+    
+    Note over Form: Étape 1 - Informations générales
+    Coach->>Form: Saisit titre, description, catégorie
+    Form->>Form: Validation temps réel (Zod)
+    Coach->>Form: Clique "Suivant"
+    Form->>Form: Sauvegarde état étape 1
+    
+    Note over Form: Étape 2 - Composition exercices
+    Form->>API: Charge catalogue exercices/complexes
+    API->>DB: SELECT exercices WHERE created_by = coach
+    DB-->>API: Liste exercices personnalisés
+    API-->>Form: Exercices disponibles
+    
+    Coach->>Form: Sélectionne exercices via drag-and-drop
+    Coach->>Form: Configure paramètres (séries, reps, poids)
+    Form->>Form: Validation contraintes métier
+    Coach->>Form: Réorganise ordre des exercices
+    Form->>Form: Sauvegarde état étape 2
+    
+    Note over Form: Étape 3 - Planification
+    Form->>API: Charge liste athlètes du coach
+    API->>DB: SELECT athletes WHERE coach_id = coach
+    DB-->>API: Athlètes disponibles
+    API-->>Form: Liste athlètes
+    
+    Coach->>Form: Sélectionne athlètes cibles
+    Coach->>Form: Définit dates d'entraînement
+    Form->>Form: Validation finale complète
+    Coach->>Form: Clique "Créer le programme"
+    
+    Form->>API: POST /workouts (données complètes)
+    API->>DB: Création workout + elements + sessions
+    DB-->>API: Programme créé avec ID
+    API-->>Form: Confirmation création
+    Form-->>UI: Redirection vers liste programmes
+    UI-->>Coach: Affiche programme créé avec succès
+```
 
-**Dashboard avancé** : Graphiques de progression, comparaisons entre athlètes, analyses statistiques approfondies.
-
-**Interface de planification** : Vue calendaire avec drag-and-drop, gestion des créneaux récurrents, synchronisation avec calendriers externes.
-
-**Mode collaboratif** : Système de commentaires sur les séances, annonces d'évenèment du club.
+Ce flow dynamique complète les wireframes statiques en montrant comment les différentes interfaces s'enchaînent pour former une expérience utilisateur cohérente. Il illustre également l'intégration entre les couches frontend et backend, préparant ainsi la transition vers l'implémentation technique détaillée.
 
 ## Conclusion
 
-message de conclusion avant de passer a la suite dans l'implémentation frontend 
+Ces maquettes, wireframes et flows d'interaction achèvent la conception technique de DropIt. L'ensemble de cette démarche établit les fondations nécessaires à l'implémentation de l'application.
+
+La suite de ce dossier aborde les aspects sécuritaires, dimension critique pour une application gérant des données personnelles d'athlètes. 

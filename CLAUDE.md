@@ -62,6 +62,53 @@ The project uses @beoe/rehype-mermaid for diagram rendering:
 - Images stored in `src/assets/`
 - Static assets in `public/`
 
+## Writing Style Guidelines
+
+### Tone and Style
+- **ALWAYS** adopt a professional and personal writing tone
+- **STAY HUMBLE**: Student learning posture, not confirmed expert
+- **AVOID** AI-style bullet point lists (generic bullet points)
+- **USE** first person to show personal involvement ("I chose", "my approach", "in my context")
+- **STRUCTURE** in narrative paragraphs that tell the development journey
+- **JUSTIFY** every technical choice with thoughtful argumentation
+- **SHOW** learning, discoveries, questioning rather than absolute certainties
+
+### Document Structure
+- **START** each section with contextual introduction
+- **DEVELOP** arguments with concrete project examples
+- **CONCLUDE** with perspectives or lessons learned
+- **RESPECT** logical hierarchy: H2 for main sections, H3 for subsections
+
+### Technical Justification
+- **EXPLAIN** the why before the how for each technical choice
+- **COMPARE** alternatives considered and argue the final choice
+- **MENTION** project constraints (time, skills, resources)
+- **INTEGRATE** learning aspects and skill development
+
+### Words to Avoid
+- "Simply", "easily", "quickly" (without justification)
+- Impersonal formulations without context
+- Unexplained technical jargon
+- Unargued statements
+
+### Words to Favor
+- "In the context of this project"
+- "This approach allows to"
+- "I chose this solution because"
+- "This decision is based on"
+- "The analysis reveals that"
+- "This experience allowed me to"
+- "I discovered that", "I learn that", "I'm beginning to understand"
+- "This approach allows me to explore", "This constitutes learning for me"
+
+### Examples of Correct Formulations
+
+❌ **Avoid:** "I used React because it's popular"
+✅ **Correct:** "I chose React for the frontend based on my two years of experience with this technology, which allowed me to focus on business challenges rather than learning a new framework"
+
+❌ **Avoid:** "PostgreSQL is a good database"
+✅ **Correct:** "PostgreSQL emerged as the primary database choice due to its proven reliability in production contexts, my familiarity with this tool acquired during previous projects, and its advanced capabilities for managing complex relationships needed to model training data"
+
 ## Deployment
 
 - Target: Cloudflare Pages (https://docs-dropit.pages.dev/)
