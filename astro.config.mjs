@@ -43,7 +43,8 @@ export default defineConfig({
 						{ label: 'Architecture logicielle', link: '/conception/architecture/' },
 						{ label: 'Base de données', link: '/conception/base-donnees/' },
 						{ label: 'Accès aux données', link: '/conception/acces-donnees/' },
-						{ label: 'Interfaces utilisateur', link: '/conception/interfaces/' },
+						{ label: 'Interfaces', link: '/conception/interfaces/' },
+						{ label: 'Implémentation frontend', link: '/conception/implementation-frontend/' },
 					],
 				},
 				{

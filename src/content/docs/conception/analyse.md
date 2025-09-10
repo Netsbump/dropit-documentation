@@ -7,15 +7,13 @@ description: Analyse détaillée des besoins utilisateurs et conception des inte
 
 Ma position d'utilisateur final présente l'avantage de faciliter cette analyse, mais elle comporte aussi le risque de projeter mes propres habitudes sur l'ensemble des utilisateurs. J'ai donc veillé à multiplier les échanges avec les autres membres du club pour valider mes hypothèses et enrichir ma compréhension des besoins diversifiés selon les profils d'utilisateurs.
 
-## Méthodologie d'analyse et validation des besoins
-
-### Approche centrée utilisateur
+## Méthodologie d'analyse
 
 Ma démarche d'analyse s'articule autour d'une approche centrée utilisateur que j'ai adaptée aux contraintes de mon projet de formation. Les échanges informels avec les membres du club lors des entraînements m'ont permis de recueillir des retours spontanés sur leurs difficultés actuelles et leurs attentes concernant un outil numérique.
 
 J'ai organisé ces retours autour de deux profils principaux d'utilisateurs dont les besoins diffèrent significativement : les athlètes, focalisés sur l'efficacité d'accès à l'information pendant l'entraînement, et les coachs, orientés vers l'efficacité de gestion et de suivi des programmes. Cette segmentation m'aide à prioriser les fonctionnalités selon leur impact sur l'expérience utilisateur de chaque groupe. Chaque fonctionnalité répond à un besoin concret exprimé par les utilisateurs, évitant ainsi le développement de fonctionnalités superflues qui complexifieraient inutilement l'interface.
 
-### Identification des fonctionnalités prioritaires
+## Identification des fonctionnalités
 
 L'analyse des dysfonctionnements actuels m'a conduit à identifier les fonctionnalités qui constituent le socle minimal viable de l'application. Ces fonctionnalités répondent directement aux problèmes les plus critiques observés : accès difficile aux programmes, dispersion de l'information, absence de suivi structuré des progressions.
 
@@ -36,7 +34,7 @@ graph TD
     style F fill:#0d47a1
 ```
 
-## Diagramme des cas d'usage et architecture fonctionnelle
+## Diagramme des cas d'usage
 
 Le diagramme ci-dessous présente une vue synthétique des principales interactions entre les utilisateurs (athlètes et coachs) et le système. Il met en évidence les différentes fonctionnalités accessibles selon le rôle de l'utilisateur.
 
@@ -67,6 +65,10 @@ sequenceDiagram
 ```
 
 ## Flux d'interactions
+
+Cette section détaille les parcours utilisateurs sous forme de flux d'interactions système-utilisateur. Ces flux constituent une spécification fonctionnelle qui me permet de comprendre précisément les étapes de chaque action et d'identifier les entités métier nécessaires à la conception de la base de données.
+
+Chaque flux décrit les échanges entre l'utilisateur et le système, révélant ainsi les besoins en données (exercices, programmes, maximums, athlètes) et les règles métier à implémenter (calculs de charges, validations, contraintes d'intégrité). 
 
 ### 1. <ins>Accéder à son entraînement personnalisé (Athlète)</ins>
 
@@ -212,10 +214,35 @@ Cette fonctionnalité s'inspire directement des besoins exprimés par les coachs
 - La liste d'**athlètes** peut être filtré par recherche (**nom, prénom**), par **catégorie de poids** (compétition), par **catégorie de sexe** (compétition) ou par **niveau** des **athlètes** (rookie, national, regional)
 - Le **coach** peut accéder au **détail** de la fiche d'un **athlète** en cliquant dessus afin de visualiser des informations supplémentaire ou d'effectuer des modification sur celle ci (niveau par exemple)
 
-## Validation et perspectives d'amélioration
+## MVP
 
-Cette analyse des besoins constitue une première itération que j'envisage d'affiner en continu grâce aux retours des utilisateurs finaux.
+Cette analyse révèle un périmètre fonctionnel conséquent. J'ai choisi d'adopter une approche MVP (Minimum Viable Product) pour tester rapidement les fonctionnalités essentielles auprès des utilisateurs de mon club avant de développer des fonctionnalités plus avancées.
 
-Les fonctionnalités décrites ci-dessus représentent le périmètre fonctionnel minimal viable que je souhaite implémenter dans la première version de DropIt.
+### Périmètre retenu
 
-Parmi les évolutions que j'envisage d'explorer : l'intégration d'analyses statistiques de progression, le développement d'un mode hors ligne pour l'application mobile, ou encore l'ajout d'un chronomètre pour les exercices qui le necessite.
+Les retours des utilisateurs de mon club m'ont permis d'identifier les fonctionnalités qui résolvent 80% des problèmes quotidiens observés :
+
+**Pour les coachs** :
+- Création et gestion du catalogue d'exercices personnalisé
+- Composition de programmes d'entraînement avec paramètres (séries, répétitions, charges)
+- Planification basique des séances via interface calendaire
+- Assignation des programmes aux athlètes
+
+**Pour les athlètes** :
+- Consultation des programmes du jour avec calcul automatique des charges
+- Enregistrement et historique des records personnels
+- Ajout de notes sur les entraînements pour communiquer avec le coach
+
+### Fonctionnalités reportées en versions ultérieures
+
+Plusieurs fonctionnalités identifiées lors de l'analyse restent pertinentes mais ne constituent pas des éléments bloquants pour l'usage quotidien :
+
+**Communication vie du club** : Bien que la dispersion des informations dans les messageries soit problématique, cette fonctionnalité peut être temporairement compensée par les outils existants du club.
+
+**Gestion fine des profils** : Les informations détaillées (catégories de compétition, mesures physiques) enrichiraient l'expérience mais ne conditionnent pas l'utilisation de base de l'application.
+
+**Analytics avancées** : Les analyses statistiques de progression et comparaisons entre athlètes apporteraient une valeur ajoutée significative mais peuvent être développées une fois l'usage établi.
+
+### Justification de cette priorisation
+
+Cette approche me permet de concentrer mes efforts sur un cœur fonctionnel robuste qui démontre la valeur métier de DropIt. L'architecture technique décrite dans la suite de projet reste conçue pour supporter des évolutions futures.

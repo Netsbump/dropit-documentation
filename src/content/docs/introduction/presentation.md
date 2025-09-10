@@ -27,9 +27,9 @@ Ma méthodologie s'appuie sur une approche centrée sur l'utilisateur final que 
 
 Cette démarche influence directement mes choix techniques : privilégier la simplicité d'usage plutôt que l'exhaustivité fonctionnelle, optimiser les parcours utilisateur les plus fréquents, intégrer dès la conception les contraintes d'usage en environnement sportif.
 
-Ce projet me permet de développer une approche complète de la conception d'applications, depuis l'analyse des besoins jusqu'au déploiement en production. Les compétences visées s'articulent autour de trois axes principaux. D'abord, la maîtrise technique d'un stack moderne. Ensuite, l'appréhension des enjeux de sécurité et de performance dans des applications métier. Enfin, la capacité à gérer un projet en autonomie.
+Ce projet me permet de développer une approche complète de la conception d'applications, depuis l'analyse des besoins jusqu'au déploiement en production. Les compétences visées s'articulent autour de trois axes principaux. D'abord, la maîtrise technique d'une stack moderne. Ensuite, l'appréhension des enjeux de sécurité et de performance dans des applications métier. Enfin, la capacité à gérer un projet en autonomie.
 
-DropIt constitue pour moi un projet évolutif qui continuera de servir de support d'apprentissage au-delà de la formation. Les retours d'usage des membres du club ouvriront de nouvelles pistes d'évolution. Je pourrai ainsi explorer des problématiques avancées : import et export de programmation pdf/excel, intégration d'objets connectés pour la collecte automatique de données d'entraînement, chronomètre intégré.
+DropIt constitue pour moi un projet évolutif qui continuera de servir de support d'apprentissage au-delà de la formation. Les retours d'usage des membres du club ouvriront de nouvelles pistes d'évolution.
 
 ## Structure de ce dossier
 
