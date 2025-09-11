@@ -537,3 +537,30 @@ Cette implémentation m'a permis de développer une vision pratique de la sécur
 L'implémentation du système d'authentification de DropIt illustre la complexité pratique de la sécurisation d'une application moderne. Cette base solide prépare maintenant l'étape suivante : la mise en œuvre d'un système de gestion des autorisations granulaire adapté aux rôles spécifiques de l'écosystème haltérophilie.
 
 La section suivante détaillera comment cette fondation d'authentification s'enrichit d'un système RBAC (Role-Based Access Control) permettant de gérer finement les permissions entre coachs, athlètes, et administrateurs, garantissant ainsi que chaque utilisateur accède uniquement aux fonctionnalités et données qui lui sont destinées.
+
+
+TODO : spécificité mobile app
+### Adaptations spécifiques au mobile
+
+L'interface mobile privilégie une approche offline-first avec stockage local via AsyncStorage pour maintenir la continuité d'usage en salle de sport. Les données critiques (programmes, exercices, performances en cours) sont synchronisées automatiquement lorsque la connectivité le permet :
+
+```typescript
+// Stratégie de cache hybride mobile
+const syncWithServer = async () => {
+  try {
+    // Synchronisation ascendante : envoi des données locales
+    const localData = await AsyncStorage.getItem('pending-performances');
+    if (localData) {
+      await api.performance.batchCreate({ body: JSON.parse(localData) });
+      await AsyncStorage.removeItem('pending-performances');
+    }
+    
+    // Synchronisation descendante : récupération des nouvelles données
+    const workouts = await api.workout.getMyWorkouts();
+    await AsyncStorage.setItem('workouts', JSON.stringify(workouts));
+  } catch (error) {
+    // Gestion gracieuse des erreurs de connectivité
+    console.warn('Sync failed, will retry later:', error);
+  }
+};
+```

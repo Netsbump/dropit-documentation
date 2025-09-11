@@ -3,6 +3,10 @@ title: Accès aux données
 description: Implémentation de la couche d'accès aux données avec MikroORM
 ---
 
+## Introduction
+
+Cette section détaille l'implémentation concrète de la couche d'accès aux données dans DropIt. Après avoir présenté l'[architecture logicielle](/conception/architecture) d'ensemble et établi le [modèle de données](/conception/base-donnees), nous explorons ici comment transformer ces concepts en code fonctionnel avec MikroORM et l'architecture hexagonale que j'ai adoptée dans l'API NestJS.
+
 ## Approches d'implémentation de la couche de données
 
 Après avoir établi le modèle conceptuel avec la méthode Merise, plusieurs approches s'offraient à moi pour implémenter la couche d'accès aux données dans DropIt. Chacune présente des avantages selon le contexte de développement et les contraintes techniques du projet.
@@ -198,11 +202,11 @@ export class WorkoutController {
 
 Le controller orchestre plusieurs mécanismes de sécurité en cascade :
 
-**Niveau 1 - Authentification** : Le `PermissionsGuard` vérifie que l'utilisateur possède un token valide et extrait ses informations via `@CurrentUser()`.
+**Niveau 1 - Authentification** : Le `PermissionsGuard` vérifie que l'utilisateur possède un token valide et extrait ses informations via `@CurrentUser()`. L'implémentation de ce système d'authentification est détaillée dans la section [authentification](/securite/authentification).
 
 **Niveau 2 - Isolation organisationnelle** : Le décorateur `@CurrentOrganization()` garantit que l'utilisateur ne peut accéder qu'aux ressources de son organisation, empêchant tout accès transversal entre clubs.
 
-**Niveau 3 - Permissions granulaires** : `@RequirePermissions('read')` vérifie que l'utilisateur dispose du droit spécifique requis pour cette action. Un membre simple peut avoir le droit 'read' mais pas 'create' ou 'delete'.
+**Niveau 3 - Permissions granulaires** : `@RequirePermissions('read')` vérifie que l'utilisateur dispose du droit spécifique requis pour cette action. Un membre simple peut avoir le droit 'read' mais pas 'create' ou 'delete'. Ce système de permissions est détaillé dans la section [gestion des autorisations](/securite/permissions).
 
 **Niveau 4 - Contrat d'API** : `@TsRestHandler(c.getWorkout)` assure que les paramètres d'entrée et les réponses correspondent exactement au contrat défini dans `@dropit/contract`, garantissant la type safety entre l'API et les clients.
 
