@@ -538,8 +538,6 @@ sequenceDiagram
 
 ## Détermination automatique des ressources
 
-TOUTE CETTE PARTIE VA DANS LES ANNEXES
-
 ### Convention de nommage
 
 J'ai implémenté une convention qui détermine automatiquement la ressource depuis le nom du contrôleur. Cette approche élimine la configuration manuelle et réduit les risques d'erreur :

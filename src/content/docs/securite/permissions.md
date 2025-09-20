@@ -75,6 +75,8 @@ Plutôt que d'avoir des relations individuelles entre coachs et athlètes, j'ai 
 
 Cette refactorisation a permis de passer d'un modèle rigide à une architecture flexible qui correspond mieux à la réalité organisationnelle des clubs de sport.
 
+Cette évolution architecturale n'a pas posé de problème de migration en pratique car j'utilise un système de seeds pour alimenter la base de données en développement. Cette approche, qui sera détaillée dans la section sur les tests, me permet de recréer facilement un jeu de données cohérent à chaque évolution du modèle.
+
 Les schémas détaillés de ces entités (MCD, MLD, MPD) et leurs relations sont disponibles dans la section [Annexes permissions](/annexes/permissions/) pour une vision complète de l'architecture de données.
 
 ## Endpoints d'autorisation automatiques
