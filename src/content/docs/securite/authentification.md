@@ -1,11 +1,11 @@
 ---
-title: Implémentation de l'authentification avec Better-Auth
-description: Mise en œuvre pratique du système d'authentification hybride dans DropIt
+title: Implémentation de l'authentification
+description: Mise en œuvre pratique du système d'authentification dans DropIt
 ---
 
-## Introduction : de la conception à l'implémentation
+## Introduction
 
-Le choix de Better-Auth permet une approche hybride combinant JWT et sessions révocables.
+Comme évoqué Better-Auth permet une approche hybride combinant JWT et sessions révocables.
 Cette implémentation s'articule autour de plusieurs composants interdépendants: la configuration du service d'authentification, la gestion des entités de données, la protection des routes via des guards, et l'exposition d'une API cohérente pour les applications clientes.
 
 ## Vue d'ensemble de l'architecture d'authentification
@@ -42,7 +42,7 @@ modules/auth/
 
 ### Implémentation du service Better-Auth
 
-Le cœur du système d'authentification réside dans le service Better-Auth que j'ai configuré pour répondre aux besoins spécifiques de DropIt. Cette configuration m'a demandé d'approfondir ma compréhension des enjeux de sécurité web et de découvrir les subtilités d'une authentification multi-plateforme.
+Le cœur du système d'authentification réside dans le service Better-Auth que j'ai configuré pour répondre aux besoins spécifiques de DropIt. Parler aussi du systeme d'email, à quoi il sert? 
 
 ```typescript
 // Configuration Better-Auth adaptée à DropIt
@@ -90,39 +90,11 @@ this._auth = betterAuth({
 });
 ```
 
-Cette configuration illustre ma démarche d'adaptation d'un outil générique aux besoins spécifiques de DropIt. L'intégration du service email et la définition des paramètres de sécurité reflètent ma compréhension progressive des enjeux de production.
-
-### Intégration avec l'écosystème NestJS
-
-L'intégration de Better-Auth dans l'architecture NestJS m'a permis d'explorer les patterns d'injection de dépendances et de découverte de modules. Cette approche facilite la testabilité et la maintenance du code :
-
-```typescript
-// auth.service.ts - Service principal
-@Injectable()
-export class AuthService implements OnModuleInit {
-  private _auth: BetterAuth;
-
-  constructor(
-    @Inject('EMAIL_SERVICE') private emailService: EmailService,
-    @Inject('CONFIG') private config: Config,
-  ) {}
-
-  async onModuleInit() {
-    // Initialisation différée pour gestion des dépendances
-    await this.initialize();
-  }
-
-  get auth(): BetterAuth {
-    return this._auth;
-  }
-}
-```
-
 ## Gestion des entités et persistance des données
 
 ### Modélisation des données d'authentification
 
-L'implémentation de Better-Auth nécessite plusieurs entités complémentaires à l'entité `User` existante. Cette modélisation m'a aidé à comprendre la complexité de la gestion des sessions modernes et des systèmes d'authentification distribués.
+L'implémentation de Better-Auth s'articule autour de plusieurs entités clefs en complément de l'entité `User` dont les principales sont les suivantes.
 
 #### Entité AuthSession : Gestion des sessions actives
 
@@ -160,48 +132,6 @@ export class AuthSession {
 
 Cette entité me permet de gérer les sessions actives avec un contrôle granulaire sur les métadonnées de connexion. L'intégration des informations d'IP et User-Agent facilite le monitoring et la détection d'activités suspectes.
 
-#### Entité AuthAccount : Support OAuth futur
-
-```typescript
-@Entity('auth_account')
-export class AuthAccount {
-  @PrimaryKey()
-  id!: string;
-
-  @Property()
-  userId!: string;
-
-  @Property()
-  accountId!: string;
-
-  @Property()
-  providerId!: string;
-
-  @Property({ type: 'json', nullable: true })
-  accessToken?: string;
-
-  @Property({ type: 'json', nullable: true })
-  refreshToken?: string;
-
-  @Property()
-  expiresAt?: Date;
-
-  @Property()
-  scope?: string;
-
-  @Property({ type: 'json', nullable: true })
-  idToken?: string;
-
-  @Property()
-  createdAt = new Date();
-
-  @Property({ onUpdate: () => new Date() })
-  updatedAt = new Date();
-}
-```
-
-Bien que non utilisée dans la version initiale de DropIt, cette entité prépare l'évolution future vers l'authentification OAuth (Google, Apple), répondant aux demandes potentielles d'amélioration de l'expérience utilisateur.
-
 #### Entité AuthVerification : Tokens temporaires
 
 ```typescript
@@ -233,7 +163,7 @@ Cette entité gère les tokens de vérification temporaires (email, réinitialis
 
 ### Implémentation du AuthGuard
 
-Le guard d'authentification constitue le point d'entrée de la sécurisation des routes dans DropIt. Son implémentation m'a permis d'approfondir ma compréhension des intercepteurs NestJS et du cycle de vie des requêtes :
+Le guard d'authentification constitue le point d'entrée de la sécurisation des routes dans DropIt. Ecrire une petite introduction sur ce que sont les guard, les decorateurs et à quoi ils servent...
 
 ```typescript
 @Injectable()
@@ -276,11 +206,9 @@ export class AuthGuard implements CanActivate {
 }
 ```
 
-Cette implémentation illustre ma compréhension de l'équilibre entre sécurité et flexibilité d'usage, permettant différents niveaux de protection selon les besoins de chaque route.
+### Décorateurs 
 
-### Décorateurs pour la flexibilité d'usage
-
-L'implémentation de décorateurs personnalisés me permet de simplifier la gestion de l'authentification dans les contrôleurs tout en maintenant une approche déclarative claire :
+Décorateur pour la flexibilité d'usages :
 
 ```typescript
 // auth.decorator.ts - Décorateurs personnalisés
@@ -304,13 +232,11 @@ export const BeforeHook = (hookFn: Function) => SetMetadata('beforeHook', hookFn
 export const AfterHook = (hookFn: Function) => SetMetadata('afterHook', hookFn);
 ```
 
-Ces décorateurs reflètent ma volonté de créer une API développeur intuitive et maintenable, facilitant l'évolution future du système d'authentification.
-
 ## Endpoints et API d'authentification
 
 ### Routes automatiquement exposées par Better-Auth
 
-Better-Auth expose automatiquement plusieurs endpoints sur le préfixe `/auth`, réduisant significativement le code à maintenir. Cette approche convention-over-configuration m'a fait apprécier les avantages des frameworks opinionated :
+Better-Auth expose automatiquement plusieurs endpoints sur le préfixe `/auth`, réduisant significativement le code à maintenir.
 
 | Route | Méthode | Description | Usage dans DropIt |
 |-------|---------|-------------|-------------------|
@@ -326,7 +252,7 @@ Cette standardisation facilite l'intégration côté client et garantit la cohé
 
 ### Intégration avec le système d'email
 
-L'intégration du système d'email avec Better-Auth m'a demandé de comprendre l'architecture asynchrone des notifications utilisateur. Cette implémentation prépare l'évolution vers des communications plus riches (notifications push, SMS) :
+L'intégration du système d'email avec Better-Auth ... Cette implémentation prépare l'évolution vers des communications plus riches (notifications push, SMS) :
 
 ```mermaid
 sequenceDiagram
@@ -472,39 +398,69 @@ hooks: {
 
 Cette approche facilite le debugging et le monitoring de la sécurité en production.
 
-## Perspectives d'évolution et apprentissages
+## Implémentation clients
 
-### Défis rencontrés et solutions
+L'intégration de Better-Auth dans DropIt s'appuie sur une configuration que j'ai adaptée aux besoins spécifiques de l'application, particulièrement pour supporter l'architecture web et mobile des deux clients:
 
-L'implémentation de Better-Auth m'a confronté à plusieurs défis techniques qui ont enrichi ma compréhension du développement backend :
+```typescript
+// Configuration Better-Auth côté serveur pour DropIt
+const authConfig = {
+  database: {
+    // Utilisation de la base PostgreSQL existante
+    provider: "postgresql",
+    url: process.env.DATABASE_URL
+  },
+  
+  // Plugin Expo pour le support mobile
+  plugins: [expo()],
+  
+  // Support multi-plateforme
+  cookies: {
+    enabled: true,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict'
+  },
+  
+  // Deep linking et origines de confiance pour Expo
+  trustedOrigins: [
+    "dropit://", // Scheme principal de l'app mobile
+    "dropit://*" // Support des deep links avec chemins
+  ],
+  
+  // Personnalisation pour DropIt
+  user: {
+    additionalFields: {
+      role: "string",
+      clubId: "string"
+    }
+  }
+};
+```
 
-**Intégration multi-plateforme** : La gestion des cookies et tokens entre web et mobile m'a demandé d'approfondir ma compréhension des mécanismes d'authentification cross-platform.
+Du côté client mobile avec le framework `Expo`, la configuration s'adapte à l'écosystème React Native :
 
-**Gestion des erreurs** : La mise en place d'une gestion d'erreurs robuste m'a sensibilisé à l'importance de l'expérience utilisateur lors des échecs d'authentification.
+```typescript
+// Configuration client mobile avec Expo
+import { createAuthClient } from "better-auth/react";
+import { expoClient } from "@better-auth/expo/client";
+import * as SecureStore from "expo-secure-store";
 
-**Performance** : L'optimisation des requêtes d'authentification via Redis m'a fait découvrir les enjeux de performance dans les systèmes à forte charge.
+export const authClient = createAuthClient({
+  baseURL: process.env.EXPO_PUBLIC_API_URL,
+  plugins: [
+    expoClient({
+      scheme: "dropit",
+      storagePrefix: "dropit-auth",
+      storage: SecureStore,
+    })
+  ]
+});
+```
 
-### Évolutions envisagées
+L'intégration du plugin Expo simplifie considérablement la gestion de la sécurité mobile en automatisant le stockage sécurisé, la gestion des cookies et le deep linking, tout en maintenant la cohérence avec le backoffice web.
 
-Cette implémentation ouvre plusieurs perspectives d'amélioration que je compte explorer dans l'évolution de DropIt :
-
-- **Authentification à deux facteurs** : Integration des TOTP pour les comptes administrateurs
-- **OAuth providers** : Support Google/Apple pour simplifier l'onboarding
-- **Session analytics** : Tableaux de bord d'usage pour les administrateurs club
-
-### Impact sur ma montée en compétences
-
-Cette implémentation m'a permis de développer une vision pratique de la sécurité applicative, complétant ma formation théorique par une expérience concrète de mise en œuvre. La maîtrise de Better-Auth enrichit mon portfolio technique et me prépare à aborder les enjeux d'authentification dans mes futurs projets professionnels.
-
-## Conclusion et transition vers la gestion des autorisations
-
-L'implémentation du système d'authentification de DropIt illustre la complexité pratique de la sécurisation d'une application moderne. Cette base solide prépare maintenant l'étape suivante : la mise en œuvre d'un système de gestion des autorisations granulaire adapté aux rôles spécifiques de l'écosystème haltérophilie.
-
-La section suivante détaillera comment cette fondation d'authentification s'enrichit d'un système RBAC (Role-Based Access Control) permettant de gérer finement les permissions entre coachs, athlètes, et administrateurs, garantissant ainsi que chaque utilisateur accède uniquement aux fonctionnalités et données qui lui sont destinées.
-
-
-TODO : spécificité mobile app
-### Adaptations spécifiques au mobile
+## Implémation spécifiques au client mobile
 
 L'interface mobile privilégie une approche offline-first avec stockage local via AsyncStorage pour maintenir la continuité d'usage en salle de sport. Les données critiques (programmes, exercices, performances en cours) sont synchronisées automatiquement lorsque la connectivité le permet :
 
@@ -528,3 +484,9 @@ const syncWithServer = async () => {
   }
 };
 ```
+## Conclusion
+
+L'implémentation du système d'authentification de DropIt illustre la complexité pratique de la sécurisation d'une application moderne. Cette base prépare maintenant l'étape suivante : la mise en œuvre d'un système de gestion des autorisations granulaire adapté aux rôles spécifiques de l'écosystème haltérophilie.
+
+La section suivante détaillera comment cette fondation d'authentification s'enrichit d'un système RBAC (Role-Based Access Control) permettant de gérer finement les permissions entre coachs, athlètes, et administrateurs, garantissant ainsi que chaque utilisateur accède uniquement aux fonctionnalités et données qui lui sont destinées.
+

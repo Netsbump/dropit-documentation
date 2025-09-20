@@ -92,6 +92,7 @@ export default defineConfig({
 						{ label: 'Sécurité', link: '/annexes/securite/' },
 						{ label: 'Références', link: '/annexes/references/' },
 						{ label: 'Roadmap', link: '/annexes/roadmap/' },
+						{ label: 'Authentifications', link: '/annexes/authentifications/' },
 					],
 				},
 			],
