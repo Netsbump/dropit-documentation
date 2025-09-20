@@ -19,20 +19,10 @@ Sur mon temps libre, je fais partie d'un club d'haltérophilie. Ma pratique de c
 
 Le projet que j'ai décidé de nommer DropIt s'inscrit dans une démarche qui allie exigences pédagogiques et utilité pratique. Cette double contrainte influence profondément mes choix de conception : chaque décision technique doit démontrer ma compréhension des enjeux de développement d'applications complètes tout en apportant une réelle valeur ajoutée aux utilisateurs finaux de mon club.
 
-L'application se structure autour de deux interfaces complémentaires répondant aux besoins différenciés des utilisateurs. Le backoffice web, destiné aux coachs, privilégie l'efficacité de saisie et la visualisation de données pour la programmation des séances et le suivi des athlètes. L'application mobile, orientée vers les pratiquants, met l'accent sur la consultation rapide des programmes et l'enregistrement des performances lors des entraînements.
-
-Cette architecture m'offre l'opportunité d'explorer différentes problématiques techniques : développement d'API REST, gestion d'états complexes dans des interfaces riches, synchronisation de données entre plateformes, optimisation des performances pour des contextes d'usage variés.
+L'application se structure autour de deux interfaces complémentaires répondant aux besoins différenciés des utilisateurs. Le backoffice web, destiné aux coachs, permet la création, visualisation et la planification d'entraînements ainsi que le suivi des athlètes. L'application mobile, destinée aux athlètes, permet la consultation de l'entraînement adapté pour chaque utilisateur et l'enregistrement des performances lors des sessions.
 
 Ma méthodologie s'appuie sur une approche centrée sur l'utilisateur final que ma position d'athlète facilite considérablement. Cette proximité avec le terrain me permet d'itérer rapidement sur les fonctionnalités, en confrontant mes développements aux besoins réels exprimés par les autres membres du club.
 
-Cette démarche influence directement mes choix techniques : privilégier la simplicité d'usage plutôt que l'exhaustivité fonctionnelle, optimiser les parcours utilisateur les plus fréquents, intégrer dès la conception les contraintes d'usage en environnement sportif.
-
 Ce projet me permet de développer une approche complète de la conception d'applications, depuis l'analyse des besoins jusqu'au déploiement en production. Les compétences visées s'articulent autour de trois axes principaux. D'abord, la maîtrise technique d'une stack moderne. Ensuite, l'appréhension des enjeux de sécurité et de performance dans des applications métier. Enfin, la capacité à gérer un projet en autonomie.
 
-DropIt constitue pour moi un projet évolutif qui continuera de servir de support d'apprentissage au-delà de la formation. Les retours d'usage des membres du club ouvriront de nouvelles pistes d'évolution.
-
-## Structure de ce dossier
-
-Cette documentation présente mon projet DropIt selon les étapes réelles de son développement. La partie conception détaille l'analyse des besoins et les choix d'architecture. La section sécurité explique comment protéger les données des utilisateurs. Les aspects de développement, tests et déploiement montrent comment ces choix se traduisent en fonctionnalités opérationnelles.
-
-Chaque section s'appuie sur des exemples tirés du développement de DropIt, permettant d'ancrer les concepts théoriques dans une réalité pratique. Cette approche vise à démontrer ma maîtrise technique et ma capacité à mener un projet complet en intégrant les contraintes métier, techniques et humaines du développement d'applications professionnelles.
+Chaque section s'appuie sur des exemples tirés du développement de DropIt, permettant d'ancrer les concepts théoriques dans une réalité pratique.
