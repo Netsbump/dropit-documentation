@@ -13,24 +13,29 @@ Cette situation impacte particulièrement le travail des coachs, qui doivent con
 
 Cette observation du terrain m'a amené à m'interroger sur la possibilité de développer une solution plus adaptée aux besoins spécifiques de la gestion d'un club d'haltérophilie, en tirant parti de ma position de pratiquant pour mieux comprendre les enjeux utilisateur.
 
-## Alignement avec les compétences du titre professionnel
+## Compétences du titre professionnel
 
-Le développement de DropIt s'inscrit dans le cadre des compétences attendues pour l'obtention du titre professionnel "Concepteur Développeur d'Applications". Cette démarche me permet d'aborder l'ensemble des aspects techniques exigés par la formation tout en répondant à un besoin réel, créant ainsi un contexte d'apprentissage particulièrement enrichissant.
+Le développement de DropIt s'inscrit dans le cadre des compétences attendues pour l'obtention du titre professionnel "Concepteur Développeur d'Applications".
 
-Le projet couvre méthodiquement l'ensemble des aspects techniques suivants que je dois maîtriser :
+Le projet couvre l'ensemble des aspects techniques suivants :
 
-- **Conception et développement d'une application multicouche** : L'architecture web/mobile de DropIt me permet d'explorer les enjeux de séparation des responsabilités et de communication entre les couches
-- **Mise en place d'une architecture moderne et évolutive** : Les choix technologiques s'orientent vers des solutions pérennes facilitant la maintenance et l'évolution
-- **Développement d'interfaces utilisateur responsives et accessibles** : La diversité des contextes d'usage (salle de sport, bureau) impose une attention particulière à l'ergonomie
-- **Création et gestion d'une base de données** : La modélisation des données d'entraînement et de progression présente des défis intéressants de conception
-- **Développement de fonctionnalités back-end sécurisées** : La gestion des données personnelles et de performance impose des exigences de sécurité élevées
-- **Déploiement et maintenance d'une application en production** : L'objectif d'utilisation réelle par mon club nécessite une approche professionnelle du déploiement
+- **Conception et développement d'une application multicouche** : Cette compétence est explorée à travers l'architecture monorepo avec packages partagés et la séparation des responsabilités entre API, interface web et application mobile. Le détail sera développé dans la partie [Architecture logicielle](/conception/architecture)
 
-## Analyse du public cible et de ses besoins
+- **Mise en place d'une architecture moderne et évolutive** : Cette approche tend vers les principes du Domain-Driven Design et de l'architecture hexagonale côté API, et une organisation par features côté frontend. L'implémentation technique sera détaillée dans les sections [Accès aux données](/conception/acces-donnees) et [Présentations](/conception/presentations)
+
+- **Développement d'interfaces utilisateur responsives et accessibles** : Cette compétence s'applique par la conception d'interfaces respectant les critères RGAA et adaptées aux contextes d'usage spécifiques des coachs et athlètes. La démarche sera présentée dans la partie [Interfaces utilisateur](/conception/interfaces)
+
+- **Création et gestion d'une base de données** : Cette compétence est abordée par le biais de la méthode Merise pour la partie conception, et mise en place au sein de l'application via une approche Code First avec un ORM et une base de données relationnelle. Le détail sera défini dans la partie [Base de données](/conception/base-donnees)
+
+- **Développement de fonctionnalités back-end sécurisées** : Cette dimension couvre l'authentification, la gestion des autorisations, la protection des données personnelles et la prévention des attaques OWASP (injections SQL, XSS, CSRF). L'implémentation sera détaillée dans les sections [Sécurité](/securite/) et [Accès aux données](/conception/acces-donnees)
+
+- **Déploiement et maintenance d'une application en production** : Cette compétence sera illustrée par la mise en place de CI/CD, l'utilisation d'un VPS avec Dokploy, et l'application des bonnes pratiques de maintenance. Les détails seront présentés dans la partie [Déploiement](/deploiement/)
+
+## Public cible et de ses besoins
 
 ### Les pratiquants
 
-L'application s'adresse principalement aux membres du club qui ont besoin d'accéder facilement à leurs programmes d'entraînement personnalisés, de suivre leurs progressions et de rester informés des actualités importantes du club. Mon observation des habitudes de mes collègues pratiquants m'aide à mieux cerner leurs besoins spécifiques :
+L'application s'adresse principalement aux membres du club qui ont besoin d'accéder facilement à leurs programmes d'entraînement personnalisés, de suivre leurs progressions et de rester informés des actualités importantes du club.
 
 L'accès rapide au programme du jour constitue leur besoin prioritaire. Entre chaque série, l'athlète doit pouvoir visualiser immédiatement l'exercice suivant et la charge à utiliser sur sa barre. Le support mobile s'impose naturellement par sa praticité dans l'environnement de la salle de sport, permettant une consultation rapide sans avoir à se déplacer vers un ordinateur fixe.
 
@@ -38,7 +43,7 @@ Le suivi de progression représente un aspect motivationnel crucial pour mainten
 
 ### Les coachs
 
-Les entraîneurs expriment des besoins différents, centrés sur l'efficacité de leur travail de programmation et de suivi. Mes échanges avec les coachs de mon club m'ont aidé à comprendre leurs priorités :
+Les entraîneurs expriment des besoins différents, centrés sur l'efficacité de leur travail de programmation et de suivi.
 
 La création et la gestion efficaces des programmes d'entraînement constituent leur besoin principal. L'outil doit leur faire gagner du temps dans ces tâches administratives pour qu'ils puissent se concentrer sur l'accompagnement technique des athlètes.
 
@@ -54,7 +59,7 @@ Dans un second temps, l'application évoluera en fonction des retours d'usage r�
 
 ## Défis techniques
 
-Le développement de DropIt présente plusieurs défis que je découvre progressivement et qui influencent mes réflexions de conception. L'interface doit être accessible sur différents supports, avec une version mobile optimisée pour les athlètes et une interface web complète pour les coachs. Cette exigence multi-plateforme m'amène à réfléchir aux choix technologiques cohérents et à l'architecture adaptée.
+SL'interface doit être accessible sur différents supports, avec une version mobile optimisée pour les athlètes et une interface web complète pour les coachs. Cette exigence multi-plateforme m'amène à réfléchir aux choix technologiques cohérents et à l'architecture adaptée.
 
 La synchronisation des données entre l'application mobile et le backoffice web nécessitera une architecture API robuste pour gérer les accès concurrents aux programmes. Par exemple, lorsqu'un coach modifie un programme pendant qu'un athlète consulte ses séances, l'application doit garantir la cohérence des informations affichées sans perturber l'expérience utilisateur.
 
@@ -68,6 +73,6 @@ L'accessibilité représente un autre aspect important du projet, avec ma volont
 
 La conception modulaire de l'application que j'envisage permettra son évolution future selon les besoins exprimés par les utilisateurs. Des fonctionnalités plus avancées pourront être ajoutées progressivement, comme des outils d'analyse de performance détaillés ou une possible extension à d'autres clubs de la région.
 
-L'architecture que je choisirai devra faciliter ces évolutions tout en maintenant la stabilité du système existant. Cette vision prospective influence dès maintenant mes décisions techniques, en privilégiant des solutions modulaires et extensibles.
+L'architecture que je choisirai devra faciliter ces évolutions tout en maintenant la stabilité du système existant.
 
 Par ailleurs, les retours d'usage réels m'aideront à mieux comprendre les enjeux de développement d'applications métier et à découvrir de nouvelles problématiques techniques selon les besoins qui émergeront.
