@@ -26,3 +26,59 @@ Le second défi concerne la scalabilité. Bien que DropIt commence avec un nombr
 
 
 
+## Annexes d'implémentations Better auth 
+
+## Configuration et service principal
+
+### Implémentation du service Better-Auth
+
+Le cœur du système d'authentification réside dans le service Better-Auth que j'ai configuré pour répondre aux besoins spécifiques de DropIt. Parler aussi du systeme d'email, à quoi il sert? 
+
+```typescript
+// Configuration Better-Auth adaptée à DropIt
+this._auth = betterAuth({
+  secret: config.betterAuth.secret,
+  trustedOrigins: config.betterAuth.trustedOrigins,
+  
+  // Authentification email/password adaptée au contexte club
+  emailAndPassword: {
+    enabled: true,
+    sendResetPassword: async (data) => {
+      // Intégration avec le service email pour réinitialisation
+      await this.emailService.sendPasswordReset(data);
+    },
+  },
+  
+  // Vérification email pour sécuriser les comptes
+  emailVerification: {
+    sendOnSignUp: true,
+    expiresIn: 60 * 60 * 24 * 10, // 10 jours - adapté aux habitudes utilisateur
+    sendVerificationEmail: async (data) => {
+      await this.emailService.sendVerificationEmail(data);
+    },
+  },
+  
+  // Connexion PostgreSQL pour cohérence avec l'architecture
+  database: new Pool({
+    connectionString: config.database.connectionString,
+  }),
+  
+  // Configuration rate limiting pour protection DDoS
+  rateLimit: {
+    window: 50,
+    max: 100,
+  },
+  
+  // Hooks personnalisés pour logique métier DropIt
+  hooks: {
+    before: createAuthMiddleware(async (ctx) => {
+      // Hook de pré-traitement pour logs et validation
+    }),
+  },
+  
+  plugins: [openAPI()], // Documentation automatique des endpoints
+});
+```
+
+
+
