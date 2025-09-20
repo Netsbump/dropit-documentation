@@ -89,6 +89,7 @@ export default defineConfig({
 					label: 'Annexes',
 					items: [
 						{ label: 'Glossaire', link: '/annexes/glossaire/' },
+						{ label: 'Sécurité', link: '/annexes/securite/' },
 						{ label: 'Références', link: '/annexes/references/' },
 						{ label: 'Roadmap', link: '/annexes/roadmap/' },
 					],
