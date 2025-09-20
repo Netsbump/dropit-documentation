@@ -3,18 +3,6 @@ title: Implémentation de l'authentification
 description: Mise en œuvre pratique du système d'authentification dans DropIt
 ---
 
-TODO: Partie à expliquer
-1. Introduction sur comment fonctionne better auth (jwt, session, schema de db, protection des routes, exposition d'un middleware d'api pour communiquer avec les entités généré etc)
-2. Rapide introduction de comment j'ai ranger mes features d'auth dans mon api
-3. Schema better auth explications des entités généré (à quoi ça sert etc) vulgarisation
-4. Endpoints exposés par better auth
-5. Configuration du middleware
-6. Restriction des ressources (protection)
-7. Gestion des sessions et sécurité: explications du concept et redirection dans les annexes pour le détails
-8. Stratégie de sécu JWT (rappel de la techno vite fait, header, payload, signature) et distinction du stockage coté client entre interface web et app mobile (pareil si besoin de plus on envoi dans les annexes)
-9. Implémentation de la lib coté clients pour profiter des rescrtions coté client aussi (page, composants)
-10. Conclusion et intro sur ce qui va suivre : les permissions (roles) avec le plugin Organization de better auth
-
 ## Introduction
 
 Après avoir justifié le choix de Better-Auth comme solution d'authentification, je détaille ici son implémentation concrète dans DropIt. Cette librairie m'offre une approche hybride combinant JWT et sessions révocables, répondant parfaitement aux besoins identifiés.
@@ -252,140 +240,64 @@ Dans cet exemple, on voit comment :
 
 ## Gestion des sessions et sécurité
 
-ICI Il faut simplifier et expliquer le fonctionnement et l'approche session des utilisateur. Eventuellement balancer des détails dans les annexes 'authentifications' avec des liens pour alleger un peu le tout
+### Architecture hybride JWT/Sessions
 
-### Architecture hybride retenue
+Better-Auth implémente une approche hybride qui combine les avantages des JWT et des sessions persistantes. Cette architecture répond parfaitement au besoin de révocation immédiate que j'ai identifié dans mes contraintes.
 
-L'architecture d'authentification que j'ai implémentée avec Better-Auth combine les approches JWT et sessions pour tirer parti des avantages de chacune :
+Concrètement, lors de la connexion, Better-Auth génère à la fois un JWT et enregistre une session en base de données. Le JWT permet une validation rapide côté serveur, tandis que la session en base permet la révocation instantanée si nécessaire (athlète quittant le club, changement de rôle).
 
-```mermaid
-graph TD
-    A[Utilisateur se connecte] --> B[Vérification identifiants]
-    B --> C[Génération JWT + Enregistrement session]
-    C --> D[Stockage session en BDD]
-    C --> E[Envoi JWT au client]
-    
-    F[Requête utilisateur] --> G[Validation JWT cryptographique]
-    G --> H{JWT valide ?}
-    H -->|Oui| I[Accès autorisé]
-    H -->|Non| J[Accès refusé]
-    
-    K[Besoin de révocation] --> L[Désactivation session en BDD]
-    L --> M[JWT invalide lors prochaine vérification]
-    
-    style A fill:#1976d2
-    style I fill:#2e7d32
-    style J fill:#d32f2f
-    style M fill:#d32f2f
-```
+Cette approche me donne la performance des tokens stateless avec la flexibilité de gestion des sessions traditionnelles. Les détails techniques de cette implémentation et la comparaison complète JWT vs Sessions sont disponibles dans les [Annexes authentification](/annexes/authentifications/).
 
-Cette approche me permet de bénéficier des performances des JWT pour la validation courante, tout en conservant la possibilité de révocation grâce au suivi des sessions en base de données. Concrètement, chaque token émis est enregistré dans une table `AuthSession` qui stocke les métadonnées de connexion (device, IP, date de création).
+## Stratégie de sécurisation côté client
 
-### Cycle de vie des sessions
+### Stockage sécurisé selon la plateforme
 
-L'implémentation de Better-Auth me permet de gérer finement le cycle de vie des sessions utilisateur :
+La sécurisation du stockage des tokens varie selon la plateforme d'accès. Pour le backoffice web, j'utilise les cookies HttpOnly qui protègent contre les attaques XSS (vulnérabilité permettant l'injection de code JavaScript malveillant). Cette protection est cruciale car les coachs accèdent parfois au backoffice depuis des postes partagés.
 
-```mermaid
-sequenceDiagram
-    participant Client
-    participant AuthGuard
-    participant AuthService
-    participant Database
+Pour l'application mobile, Better-Auth utilise automatiquement le stockage sécurisé natif via `expo-secure-store` : Keychain sur iOS et EncryptedSharedPreferences sur Android. Le plugin gère aussi le deep linking (redirection automatique vers l'app après authentification externe) pour les futures intégrations OAuth.
 
-    Client->>AuthGuard: Requête avec token
-    AuthGuard->>AuthService: getSession()
-    AuthService->>Database: Vérification session
-    
-    Database-->>AuthService: Session valide
-    
-    AuthService-->>AuthGuard: Session enrichie
-    AuthGuard->>AuthGuard: Validation autorisation
-    AuthGuard-->>Client: Accès autorisé/refusé
-```
+### Configuration des sessions
 
-## Stratégie de sécurisation des tokens JWT
+J'ai adapté la durée des sessions selon les habitudes d'usage : 7 jours pour le web avec renouvellement automatique, et 30 jours pour le mobile pour éviter les reconnexions fréquentes. Cette configuration équilibre sécurité et expérience utilisateur.
 
-### Stockage côté client
+Les détails d'implémentation, la configuration complète des tokens et les spécificités techniques sont disponibles dans les [Annexes authentification](/annexes/authentifications/).
 
-La sécurisation du stockage des tokens côté client constitue un enjeu majeur que j'ai abordé en analysant les différentes approches possibles. Pour le backoffice web de DropIt, j'ai opté pour les cookies HttpOnly qui offrent une protection optimale contre les attaques XSS, vulnérabilité qui permet de ?... dans un environnement web. 
+## Implémentation côté clients
 
-Les coachs accèdent au backoffice depuis des postes potentiellement partagés, rendant crucial le niveau de sécurité du stockage des tokens. Les cookies HttpOnly, inaccessibles depuis JavaScript, réduisent significativement la surface d'attaque.
+### Protection unifiée API et interface
 
-Pour l'application mobile développée avec Expo et React Native, j'ai opté pour une approche plus intégrée grâce au plugin Expo de Better-Auth. Cette solution utilise automatiquement `expo-secure-store` pour le stockage sécurisé des sessions, gérant de manière transparente les spécificités iOS (Keychain) et Android (EncryptedSharedPreferences) sans nécessiter d'implémentation manuelle. Le plugin `@better-auth/expo/client` prend en charge la gestion automatique des cookies dans les headers, le deep linking (c'est quoi ?) pour l'authentification sociale, et la synchronisation des sessions entre les différentes parties de l'application mobile.
+L'un des avantages majeurs de Better-Auth est sa capacité à sécuriser à la fois l'accès aux APIs et le rendu conditionnel des interfaces utilisateur. Cette approche unifiée me permet de maintenir une cohérence de sécurité entre le backend et le frontend.
 
-### Sécurité d'accès et expiration des sessions
-
-Dans le contexte de DropIt, j'ai configuré Better-Auth pour gérer automatiquement l'expiration des sessions afin de maintenir un niveau de sécurité approprié sans créer de friction excessive pour les utilisateurs. Les sessions web ont une durée de vie de 7 jours avec renouvellement automatique lors d'activité, tandis que les sessions mobiles persistent 30 jours pour éviter des reconnexions fréquentes qui nuiraient à l'expérience utilisateur.
-
-Cette approche s'appuie sur mon analyse des habitudes d'usage : les coachs accèdent régulièrement au backoffice web pour programmer les séances, tandis que les athlètes consultent leurs données de manière plus sporadique via l'application mobile.
-
-## Implémentation clients
-
-L'intégration de Better-Auth dans DropIt s'appuie sur une configuration que j'ai adaptée aux besoins spécifiques de l'application, particulièrement pour supporter l'architecture web et mobile des deux clients:
+Côté backend, mes APIs sont protégées par les Guards comme nous l'avons vu. Côté frontend, Better-Auth fournit des hooks React pour conditionner l'affichage des composants selon l'état d'authentification :
 
 ```typescript
-// Configuration Better-Auth côté serveur pour DropIt
-const authConfig = {
-  database: {
-    // Utilisation de la base PostgreSQL existante
-    provider: "postgresql",
-    url: process.env.DATABASE_URL
-  },
-  
-  // Plugin Expo pour le support mobile
-  plugins: [expo()],
-  
-  // Support multi-plateforme
-  cookies: {
-    enabled: true,
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict'
-  },
-  
-  // Deep linking et origines de confiance pour Expo
-  trustedOrigins: [
-    "dropit://", // Scheme principal de l'app mobile
-    "dropit://*" // Support des deep links avec chemins
-  ],
-  
-  // Personnalisation pour DropIt
-  user: {
-    additionalFields: {
-      role: "string",
-      clubId: "string"
-    }
-  }
-};
+// Exemple d'usage côté client web/mobile
+import { useSession } from "@better-auth/react";
+
+function WorkoutForm() {
+  const { data: session, isPending } = useSession();
+
+  if (isPending) return <LoadingSpinner />;
+  if (!session) return <LoginPrompt />;
+
+  // Composant accessible uniquement aux utilisateurs connectés
+  return <CreateWorkoutForm user={session.user} />;
+}
 ```
 
-Du côté client mobile avec le framework `Expo`, la configuration s'adapte à l'écosystème React Native :
+### Configuration multi-plateforme
 
-```typescript
-// Configuration client mobile avec Expo
-import { createAuthClient } from "better-auth/react";
-import { expoClient } from "@better-auth/expo/client";
-import * as SecureStore from "expo-secure-store";
+Better-Auth s'adapte automatiquement aux spécificités de chaque plateforme. Pour l'application mobile Expo, j'utilise le plugin dédié qui gère automatiquement le stockage sécurisé et les redirections. Pour le backoffice web, la configuration standard avec cookies HttpOnly suffit.
 
-export const authClient = createAuthClient({
-  baseURL: process.env.EXPO_PUBLIC_API_URL,
-  plugins: [
-    expoClient({
-      scheme: "dropit",
-      storagePrefix: "dropit-auth",
-      storage: SecureStore,
-    })
-  ]
-});
-```
-
-L'intégration du plugin Expo simplifie considérablement la gestion de la sécurité mobile en automatisant le stockage sécurisé, la gestion des cookies et le deep linking, tout en maintenant la cohérence avec le backoffice web.
-
-FAUT Dire que better auth permet la sécurisation a la fois de l'acces api mais aussi de conditionner le rendu des pages et/ou composant coté client le tout harmonisé des deux cotés
+Cette approche unifiée me garantit une expérience de sécurité cohérente entre le web et le mobile, tout en respectant les bonnes pratiques spécifiques à chaque plateforme. Les détails de configuration et exemples d'implémentation sont disponibles dans les [Annexes authentification](/annexes/authentifications/).
 
 ## Conclusion
 
-L'implémentation du système d'authentification de DropIt illustre la complexité pratique de la sécurisation d'une application moderne. Cette base prépare maintenant l'étape suivante : la mise en œuvre d'un système de gestion des autorisations granulaire adapté aux rôles spécifiques de l'écosystème haltérophilie.
+L'implémentation de Better-Auth dans DropIt me fournit une base d'authentification solide qui répond aux contraintes identifiées : révocation immédiate, architecture multi-plateforme, et conformité RGPD. Cette fondation technique me permet maintenant de me concentrer sur la couche d'autorisation.
 
-La section suivante détaillera comment cette fondation d'authentification s'enrichit d'un système RBAC (Role-Based Access Control) permettant de gérer finement les permissions entre coachs, athlètes, et administrateurs, garantissant ainsi que chaque utilisateur accède uniquement aux fonctionnalités et données qui lui sont destinées.
+La section suivante détaille comment j'enrichis cette base avec le plugin Organization de Better-Auth pour implémenter un système de permissions granulaire. Ce système RBAC (Role-Based Access Control) me permet de gérer finement les droits d'accès entre administrateurs, coachs et athlètes, garantissant que chaque utilisateur accède uniquement aux données et fonctionnalités de son périmètre d'action dans le club.
+
+---
+
+*Note : L'intégration avec le système d'email, les configurations avancées et les détails d'implémentation techniques sont disponibles dans les [Annexes authentification](/annexes/authentifications/).*
 
