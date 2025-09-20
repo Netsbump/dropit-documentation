@@ -3,6 +3,70 @@ title: Annexe Permissions
 description: Détails techniques du système de permissions
 ---
 
+## Choix du modèle de permissions
+
+### Évaluation des approches disponibles
+
+Pour DropIt, j'ai opté pour un modèle RBAC (Role-Based Access Control) qui correspond aux besoins d'un contexte organisationnel structuré comme les clubs de sport. Ce choix s'est imposé après avoir évalué les différentes approches disponibles :
+
+**RBAC (Role-Based Access Control)** : Permissions basées sur les rôles (owner, admin, member)
+- ✅ Correspond à la hiérarchie naturelle des clubs
+- ✅ Simple à comprendre et maintenir
+- ✅ Nativement supporté par Better-Auth Organizations
+- ✅ Évolutif avec l'organisation
+
+**ACL (Access Control Lists)** : Permissions individuelles par ressource
+- ❌ Trop granulaire pour le contexte club
+- ❌ Complexité de gestion accrue
+- ❌ Maintenance difficile avec de nombreux utilisateurs
+
+**ABAC (Attribute-Based Access Control)** : Permissions basées sur des attributs contextuels
+- ❌ Over-engineering pour les besoins actuels
+- ❌ Complexité d'implémentation élevée
+- ❌ Courbe d'apprentissage importante
+
+**Scopes OAuth** : Permissions délimitées pour les applications tierces
+- ❌ Non applicable dans ce contexte (pas d'intégration tierce)
+- ❌ Conçu pour les APIs publiques
+
+Le modèle RBAC s'aligne naturellement avec l'organisation hiérarchique des clubs de sport et bénéficie du support natif de Better-Auth, facilitant l'implémentation et la maintenance.
+
+### Stratégies de contrôle d'accès
+
+Pour implémenter le contrôle d'accès basé sur les rôles, plusieurs approches techniques étaient envisageables. J'ai évalué les options suivantes :
+
+**Guards NestJS** (approche choisie)
+- ✅ Intégration native avec l'architecture existante
+- ✅ Composabilité avec l'AuthGuard déjà en place
+- ✅ Support direct dans Better-Auth
+- ✅ Debugging et maintenance simplifiés
+- ✅ Granularité au niveau méthode
+
+**Middleware Express**
+- ❌ Moins granulaire (niveau route vs méthode)
+- ❌ Difficulté d'accès aux métadonnées de route
+- ❌ Logique partagée difficile
+
+**API Gateway** (Kong, Traefik, Envoy)
+- ❌ Complexité d'infrastructure supplémentaire
+- ❌ Logique métier déportée hors de l'application
+- ❌ Debugging plus complexe
+- ❌ Coût d'exploitation
+
+**Row Level Security (PostgreSQL)**
+- ❌ Couplage fort avec la base de données
+- ❌ Difficulté de test et de debug
+- ❌ Logique business dans la DB
+- ❌ Moins flexible pour l'évolution
+
+**Moteurs dédiés** (OPA, Casbin)
+- ❌ Over-engineering pour le contexte actuel
+- ❌ Courbe d'apprentissage supplémentaire
+- ❌ Infrastructure supplémentaire
+- ❌ Complexité de déploiement
+
+L'approche Guards s'intègre parfaitement avec l'infrastructure d'authentification déjà mise en place et offre la granularité nécessaire pour contrôler l'accès au niveau de chaque méthode de contrôleur.
+
 ## Configuration détaillée du package @dropit/permissions
 
 ### Structure complète des permissions

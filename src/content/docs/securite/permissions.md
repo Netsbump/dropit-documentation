@@ -11,26 +11,95 @@ Dans DropIt, chaque utilisateur évolue au sein d'une organisation (club de spor
 
 ## Organisation modulaire des permissions
 
-montrer la structure de dossier (dans le meme module d'auth que pour better auth pour isoler les responsabilité ?) => voir dans Dropit
+Dans mon API NestJS, j'ai choisi d'intégrer la gestion des permissions au sein du module d'identité existant, aux côtés de l'authentification. Cette approche me permet de maintenir une cohérence architecturale et de centraliser toutes les préoccupations liées à la sécurité.
 
-## Entités générées par Better Auth
+```
+modules/identity/
+├── domain/
+│   ├── auth/                    # Entités d'authentification
+│   │   ├── user.entity.ts
+│   │   ├── session.entity.ts
+│   │   └── verification.entity.ts
+│   └── organization/            # Entités d'organisation
+│       ├── organization.entity.ts
+│       ├── member.entity.ts
+│       └── invitation.entity.ts
+├── infrastructure/
+│   ├── guards/                  # Guards de sécurité
+│   │   ├── auth.guard.ts
+│   │   └── permissions.guard.ts
+│   └── decorators/              # Décorateurs
+│       ├── auth.decorator.ts
+│       ├── permissions.decorator.ts
+│       └── organization.decorator.ts
+├── application/
+│   └── auth.service.ts          # Service Better-Auth
+└── identity.module.ts           # Configuration du module
+```
 
-Mon système s'appuie sur le plugin Organization de Better-Auth qui gère nativement les concepts d'organisations et de membres. Cette intégration me permet de bénéficier des fonctionnalités avancées (invitations, gestion des rôles, sessions par organisation) tout en conservant un contrôle fin sur les permissions métier.
+Cette organisation modulaire reflète la séparation des responsabilités : l'authentification gère l'identité, tandis que les permissions contrôlent l'autorisation basée sur les rôles d'organisation.
 
-Comme pour l'auth, via un system de plugin organizations qu'on peut ajouter dans la configuration de better auth
-Lister les tables et dire de consulter les annexes pour le détail et les MCD MPD MLD liés. 
+## Entités générées par Better Auth Organizations
 
-Dire que ça a necessité un peu d'adaptation de mon modele existant pour permettre de définir les relations coach athlete par le bias d'une organization (club) plutot que comme une relation directement coach athlete
+### Plugin Organization
 
-## Endpoints d'autorisation automatique 
+Mon système s'appuie sur le plugin Organization de Better-Auth qui étend l'infrastructure d'authentification avec la gestion native des organisations multi-utilisateurs. Cette extension se configure simplement en ajoutant le plugin à ma configuration Better-Auth existante :
 
-de la meme façon que pour l'auth y a des endoint dispo pour les actions lié aux permissions
+```typescript
+// Configuration Better-Auth avec plugin Organization
+export const auth = betterAuth({
+  // ... configuration de base
+  plugins: [
+    organization(), // Plugin pour les organisations
+    // ... autres plugins
+  ],
+});
+```
+
+Le plugin génère automatiquement trois nouvelles entités qui s'intègrent harmonieusement avec les entités d'authentification :
+
+- **Organization** : Représente le club de sport avec ses métadonnées
+- **Member** : Lie un utilisateur à une organisation avec un rôle spécifique
+- **Invitation** : Gère le processus d'ajout de nouveaux membres
+
+### Adaptation du modèle métier
+
+L'intégration de ce plugin a nécessité une évolution significative de mon modèle de données initial. Initialement, j'avais conçu une relation directe coach-athlète, mais l'approche organisationnelle m'a conduit à repenser cette architecture.
+
+Plutôt que d'avoir des relations individuelles entre coachs et athlètes, j'ai restructuré le modèle autour du concept d'organisation (club). Cette approche présente plusieurs avantages :
+
+- **Scalabilité** : Un club peut avoir plusieurs coachs et de nombreux athlètes
+- **Flexibilité** : Les rôles peuvent évoluer (un athlète peut devenir coach)
+- **Isolation** : Chaque club fonctionne de manière autonome
+- **Collaboration** : Plusieurs coachs peuvent collaborer au sein du même club
+
+Cette refactorisation a permis de passer d'un modèle rigide à une architecture flexible qui correspond mieux à la réalité organisationnelle des clubs de sport.
+
+Les schémas détaillés de ces entités (MCD, MLD, MPD) et leurs relations sont disponibles dans la section [Annexes permissions](/annexes/permissions/) pour une vision complète de l'architecture de données.
+
+## Endpoints d'autorisation automatiques
+
+Comme pour l'authentification, Better-Auth expose automatiquement des endpoints dédiés à la gestion des organisations et permissions sur le préfixe `/auth/organization`. Cette fonctionnalité me fait gagner un temps considérable en évitant le développement manuel de ces routes critiques.
+
+| Route | Méthode | Description | Usage dans DropIt |
+|-------|---------|-------------|-------------------|
+| `/auth/organization/create` | POST | Création d'organisation | Nouveau club de sport |
+| `/auth/organization/invite-member` | POST | Invitation de membre | Ajout d'athlètes/coachs |
+| `/auth/organization/accept-invitation` | POST | Acceptation d'invitation | Adhésion au club |
+| `/auth/organization/get-invitations` | GET | Liste des invitations | Gestion des demandes |
+| `/auth/organization/remove-member` | POST | Exclusion de membre | Gestion des départs |
+| `/auth/organization/update-member-role` | POST | Modification de rôle | Promotion coach/admin |
+| `/auth/organization/set-active` | POST | Organisation active | Changement de club actif |
+
+Ces endpoints intègrent automatiquement les vérifications de permissions : seuls les utilisateurs autorisés peuvent effectuer ces actions selon leur rôle dans l'organisation. La documentation complète de ces APIs est générée automatiquement via le plugin openAPI() de Better-Auth.
 
 ### Définition des permissions métier
 
-afin de définir les permission, j'ai profiter de mon monorepo pour centralise la source de vérité dans un package dédié `@dropit/permissions` qui centralise toute la logique de permissions. Cette approche me garantit la cohérence entre l'API backend et les interfaces client (web et mobile). Le package définit les ressources disponibles, les actions possibles sur chaque ressource, et les permissions accordées à chaque rôle.
+Pour structurer efficacement les permissions de DropIt, j'ai profité de l'architecture monorepo pour créer un package dédié `@dropit/permissions` qui centralise toute la logique d'autorisation. Cette décision architecturale répond à un besoin crucial : maintenir la cohérence des permissions entre l'API backend et les interfaces client (web et mobile).
 
-Cette centralisation présente un avantage majeur : toute modification de permissions se répercute automatiquement sur tous les clients, évitant les incohérences entre les différentes parties de l'application.
+Dans un système multi-plateforme comme DropIt, il est essentiel que les règles d'autorisation soient identiques partout. Un athlète qui ne peut pas créer d'entraînement côté API ne doit pas voir le bouton "Créer" dans l'interface mobile. Cette cohérence était auparavant difficile à maintenir avec des logiques de permissions dispersées.
+
+Le package définit de manière déclarative les ressources disponibles (workout, exercise, athlete...), les actions possibles sur chaque ressource (read, create, update, delete), et les permissions accordées à chaque rôle organisationnel. Cette approche me permet de structurer les autorisations selon une hiérarchie claire qui reflète la réalité des clubs de sport.
 
 ### Package @dropit/permissions
 
@@ -86,31 +155,15 @@ export const owner = ac.newRole({
 
 Cette hiérarchie reflète la réalité organisationnelle des clubs où les propriétaires supervisent l'ensemble, les coachs gèrent l'entraînement, et les athlètes consultent leurs programmes.
 
-### Définition des différente possibilité de gesion des permissions : 
-Evoquer tout ça mais le définir dans les annexes 
+Cette approche centralisée présente un avantage majeur : toute modification de permissions se répercute automatiquement sur tous les clients lors de la mise à jour du package, évitant définitivement les incohérences entre les différentes parties de l'application.
 
-définir rapidement les diffentes possibilité et dire que j'ai choisi RBAC (pourquoi ? je crois que c'est mieux pour mon besoin ? Approche spécifique à better auth ou pas forcément ?)
-- RBAC
-- ACL 
-- Policies / ABAC 
-- Scopes quand on utilise un IDP ? 
-
-### Comment controler l'acces en fonction du role ? 
-Evoquer tout ça mais le définir dans les annexes
-Expliquer les différentes approches possibles de façon détaillé dans les annexes mais dire que que moi j'ai choisi l'approche guard qui est prévu par Better Auth et qui s'integre bien avec mon auth mise en place précédemment 
-- Backend (middleware, guard, interceptors)
-- API gateway (Kong, Traeffik, Envoy -policies en edge)
-- Base de données : Row Level Security (PostgreSQL)
-- Moteur dédié: OPA, Casbin, policy engine central 
-
+Cette façon de définir les permissions s'appelle un modèle RBAC (Role-Based Access Control) et correspond aux besoins d'organisation structurée dont j'avais besoin. Les détails sur les autres modèles de permissions évalués (ACL, ABAC, Scopes OAuth) et les stratégies de contrôle d'accès alternatives (API Gateway, Row Level Security, moteurs dédiés) sont développés dans les [Annexes permissions](/annexes/permissions/).
 
 ## Implémentation côté serveur
 
-### Decorateur & Guards 
+Comme pour l'authentification, j'ai adopté une approche déclarative en créant des décorateurs spécifiques aux permissions. Cette cohérence architecturale facilite la compréhension et la maintenance du code d'autorisation.
 
-De la meme façon que pour l'authentification, j'ai défini des décorateur spécifique aux permission et des guard
-
-### Exemples Decorateurs
+#### Décorateurs de permissions
 
 ```typescript
 /**
@@ -128,7 +181,7 @@ export const NoOrganization = () =>
 
 Ces décorateurs me permettent d'adopter une approche déclarative où les permissions sont explicitement définies au niveau de chaque route, facilitant la lecture et la maintenance du code.
 
-### Exemples Guard
+#### PermissionsGuard
 
 Le PermissionsGuard constitue le point d'entrée principal pour la vérification des permissions. Cette classe s'exécute après l'AuthGuard et effectue les contrôles d'autorisation basés sur le rôle d'organisation de l'utilisateur.
 
@@ -174,43 +227,68 @@ export class PermissionsGuard implements CanActivate {
 
 L'élément clé de cette implémentation est l'utilisation du rôle d'organisation (`Member.role`) plutôt qu'un rôle global utilisateur. Cette approche me permet de gérer des utilisateurs ayant des rôles différents dans différentes organisations, cas d'usage courant où un coach peut être simple membre dans un autre club.
 
-### Exemple complet 
+### Exemple d'utilisation complète
 
-controlleur workout
-
-## Sécurisation côté client
-
-### Protection unifiée des interfaces
-
-Comme pour l'authentification, le système de permissions s'étend naturellement aux interfaces utilisateur. J'utilise le même package `@dropit/permissions` côté client pour conditionner l'affichage des éléments selon les droits de l'utilisateur connecté.
+Voici comment j'applique concrètement ce système dans le `WorkoutController`, illustrant l'intégration entre authentification et permissions :
 
 ```typescript
-import { usePermissions } from '@dropit/permissions/react';
+@UseGuards(PermissionsGuard) // 🔒 Protection globale du contrôleur
+@Controller('workouts')
+export class WorkoutController {
+  //...
 
-function WorkoutManagement() {
-  const { canCreate, canUpdate, canDelete } = usePermissions('workout');
+  @RequirePermissions('read') // 👁️ Lecture : accessible à tous les rôles
+  getWorkouts(
+    @CurrentOrganization() organizationId: string,
+    @CurrentUser() user: AuthenticatedUser
+  ) {
+    return tsRestHandler(c.getWorkouts, async () => {
+      return await this.workoutUseCase.getAll(organizationId, user.id);
+    });
+  }
 
-  return (
-    <div>
-      {canCreate && <CreateWorkoutButton />}
-      {canUpdate && <EditWorkoutButton />}
-      {canDelete && <DeleteWorkoutButton />}
-    </div>
-  );
+  @RequirePermissions('create') // ✍️ Création : admin et owner uniquement
+  createWorkout(
+    @CurrentOrganization() organizationId: string,
+    @CurrentUser() user: AuthenticatedUser
+  ) {
+    return tsRestHandler(c.createWorkout, async ({ body }) => {
+      return await this.workoutUseCase.create(body, organizationId, user.id);
+    });
+  }
 }
 ```
 
-Cette approche garantit que les utilisateurs ne voient que les actions qu'ils sont autorisés à effectuer, améliorant l'expérience utilisateur tout en renforçant la sécurité.
+Cet exemple illustre plusieurs concepts clés :
+
+- **Protection globale** : `@UseGuards(PermissionsGuard)` applique la vérification à toutes les routes
+- **Permissions granulaires** : Chaque action spécifie ses besoins via `@RequirePermissions`
+- **Injection contextuelle** : `@CurrentOrganization()` et `@CurrentUser()` fournissent le contexte
+- **Détermination automatique** : La ressource `workout` est extraite du nom `WorkoutController`
+- **Cohérence** : Même pattern pour tous les contrôleurs de l'application
+
+Le système vérifie automatiquement que l'utilisateur a le rôle approprié dans l'organisation active avant d'autoriser l'accès à chaque méthode.
+
+## Perspectives d'évolution côté client
+
+### Protection des interfaces utilisateur
+
+L'architecture centralisée du package `@dropit/permissions` ouvre la voie à une extension naturelle vers les interfaces utilisateur. Bien que cette fonctionnalité ne soit pas encore implémentée dans DropIt, elle représente une évolution logique du système de permissions.
+
+L'idée serait d'utiliser le même package côté client pour conditionner l'affichage des éléments selon les droits de l'utilisateur connecté, garantissant ainsi une cohérence parfaite entre les autorisations backend et l'expérience utilisateur frontend.
+
+Cette approche permettrait de masquer ou désactiver automatiquement les actions non autorisées, transformant les erreurs de permissions en prévention d'interface. Un athlète ne verrait jamais un bouton "Créer un entraînement" qu'il ne peut pas utiliser, améliorant significativement l'expérience utilisateur.
+
+L'implémentation technique de cette fonctionnalité sera considérée lors des prochaines itérations du projet, si le besoin se présente.
 
 ## Conclusion
 
-L'implémentation du système de permissions dans DropIt complète la couche d'authentification en ajoutant un contrôle d'accès granulaire et contextuel. Cette architecture RBAC basée sur les rôles d'organisation me permet de gérer finement les droits d'accès tout en maintenant la simplicité d'utilisation.
+L'implémentation du système de permissions dans DropIt complète la couche d'authentification en ajoutant un contrôle d'accès granulaire et contextuel. Cette architecture basée sur les rôles d'organisation me permet de gérer les droits d'accès tout en maintenant la simplicité d'utilisation.
 
 La centralisation dans le package `@dropit/permissions` assure la cohérence entre l'API et les clients, tandis que l'intégration avec Better-Auth Organizations fournit les mécanismes techniques robustes nécessaires à la gestion des organisations multi-utilisateurs.
 
-Cette fondation solide me permet maintenant de me concentrer sur les aspects métier de l'application, avec la certitude que chaque action est correctement autorisée selon le contexte organisationnel de l'utilisateur.
+Cette fondation me permet maintenant de me concentrer sur les aspects métier de l'application, avec la certitude que chaque action est correctement autorisée selon le contexte organisationnel de l'utilisateur.
 
----
+Dans la section suivante, j'aborderai les différentes stratégies de tests mises en place dans DropIt pour garantir la fiabilité de cette infrastructure de sécurité, depuis les tests unitaires des Guards d'authentification et d'autorisation jusqu'aux tests d'intégration des flux métier complets impliquant les ressources protégées.
 
-*Note : Les détails techniques d'implémentation, les configurations avancées et les exemples d'utilisation client sont disponibles dans les [Annexes permissions](/annexes/permissions/).*
 
