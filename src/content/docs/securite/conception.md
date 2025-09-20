@@ -7,15 +7,13 @@ description: Analyse des besoins sécuritaires et choix d'architecture d'authent
 
 Après avoir défini l'architecture globale de DropIt, j'ai souhaité approfondir un aspect crucial qui me préoccupait particulièrement : la sécurisation de l'accès aux données dans le contexte spécifique d'un club d'haltérophilie. Cette réflexion m'a menée à concevoir une stratégie d'authentification et d'autorisation qui réponde aux défis techniques et réglementaires de ce domaine.
 
-## Analyse du contexte sécuritaire de DropIt
-
-### Identification des enjeux spécifiques
+## Identification des enjeux spécifiques
 
 L'analyse du contexte métier de DropIt m'a révélé des défis sécuritaires particuliers que je n'avais pas immédiatement anticipés. Dans le contexte d'un club d'haltérophilie, je dois gérer trois profils d'utilisateurs aux besoins radicalement différents : les administrateurs qui supervisent l'ensemble du système, les coachs qui accèdent quotidiennement aux données d'entraînement depuis le backoffice web, et les athlètes qui consultent leurs performances via l'application mobile.
 
 Cette diversité d'accès m'a fait prendre conscience de la complexité de la gestion des droits dans une application multi-plateforme. Chaque profil nécessite un niveau de granularité différent : un coach doit pouvoir consulter les données de ses athlètes mais pas celles d'un autre groupe, tandis qu'un athlète ne devrait accéder qu'à ses propres informations.
 
-### Contraintes réglementaires et techniques
+## Contraintes réglementaires et techniques
 
 Mon approche de la sécurité s'appuie d'abord sur mes obligations légales en tant que développeur manipulant des données personnelles. Le RGPD impose une protection rigoureuse des données personnelles, mais le contexte spécifique d'un club d'haltérophilie ajoute des exigences supplémentaires que j'ai dû identifier et intégrer dans ma conception.
 
