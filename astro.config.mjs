@@ -50,10 +50,9 @@ export default defineConfig({
 				{
 					label: 'Sécurité',
 					items: [
-						{ label: 'Conception sécurisée', link: '/securite/conception/' },
+						{ label: 'Conception', link: '/securite/conception/' },
 						{ label: 'Authentification', link: '/securite/authentification/' },
 						{ label: 'Gestion des roles', link: '/securite/permissions/' },
-						{ label: 'OWASP', link: '/securite/owasp/' },
 					],
 				},
 				{
