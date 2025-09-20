@@ -5,62 +5,28 @@ description: Mise en œuvre pratique du système d'authentification hybride dans
 
 ## Introduction : de la conception à l'implémentation
 
-L'implémentation du système d'authentification de DropIt constitue pour moi une étape cruciale où les choix architecturaux présentés dans la conception sécurisée se concrétisent en code fonctionnel. Cette phase m'a permis de découvrir la complexité pratique de la mise en œuvre d'un système d'authentification robuste, au-delà des concepts théoriques étudiés en formation.
-
-Le choix de Better-Auth, motivé par son approche hybride combinant JWT et sessions révocables, m'a confronté à l'apprentissage d'une technologie récente et moins documentée que les solutions classiques. Cette exploration m'a enrichi techniquement tout en me faisant comprendre les enjeux réels de l'intégration d'outils tiers dans un projet professionnel.
-
-Cette implémentation s'articule autour de plusieurs composants interdépendants que j'ai dû comprendre et maîtriser progressivement : la configuration du service d'authentification, la gestion des entités de données, la protection des routes via des guards, et l'exposition d'une API cohérente pour les applications clientes.
+Le choix de Better-Auth permet une approche hybride combinant JWT et sessions révocables.
+Cette implémentation s'articule autour de plusieurs composants interdépendants: la configuration du service d'authentification, la gestion des entités de données, la protection des routes via des guards, et l'exposition d'une API cohérente pour les applications clientes.
 
 ## Vue d'ensemble de l'architecture d'authentification
 
-### Technologies et justifications
+### Schema Better Auth
 
-L'implémentation repose sur [Better-Auth](https://www.better-auth.com/docs), une bibliothèque d'authentification moderne que j'ai choisie pour ses capacités hybrides JWT/sessions. Cette solution me permet d'explorer une alternative aux approches traditionnelles tout en répondant aux exigences de sécurité identifiées dans la phase de conception.
+Better auth propose des packages pour l'api et les différents clients web et mobile. 
+Pour la partie backend, y a un schema a respecter, donc les entités etc a présenter qu'il a fallu intégrer dans mon systeme déjà existant. Hormis la table User, les autres tables sont autonomes et ne représente pas de difficulté particulière dans l'implémentation. 
+Pour bien visualiser les tables généré par le package je les ai representer sous forme de méthode merise ci dessous 
 
-```mermaid
-graph TB
-    subgraph "Client Applications"
-        WEB[Interface Web React]
-        MOBILE[App Mobile Expo]
-    end
-    
-    subgraph "Authentication Layer"
-        GUARD[AuthGuard NestJS]
-        SERVICE[AuthService Better-Auth]
-        MIDDLEWARE[Auth Middleware]
-    end
-    
-    subgraph "Data Persistence"
-        USER[(User Entity)]
-        SESSION[(AuthSession)]
-        ACCOUNT[(AuthAccount)]
-        VERIFY[(AuthVerification)]
-    end
-    
-    subgraph "External Services"
-        EMAIL[Email Service]
-        CACHE[Redis Cache]
-    end
-    
-    WEB --> GUARD
-    MOBILE --> GUARD
-    GUARD --> SERVICE
-    SERVICE --> MIDDLEWARE
-    SERVICE --> USER
-    SERVICE --> SESSION
-    SERVICE --> ACCOUNT
-    SERVICE --> VERIFY
-    SERVICE --> EMAIL
-    SERVICE --> CACHE
-    
-    style GUARD fill:#1976d2,color:#fff
-    style SERVICE fill:#2e7d32,color:#fff
-    style EMAIL fill:#ff5722,color:#fff
-```
+TODO: Schema MCD 
+
+TODO: Schema MLD
+
+TODO: Schema MPD
+
+Bien évidemment on utilera plutot un script pour les généré directement en code first coté api. Il est aussi possible de les créer à la main entité par entité dans nest.js en faisant bien attention de respecter scrupuleursement le schema de bdd requis par Better auth. 
 
 ### Architecture modulaire adoptée
 
-J'ai structuré l'implémentation selon une architecture modulaire qui sépare clairement les responsabilités et facilite la maintenance. Cette organisation m'aide à comprendre le rôle de chaque composant dans l'écosystème d'authentification :
+J'ai structuré l'implémentation selon une architecture modulaire qui sépare clairement les responsabilités et facilite la maintenance.
 
 ```
 modules/auth/
@@ -71,8 +37,6 @@ modules/auth/
 ├── auth.service.ts    # Service principal Better-Auth
 └── README.md          # Documentation technique
 ```
-
-Cette structuration reflète ma compréhension progressive de l'organisation du code dans une application NestJS professionnelle, compétence que je développe au fil de ce projet.
 
 ## Configuration et service principal
 
