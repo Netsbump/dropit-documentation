@@ -10,20 +10,20 @@ TODO: Partie à expliquer
 4. Endpoints exposés par better auth
 5. Configuration du middleware
 6. Restriction des ressources (protection)
-7. Implémentation concrete sur un exemple d'une route d'un controlleur (prendre le meme exemple que dans l'architecture)
-8. Gestion des sessions et sécurité: explications du concept et redirection dans les annexes pour le détails
-9. Stratégie de sécu JWT (rappel de la techno vite fait, header, payload, signature) et distinction du stockage coté client entre interface web et app mobile (pareil si besoin de plus on envoi dans les annexes)
-10. Implémentation de la lib coté clients pour profiter des rescrtions coté client aussi (page, composants)
-11. Conclusion et intro sur ce qui va suivre : les permissions (roles) avec le plugin Organization de better auth
+7. Gestion des sessions et sécurité: explications du concept et redirection dans les annexes pour le détails
+8. Stratégie de sécu JWT (rappel de la techno vite fait, header, payload, signature) et distinction du stockage coté client entre interface web et app mobile (pareil si besoin de plus on envoi dans les annexes)
+9. Implémentation de la lib coté clients pour profiter des rescrtions coté client aussi (page, composants)
+10. Conclusion et intro sur ce qui va suivre : les permissions (roles) avec le plugin Organization de better auth
 
 ## Introduction
 
-Comme évoqué Better-Auth permet une approche hybride combinant JWT et sessions révocables.
-Cette implémentation s'articule autour de plusieurs composants interdépendants: la configuration du service d'authentification, la gestion des entités de données, la protection des routes via des guards, et l'exposition d'une API cohérente pour les applications clientes.
+Après avoir justifié le choix de Better-Auth comme solution d'authentification, je détaille ici son implémentation concrète dans DropIt. Cette librairie m'offre une approche hybride combinant JWT et sessions révocables, répondant parfaitement aux besoins identifiés.
 
-## Architecture modulaire
+L'implémentation de Better-Auth dans mon projet s'articule autour de plusieurs composants : la génération automatique d'entités de base de données, l'exposition d'endpoints d'authentification prêts à l'emploi, la protection des routes via un système de guards, et la configuration d'un middleware pour déléguer les requêtes d'authentification à la librairie.
 
-J'ai choisi d'isoler toute ce qui concerne l'authentification au sein d'un domaine spécifique afin d'en faciliter la maintenant et de garder toute ces fonctionnalité découplé le plus possible du reste de mon application. même si je n'en ai pas le besoin c'est une approche qui m'a semblé plus naturelle pour garder la possibilité un jour de migrer plus facilement de systeme d'authentification (hum non ça risque d'etre vraiement le bordel quand meme, vu que j'aurai des données utilisateurs donc difficile comme argument) structuré l'implémentation selon une architecture modulaire qui sépare clairement les responsabilités et facilite la maintenance.
+## Organisation modulaire de l'authentification
+
+Dans mon API NestJS, j'ai choisi d'isoler tout ce qui concerne l'authentification au sein d'un module dédié. Cette approche me permet de maintenir une séparation claire des responsabilités et facilite la maintenance du code d'authentification.
 
 ```
 modules/auth/
@@ -35,88 +35,25 @@ modules/auth/
 └── README.md          # Documentation technique
 ```
 
-## Schema Better Auth
+## Entités générées par Better-Auth
 
-Better auth propose des packages pour l'api et les différents clients web et mobile. 
-Pour la partie backend, y a un schema a respecter, donc les entités etc a présenter qu'il a fallu intégrer dans mon systeme déjà existant. Hormis la table User, les autres tables sont autonomes et ne représente pas de difficulté particulière dans l'implémentation. 
+Better-Auth impose un schéma de base de données spécifique que j'ai dû intégrer dans mon système existant. Cette librairie génère automatiquement quatre entités principales : User, Session, Account, et Verification.
 
-Faire la liste des entités généré: User, Session, Account, Verification
+L'intégration de ces entités dans mon architecture existante s'est révélée simple. Seule la table User nécessitait une attention particulière car elle devait s'harmoniser avec mon modèle utilisateur existant. Les autres tables (Session, Account, Verification) sont autonomes et n'ont posé aucune difficulté d'implémentation.
 
-TODO: Schema MCD => redirection dans les annexes (j'ai les png qu'il faut que j'integre dans le projet et qui seront visible dans les annexes)
+Les schémas détaillés de ces entités (MCD, MLD, MPD) sont disponibles dans la section [Annexes authentification](/annexes/authentifications/) pour une vision complète de l'architecture de données.
 
-TODO: Schema MLD => redirection dans les annexes  (j'ai les png qu'il faut que j'integre dans le projet et qui seront visible dans les annexes)
+### Entités clés : Session et Verification
 
-TODO: Schema MPD => redirection dans les annexes (j'ai les png qu'il faut que j'integre dans le projet et qui seront visible dans les annexes)
+L'entité **Session** gère les sessions actives des utilisateurs en stockant les métadonnées essentielles : ID utilisateur, token de session, date d'expiration, ainsi que l'adresse IP et le User-Agent pour le monitoring de sécurité. Cette approche me permet de détecter facilement les activités suspectes.
 
-### Entité Session : Gestion des sessions actives
+L'entité **Verification** s'occupe des tokens temporaires utilisés pour la vérification d'email et la réinitialisation de mot de passe. Chaque token a une durée de vie limitée, gérant automatiquement l'expiration pour renforcer la sécurité.
 
-```typescript
-@Entity('auth_session')
-export class AuthSession {
-  @PrimaryKey()
-  id!: string;
+Dans mon implémentation, j'utilise l'approche code-first de NestJS avec MikroORM pour générer automatiquement ces entités. Il est aussi possible de les créer manuellement, mais il faut respecter scrupuleusement le schéma requis par Better-Auth. 
 
-  @Property()
-  userId!: string;
+## Endpoints d'authentification automatiques
 
-  @Property({ type: 'text', nullable: true })
-  impersonatedBy?: string;
-
-  @Property()
-  token!: string;
-
-  @Property()
-  expiresAt!: Date;
-
-  @Property()
-  ipAddress?: string;
-
-  @Property()
-  userAgent?: string;
-
-  @Property()
-  createdAt = new Date();
-
-  @Property({ onUpdate: () => new Date() })
-  updatedAt = new Date();
-}
-```
-
-Cette entité me permet de gérer les sessions actives avec un contrôle granulaire sur les métadonnées de connexion. L'intégration des informations d'IP et User-Agent facilite le monitoring et la détection d'activités suspectes.
-
-### Entité Verification : Tokens temporaires
-
-```typescript
-@Entity('auth_verification')
-export class AuthVerification {
-  @PrimaryKey()
-  id!: string;
-
-  @Property()
-  identifier!: string;
-
-  @Property()
-  value!: string;
-
-  @Property()
-  expiresAt!: Date;
-
-  @Property()
-  createdAt = new Date();
-
-  @Property({ onUpdate: () => new Date() })
-  updatedAt = new Date();
-}
-```
-
-Cette entité gère les tokens de vérification temporaires (email, réinitialisation de mot de passe), avec gestion automatique de l'expiration pour la sécurité.
-
-Bien évidemment on utilera plutot un script pour les généré directement en code first coté api. Il est aussi possible de les créer à la main entité par entité dans nest.js en faisant bien attention de respecter scrupuleursement le schema de bdd requis par Better auth. 
-
-## Endpoints exposées par Better-Auth
-
-La génération du schema et des tables s'accompagne d'endpoints 
-Better-Auth expose automatiquement plusieurs endpoints sur le préfixe `/auth`, réduisant significativement le code à maintenir.
+L'un des avantages majeurs de Better-Auth est l'exposition automatique d'endpoints d'authentification complets sur le préfixe `/auth`. Cette fonctionnalité me fait gagner un temps considérable en évitant le développement manuel de ces routes critiques.
 
 | Route | Méthode | Description | Usage dans DropIt |
 |-------|---------|-------------|-------------------|
@@ -128,16 +65,29 @@ Better-Auth expose automatiquement plusieurs endpoints sur le préfixe `/auth`, 
 | `/auth/verify` | GET | Vérification email | Sécurisation des comptes |
 | `/auth/reset-password` | POST | Réinitialisation | Récupération comptes oubliés |
 
-Cette standardisation permet d'avoir toute les routes clefs en main pour implémenter rapidement toute les bonnes pratique d'auth et securisé. 
-Lorsqu'on défini la configuration de better auth, on peut ajouter le pluggin openApi() qui permet aux développeurs d'acceder à la documentation de chacune de ces routes, ce que j'ai fait. 
+Cette standardisation me garantit l'implémentation des bonnes pratiques de sécurité sans effort supplémentaire. J'ai ajouté le plugin openAPI() à ma configuration Better-Auth, ce qui génère automatiquement la documentation Swagger de tous ces endpoints pour faciliter le développement côté client. 
 
-## Configuration du middleware
+## Configuration du middleware d'authentification
 
-En gros ici je veux dire que chaque requete qui entre sur mon api si elle commence par '/auth' est rediriger vers les routes better auth car on delegue toutes ces fonctionnalité à la librairie 
+Pour intégrer Better-Auth dans mon API NestJS, j'ai configuré un middleware qui redirige automatiquement toutes les requêtes commençant par `/auth` vers les routes gérées par Better-Auth. Cette approche me permet de déléguer complètement la gestion de l'authentification à la librairie.
 
-Faire un petit diagramme de sequence avec couche client, api, better auth middleware, database
+```mermaid
+sequenceDiagram
+    participant Client
+    participant NestJS
+    participant BetterAuth
+    participant Database
 
-et un extrait de code de `main.ts` pour illustrer cette config au sein du point d'entrée de mon app 
+    Client->>NestJS: POST /api/auth/login
+    NestJS->>NestJS: Détection préfixe /auth
+    NestJS->>BetterAuth: Délégation à Better-Auth
+    BetterAuth->>Database: Vérification credentials
+    Database-->>BetterAuth: User data
+    BetterAuth-->>NestJS: Session + JWT
+    NestJS-->>Client: 200 + cookies
+```
+
+Voici la configuration dans le point d'entrée de mon application : 
 
 ```ts
 import { NestFactory } from '@nestjs/core';
@@ -174,176 +124,131 @@ async function bootstrap() {
     }
   );
 
-  app.enableCors({
-    origin: config.betterAuth.trustedOrigins,
-    credentials: true,
-  });
-
-  app.setGlobalPrefix(PREFIX);
-
-  // Configuration Swagger
-  SwaggerModule.setup('api', app, openApiDocument);
-
   await app.listen(PORT, '0.0.0.0');
-  console.log(`Application is running on: http://localhost:${PORT}`);
-  console.log(`Also accessible on network: http://192.168.1.147:${PORT}`);
 }
 
 bootstrap();
 ```
 
-## Protection des routes et système de guards
+## Protection des routes
 
-### Implémentation du AuthGuard
+### Décorateurs
 
-Le guard d'authentification constitue le point d'entrée de la sécurisation des routes dans DropIt. Ecrire une petite introduction sur ce que sont les guard, et dire qu'on utilisera ça avec des decorateur ? 
+Un décorateur en TypeScript est une fonction qui permet d'annoter et de modifier des classes, méthodes ou propriétés. Dans le contexte de NestJS, les décorateurs me permettent d'ajouter des métadonnées à mes routes pour indiquer leur niveau de sécurité.
+
+Concrètement, au lieu d'écrire de la logique conditionnelle dans chaque contrôleur, j'annote simplement mes routes avec `@Public()` ou `@Optional()` pour indiquer leur niveau de sécurité. Je peux aussi injecter directement l'utilisateur connecté ou sa session dans les paramètres de mes méthodes.
+
+Dans mon projet, j'ai configuré l'authentification comme étant globale : par défaut, toutes les routes nécessitent une authentification, sauf si je les marque explicitement avec `@Public()`. Cette configuration se fait via un système de Guards que je vais présenter juste après.
+
+Voici une version simplifiée de mes décorateurs principaux :
+
+```typescript
+/**
+ * Décorateur pour marquer une route comme publique (accessible sans authentification)
+ */
+export const Public = () => SetMetadata('PUBLIC', true);
+
+/**
+ * Décorateur pour marquer une route comme optionnelle (accessible avec ou sans authentification)
+ */
+export const Optional = () => SetMetadata('OPTIONAL', true);
+
+/**
+ * Décorateur pour injecter la session dans un contrôleur
+ */
+export const Session = createParamDecorator(
+  (_data: unknown, context: ExecutionContext) => {
+    const request = context.switchToHttp().getRequest();
+    return request.session;
+  }
+);
+
+/**
+ * Décorateur pour injecter l'utilisateur connecté dans un contrôleur
+ */
+export const CurrentUser = createParamDecorator(
+  (_data: unknown, context: ExecutionContext) => {
+    const request = context.switchToHttp().getRequest();
+    return request.user;
+  }
+);
+```
+
+Ces décorateurs me permettent d'annoter facilement mes routes selon leur niveau de sécurité et d'injecter automatiquement les données de session dans mes contrôleurs.
+
+### Guards
+
+Les Guards sont des classes qui implémentent une logique de sécurité dans NestJS. Un Guard s'exécute avant chaque route pour déterminer si la requête peut y accéder. Dans le contexte de l'authentification, le Guard vérifie si l'utilisateur est connecté et dispose des droits nécessaires.
+
+Le Guard lit les métadonnées ajoutées par les décorateurs pour adapter son comportement. Par exemple, si une route est marquée `@Public()`, le Guard autorisera l'accès même sans authentification. 
+
+Voici une version allégée de mon AuthGuard qui montre la logique principale :
 
 ```typescript
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private reflector: Reflector, private authService: AuthService) {}
+  constructor(
+    private readonly reflector: Reflector,
+    private readonly authService: AuthService
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     
-    // Vérification des métadonnées de route (@Public, @Optional)
-    const isPublic = this.reflector.getAllAndOverride<boolean>('isPublic', [
-      context.getHandler(),
-      context.getClass(),
-    ]);
-
-    const isOptional = this.reflector.getAllAndOverride<boolean>('isOptional', [
-      context.getHandler(),
-      context.getClass(),
-    ]);
-
     try {
       // Récupération de la session via Better-Auth
-      const session = await this.authService.auth.api.getSession({
-        headers: request.headers,
+      const session = await this.authService.api.getSession({
+        headers: fromNodeHeaders(request.headers),
       });
 
-      if (session) {
-        // Enrichissement de la requête avec les données utilisateur
-        request.user = session.user;
-        request.session = session.session;
-        return true;
+      // Injection session et utilisateur dans la requête
+      request.session = session;
+      request.user = session?.user ?? null;
+
+      // Vérification des métadonnées de route
+      const isPublic = this.reflector.get('PUBLIC', context.getHandler());
+      const isOptional = this.reflector.get('OPTIONAL', context.getHandler());
+
+      if (isPublic) return true;
+      if (isOptional && !session) return true;
+      
+      if (!session) {
+        throw new UnauthorizedException('You must be logged in to access this resource');
       }
 
-      // Gestion des routes publiques et optionnelles
-      return isPublic || isOptional || false;
+      return true;
     } catch (error) {
-      return isPublic || isOptional || false;
+      throw new UnauthorizedException('Authentication failed');
     }
   }
 }
 ```
 
-### Décorateurs 
+### Exemple d'utilisation concrète
 
-expliquer rapidement ce que sont les décorateurs 
-
-```typescript
-// auth.decorator.ts - Décorateurs personnalisés
-
-// Marquer une route comme publique
-export const Public = () => SetMetadata('isPublic', true);
-
-// Authentification optionnelle
-export const Optional = () => SetMetadata('isOptional', true);
-
-// Injection de la session dans les paramètres
-export const Session = createParamDecorator(
-  (data: unknown, ctx: ExecutionContext) => {
-    const request = ctx.switchToHttp().getRequest();
-    return data ? request.session?.[data] : request.session;
-  },
-);
-
-// Hooks pour logique personnalisée
-export const BeforeHook = (hookFn: Function) => SetMetadata('beforeHook', hookFn);
-export const AfterHook = (hookFn: Function) => SetMetadata('afterHook', hookFn);
-```
-
-### Intégration avec le système d'email
-
-TODO: En parler vite fait mais mettre le détail et schema dans l'annexe dédié (authentifications)
-L'intégration du système d'email avec Better-Auth ... Cette implémentation prépare l'évolution vers des communications plus riches (notifications push, SMS) :
-
-```mermaid
-sequenceDiagram
-    participant Client
-    participant API
-    participant BetterAuth
-    participant Database
-    participant EmailService
-
-    Client->>API: POST /auth/signup
-    API->>BetterAuth: Process signup
-    BetterAuth->>Database: Create user
-    Database-->>BetterAuth: User created
-    
-    alt Email verification enabled
-        BetterAuth->>EmailService: Send verification email
-        EmailService->>EmailService: Generate email template
-        EmailService-->>Client: Email avec lien de vérification
-    end
-    
-    BetterAuth-->>API: User created
-    API-->>Client: 201 Created
-    
-    Note over Client,EmailService: Processus asynchrone<br/>pour performance optimale
-```
-
-## Patterns d'utilisation dans les contrôleurs
-
-### Protection complète d'un contrôleur
-
-L'application du guard au niveau du contrôleur simplifie la sécurisation de l'ensemble des routes d'un module métier :
+Pour illustrer l'usage pratique de ces décorateurs et du système de Guards, voici un extrait simplifié de mon `WorkoutController`:
 
 ```typescript
-@Controller('athlete')
-@UseGuards(AuthGuard)  // Protection globale du contrôleur
-export class AthleteController {
-  @Get('profile')
-  getProfile(@Session() session) {
-    // Accès automatique aux données de session
-    return {
-      user: session.user,
-      lastLogin: session.session.createdAt,
-    };
-  }
-  
-  @Get('public-stats')
-  @Public()  // Exception pour route publique
-  getPublicStats() {
-    // Statistiques publiques du club
-    return this.athleteService.getPublicStats();
+@UseGuards(PermissionsGuard)
+@Controller()
+export class WorkoutController {
+  constructor(
+    private readonly workoutUseCases: WorkoutUseCases
+  ) {}
+
+  getWorkouts(@CurrentUser() user: AuthenticatedUser) {
+    return tsRestHandler(c.getWorkouts, async () => {
+      return await this.workoutUseCases.getWorkouts(organizationId, user.id);
+    });
   }
 }
 ```
 
-### Authentification optionnelle pour contenu personnalisé
-
-Certaines fonctionnalités de DropIt bénéficient d'une personnalisation selon l'état d'authentification, sans l'exiger absolument :
-
-```typescript
-@Controller('content')
-@UseGuards(AuthGuard)
-export class ContentController {
-  @Get('articles')
-  @Optional()  // Authentification optionnelle
-  getArticles(@Session() session) {
-    if (session) {
-      // Contenu personnalisé pour utilisateur authentifié
-      return this.contentService.getPersonalizedContent(session.user);
-    } else {
-      // Contenu public pour visiteur anonyme
-      return this.contentService.getPublicContent();
-    }
-  }
-}
-```
+Dans cet exemple, on voit comment :
+- L'`AuthGuard` global vérifie automatiquement l'authentification avant d'arriver au contrôleur
+- Le décorateur `@CurrentUser()` injecte automatiquement l'utilisateur connecté dans les paramètres
+- Aucune route n'est marquée `@Public()` donc toutes nécessitent une authentification
+- Le `@UseGuards(PermissionsGuard)` ajoute une couche de vérification des permissions (système qui sera détaillé dans la section suivante)
 
 ## Gestion des sessions et sécurité
 

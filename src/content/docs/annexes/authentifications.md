@@ -80,5 +80,35 @@ this._auth = betterAuth({
 });
 ```
 
+### Intégration avec le système d'email
+
+L'intégration du système d'email avec Better-Auth facilite la gestion des notifications d'authentification. Cette implémentation prépare l'évolution vers des communications plus riches (notifications push, SMS). Le détail de cette intégration est disponible dans les [Annexes authentification](/annexes/authentifications/).
+
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API
+    participant BetterAuth
+    participant Database
+    participant EmailService
+
+    Client->>API: POST /auth/signup
+    API->>BetterAuth: Process signup
+    BetterAuth->>Database: Create user
+    Database-->>BetterAuth: User created
+    
+    alt Email verification enabled
+        BetterAuth->>EmailService: Send verification email
+        EmailService->>EmailService: Generate email template
+        EmailService-->>Client: Email avec lien de vérification
+    end
+    
+    BetterAuth-->>API: User created
+    API-->>Client: 201 Created
+    
+    Note over Client,EmailService: Processus asynchrone<br/>pour performance optimale
+```
+
 
 
