@@ -73,25 +73,17 @@ export default defineConfig({
 					label: 'Gestion de projet',
 					items: [
 						{ label: 'Contribution au projet', link: '/gestion/contribution/' },
-						{ label: 'Documentation et rapports', link: '/gestion/documentation/' },
-						{ label: 'FAQ & Support', link: '/gestion/support/' },
-					],
-				},
-				{
-					label: 'Environnement de travail',
-					items: [
-						{ label: 'Installation et configuration', link: '/environnement/installation/' },
-						{ label: 'Outils et technologies', link: '/environnement/outils/' },
+						{ label: 'Documentations', link: '/gestion/documentations/' },
 					],
 				},
 				{
 					label: 'Annexes',
 					items: [
-						{ label: 'Glossaire', link: '/annexes/glossaire/' },
 						{ label: 'Sécurité', link: '/annexes/securite/' },
-						{ label: 'Références', link: '/annexes/references/' },
-						{ label: 'Roadmap', link: '/annexes/roadmap/' },
 						{ label: 'Authentifications', link: '/annexes/authentifications/' },
+						{ label: 'Permissions', link: '/annexes/permissions/' },
+						{ label: 'Glossaire', link: '/annexes/glossaire/' },
+						{ label: 'Cahier des charges', link: '/annexes/cahier-des-charges/' },
 					],
 				},
 			],
