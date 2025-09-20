@@ -67,7 +67,6 @@ export default defineConfig({
 					items: [
 						{ label: 'Préparation au déploiement', link: '/deploiement/preparation/' },
 						{ label: 'Mise en production', link: '/deploiement/production/' },
-						{ label: 'Performances globales', link: '/deploiement/performances/' },
 					],
 				},
 				{
