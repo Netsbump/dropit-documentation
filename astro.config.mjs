@@ -79,7 +79,6 @@ export default defineConfig({
 				{
 					label: 'Annexes',
 					items: [
-						{ label: 'Sécurité', link: '/annexes/securite/' },
 						{ label: 'Authentifications', link: '/annexes/authentifications/' },
 						{ label: 'Permissions', link: '/annexes/permissions/' },
 						{ label: 'Glossaire', link: '/annexes/glossaire/' },
