@@ -5,21 +5,21 @@ description: Analyse des besoins sécuritaires et choix d'architecture d'authent
 
 ## Introduction
 
-Après avoir défini l'architecture globale de DropIt, j'ai souhaité approfondir un aspect crucial qui me préoccupait particulièrement : la sécurisation de l'accès aux données dans le contexte spécifique d'un club d'haltérophilie. Cette réflexion m'a menée à concevoir une stratégie d'authentification et d'autorisation qui réponde aux défis techniques et réglementaires de ce domaine.
+Après avoir défini l'architecture globale de DropIt, j'aborde maintenant la conception de la sécurité applicative. Cette réflexion m'a amenée à analyser les besoins d'authentification et d'autorisation de l'application, puis à choisir une stratégie technique adaptée aux contraintes du projet.
 
-## Identification des enjeux spécifiques
+## Analyse des besoins d'authentification
 
-L'analyse du contexte métier de DropIt m'a révélé des défis sécuritaires particuliers que je n'avais pas immédiatement anticipés. Dans le contexte d'un club d'haltérophilie, je dois gérer trois profils d'utilisateurs aux besoins radicalement différents : les administrateurs qui supervisent l'ensemble du système, les coachs qui accèdent quotidiennement aux données d'entraînement depuis le backoffice web, et les athlètes qui consultent leurs performances via l'application mobile.
+L'architecture multi-plateforme de DropIt impose de gérer trois profils d'utilisateurs distincts : les administrateurs depuis le backoffice web, les coachs depuis l'interface de gestion, et les athlètes via l'application mobile React Native.
 
-Cette diversité d'accès m'a fait prendre conscience de la complexité de la gestion des droits dans une application multi-plateforme. Chaque profil nécessite un niveau de granularité différent : un coach doit pouvoir consulter les données de ses athlètes mais pas celles d'un autre groupe, tandis qu'un athlète ne devrait accéder qu'à ses propres informations.
+Cette configuration m'amène à concevoir un système de permissions granulaire. Un coach doit pouvoir consulter et modifier les données des athlètes de son groupe, tandis qu'un athlète accède uniquement à ses propres informations d'entraînement. Cette séparation des accès constitue le fondement de ma stratégie d'autorisation.
 
 ## Contraintes réglementaires et techniques
 
-Mon approche de la sécurité s'appuie d'abord sur mes obligations légales en tant que développeur manipulant des données personnelles. Le RGPD impose une protection rigoureuse des données personnelles, mais le contexte spécifique d'un club d'haltérophilie ajoute des exigences supplémentaires que j'ai dû identifier et intégrer dans ma conception.
+Mon approche de la sécurité intègre d'abord les obligations légales liées au traitement des données personnelles. Le RGPD impose une protection rigoureuse des informations collectées : performances personnelles, historiques d'entraînement, et données de profil utilisateur.
 
-La particularité du secteur sportif réside dans la sensibilité des données collectées : performances personnelles, évolution physique, historiques d'entraînement, parfois même des informations liées à la santé. Ces informations requièrent un niveau de protection élevé, non seulement pour respecter la réglementation, mais aussi pour maintenir la confiance des utilisateurs dans l'application.
+Au-delà de la conformité réglementaire, j'ai identifié des besoins opérationnels spécifiques à l'application : révocation immédiate des droits d'accès lors du départ d'un utilisateur, gestion des changements de rôle (passage d'athlète à coach), et traçabilité des accès aux données pour les audits de sécurité.
 
-J'ai également identifié des besoins opérationnels spécifiques au contexte sportif : la révocation immédiate des droits d'accès lorsqu'un athlète quitte le club, la gestion des changements de rôle (un athlète qui devient coach), ou encore la nécessité de tracer précisément qui accède à quelles données pour des raisons de conformité.
+Ces contraintes m'orientent vers une solution d'authentification qui offre à la fois la flexibilité nécessaire pour les évolutions fonctionnelles et la robustesse requise pour la protection des données.
 
 ## Solutions envisagées
 
@@ -29,34 +29,36 @@ Chaque solution présente des avantages et inconvénients spécifiques dans le c
 
 Cette analyse m'a orienté vers l'utilisation d'une librairie externe, et plus spécifiquement vers Better-Auth.
 
-## Solution retenue
+## Solution retenue : Better-Auth
 
-Better-Auth s'est imposé comme la solution la plus adaptée à mon contexte pour plusieurs raisons concrètes.
+J'ai choisi Better-Auth comme solution d'authentification après analyse comparative des alternatives disponibles. Cette décision s'appuie sur plusieurs critères qui correspondent directement aux besoins de DropIt.
 
-Cette librairie me fournit une authentification prête à l'emploi avec des endpoints clés en main et une gestion complète des données en base. Plus intéressant encore, Better-Auth propose une implémentation hybride combinant JWT et sessions persistantes, ce qui me permet d'avoir à la fois les performances des JWT et la possibilité de révocation immédiate des droits via les sessions stockées en base.
+Better-Auth propose une implémentation hybride combinant JWT et sessions persistantes, ce qui répond à ma contrainte de révocation immédiate des droits. Les JWT me donnent les performances nécessaires pour l'API REST, tandis que les sessions en base permettent d'invalider instantanément l'accès d'un utilisateur sans attendre l'expiration du token.
 
-Le système de plugins de Better-Auth répond parfaitement à mes besoins évolutifs. J'utilise notamment le plugin d'autorisation qui génère automatiquement les tables de gestion des rôles et expose des endpoints pour administrer facilement les permissions utilisateur dans mon application.
+Le système de plugins de Better-Auth me permet d'ajouter progressivement des fonctionnalités selon l'évolution du projet. Le plugin d'autorisation génère automatiquement les tables nécessaires avec une structure optimisée pour l'authentification, garantissant la cohérence entre le système d'auth et la gestion des droits.
 
-L'intégration naturelle avec l'écosystème TypeScript/Node.js que j'ai choisi pour DropIt facilite la maintenance et réduit ma courbe d'apprentissage, me permettant de me concentrer sur la logique métier plutôt que sur l'implémentation des mécanismes de sécurité.
+Cette librairie s'intègre naturellement dans la stack TypeScript/NestJS que j'ai choisie pour l'API. Cette cohérence technologique me permet de me concentrer sur l'implémentation de la logique métier plutôt que sur la configuration d'un système d'authentification externe.
 
-Better-Auth implémente nativement de nombreuses bonnes pratiques de sécurité qui m'auraient demandé un travail considérable à développer manuellement. Ces fonctionnalités couvrent les aspects essentiels de la protection applicative.
+Better-Auth implémente nativement plusieurs mécanismes de sécurité essentiels pour DropIt. Le système de rate-limiting configure automatiquement des limites par IP (5 tentatives de connexion par minute) qui protègent l'API contre les attaques par force brute sans nécessiter de configuration manuelle.
 
-Le système de rate-limiting intégré me protège contre les attaques par force brute en limitant les tentatives de connexion (par exemple 5 tentatives par minute) et prévient le spam d'endpoints coûteux. La protection CSRF via des tokens double-submit sécurise automatiquement mes requêtes POST/PUT/DELETE en ajoutant un token aléatoire qu'un site tiers ne peut pas deviner.
+La protection CSRF utilise des tokens double-submit pour sécuriser les requêtes d'écriture. Chaque requête POST/PUT/DELETE inclut un token généré côté serveur et vérifié à la réception, empêchant l'exécution de requêtes non autorisées depuis des sites tiers.
 
-Les cookies configurés avec le flag SameSite=Lax réduisent les risques d'attaques CSRF en s'assurant que les cookies ne sont envoyés que depuis mon domaine. Cette configuration par défaut me fait gagner du temps tout en renforçant la sécurité.
+Les cookies de session sont automatiquement configurés avec les flags sécurisés appropriés : `SameSite=Lax` pour limiter l'envoi aux requêtes same-origin, `HttpOnly` pour prévenir l'accès via JavaScript, et `Secure` en production pour forcer HTTPS.
 
-Better-Auth fournit également des fonctionnalités de conformité RGPD que j'apprécie particulièrement. L'export automatique des données utilisateur génère un fichier JSON/ZIP conforme aux obligations légales de portabilité. La table audit_log trace automatiquement qui fait quoi et quand, ce qui me permet de prouver la conformité RGPD et facilite les enquêtes en cas d'incident de sécurité.
+Ces configurations par défaut peuvent être ajustées selon l'évolution des besoins sécuritaires du projet.
 
-La librairie expose aussi des standards modernes comme JWKS (l'annuaire public des clés) qui permet à n'importe quel service de vérifier mes JWT sans échange manuel de clés, et OIDC discovery qui standardise les endpoints d'authentification pour faciliter l'intégration future avec d'autres systèmes.
+Better-Auth intègre des fonctionnalités de conformité RGPD directement dans son API. L'endpoint `/api/auth/user/export` génère automatiquement un archive contenant toutes les données utilisateur au format JSON, répondant aux obligations de portabilité. Le système d'audit trace chaque action (connexion, modification de profil, changement de permissions) dans une table dédiée, facilitant les investigations et la preuve de conformité.
+
+La librairie expose également les standards d'authentification modernes : l'endpoint JWKS (`/.well-known/jwks.json`) publie les clés publiques permettant la vérification des JWT par des services externes, tandis qu'OIDC Discovery (`/.well-known/openid-configuration`) standardise la découverte des endpoints d'authentification.
 
 ### Évolutions envisagées
 
-L'architecture mise en place ouvre plusieurs perspectives d'évolution que je compte explorer dans la suite du développement de DropIt. L'implémentation de l'authentification à deux facteurs (2FA) constitue une priorité, particulièrement pour les comptes administrateurs qui disposent d'accès privilégiés.
+L'architecture retenue me permet d'envisager plusieurs améliorations sécuritaires futures. L'authentification à deux facteurs (2FA) représente une priorité pour les comptes administrateurs, Better-Auth proposant un plugin dédié qui gère nativement la génération de QR codes et la validation des codes temporaires via des applications comme Google Authenticator.
 
-De même, l'intégration de Better-Auth avec les providers OAuth (Google, Apple) pourrait simplifier l'onboarding des athlètes, tout en maintenant le niveau de sécurité requis. Cette évolution nécessitera cependant une analyse approfondie des implications en termes de protection des données personnelles.
+L'ajout de providers OAuth (Google, Apple) pourrait faciliter l'onboarding des utilisateurs mobiles grâce aux plugins sociaux de Better-Auth. Cette intégration nécessitera toutefois une évaluation des implications RGPD liées au partage de données avec des tiers.
 
 ## Conclusion
 
-Cette analyse m'a permis de poser les fondations conceptuelles de la sécurité dans DropIt. Le choix de Better-Auth comme solution d'authentification répond aux contraintes techniques et réglementaires identifiées, tout en offrant la flexibilité nécessaire pour les évolutions futures.
+Le choix de Better-Auth comme solution d'authentification répond aux exigences techniques et réglementaires de DropIt : gestion granulaire des permissions, révocation immédiate des droits, conformité RGPD, et extensibilité via le système de plugins.
 
-La section suivante détaille comment j'ai implémenté cette librairie au sein de mon projet, notamment le fonctionnement de l'architecture hybride JWT/sessions, les entités générées automatiquement par Better-Auth et le système de guards et décorateurs mis à disposition pour sécuriser les routes.
+La section suivante présente l'implémentation concrète de cette librairie dans le projet, détaillant l'architecture hybride JWT/sessions, les entités générées, et les mécanismes de protection des routes API.
