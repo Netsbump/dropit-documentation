@@ -83,6 +83,7 @@ export default defineConfig({
 						{ label: 'Permissions', link: '/annexes/permissions/' },
 						{ label: 'Glossaire', link: '/annexes/glossaire/' },
 						{ label: 'Cahier des charges', link: '/annexes/cahier-des-charges/' },
+						{ label: 'Bilan', link: '/annexes/bilan/' },
 					],
 				},
 			],
