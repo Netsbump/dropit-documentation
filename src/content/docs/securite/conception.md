@@ -47,7 +47,9 @@ Les cookies de session sont automatiquement configurés avec les flags sécuris�
 
 Ces configurations par défaut peuvent être ajustées selon l'évolution des besoins sécuritaires du projet.
 
-Better-Auth intègre des fonctionnalités de conformité RGPD directement dans son API. L'endpoint `/api/auth/user/export` génère automatiquement un archive contenant toutes les données utilisateur au format JSON, répondant aux obligations de portabilité. Le système d'audit trace chaque action (connexion, modification de profil, changement de permissions) dans une table dédiée, facilitant les investigations et la preuve de conformité.
+Better-Auth intègre des fonctionnalités de conformité RGPD essentielles pour DropIt. L'endpoint `/api/auth/user/export` génère automatiquement une archive contenant toutes les données utilisateur au format JSON, répondant aux **obligations de portabilité** (Article 20 RGPD) : performances d'entraînement, historiques de blessures, données de profil.
+
+Le système d'audit trace chaque action dans une table dédiée, servant trois objectifs RGPD cruciaux : **preuve d'accès** (qui a consulté quelles données et quand), **détection d'anomalies** (accès non autorisés), et **preuve de suppression** (enregistrement de l'effacement des données utilisateur lors du départ d'un athlète). Cette traçabilité est particulièrement importante pour les données de santé stockées dans DropIt (blessures, limitations physiques).
 
 La librairie expose également les standards d'authentification modernes : l'endpoint JWKS (`/.well-known/jwks.json`) publie les clés publiques permettant la vérification des JWT par des services externes, tandis qu'OIDC Discovery (`/.well-known/openid-configuration`) standardise la découverte des endpoints d'authentification.
 
