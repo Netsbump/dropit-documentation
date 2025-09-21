@@ -22,6 +22,13 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			title: 'DropIt Docs',
+			defaultLocale: 'root',
+			locales: {
+				root: {
+					label: 'Français',
+					lang: 'fr',
+				},
+			},
 			social: {
 				github: 'https://github.com/withastro/starlight',
 			},
