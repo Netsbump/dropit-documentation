@@ -3,85 +3,75 @@ title: Contribution au projet
 description: Organisation du projet et méthodes de développement collaboratif
 ---
 
-## Philosophie Open Source et licencing
+## Philosophie Open Source
 
-Le projet DropIt est actuellement hébergé sur GitHub sous licence MIT, favorisant la transparence et l'apprentissage communautaire. Cette approche open source me permet de démontrer mes compétences techniques tout en contribuant à l'écosystème des outils d'haltérophilie.
+Le projet DropIt est hébergé sur GitHub sous licence MIT, favorisant la transparence et l'apprentissage communautaire. Cette approche open source me permet de démontrer mes compétences techniques tout en contribuant à l'écosystème des outils d'haltérophilie.
 
-J'envisage prochainement d'évoluer vers une licence plus restrictive (Free Software License) pour préserver l'usage non-commercial du projet.
+J'envisage d'évoluer vers une licence plus restrictive pour préserver l'usage non-commercial du projet.
 
 ## Infrastructure de développement
 
-### Environnement containerisé avec Docker
+### Environnement Docker
 
-L'environnement de développement repose entièrement sur Docker Compose, garantissant la reproductibilité entre les postes de développement. Cette approche résout les problèmes classiques des différents environnement des developpeurs et facilite significativement l'onboarding de nouveaux contributeurs.
+L'environnement repose entièrement sur Docker Compose, garantissant la reproductibilité entre postes. Cette approche résout les problèmes classiques de différences d'environnement et facilite l'onboarding des contributeurs.
 
-La stack complète (PostgreSQL, PgAdmin et prochainement Redis, Typesense) s'initialise via une simple commande `docker-compose up`, créant un environnement isolé et fonctionnel en quelques minutes.
+La stack complète (PostgreSQL, PgAdmin, Redis, Typesense) s'initialise via `docker-compose up`, créant un environnement isolé et fonctionnel en quelques minutes.
 
-### Gestion des données avec volumes persistants
+### Données et seeders
 
-Les volumes Docker attachés aux services garantissent la persistance des données entre les redémarrages de containers. Cette configuration évite la perte frustrante des données de développement et des jeux d'essai, particulièrement précieuse lors des phases de test intensives.
+Les volumes Docker garantissent la persistance des données entre redémarrages, évitant la perte des données de développement lors des phases de test.
 
-Le système de seeders automatiques populate la base avec des données réalistes d'exercices d'haltérophilie, d'athlètes fictifs, et de programmes d'entraînement types. Cette initialisation automatique permet aux nouveaux développeurs de découvrir immédiatement les fonctionnalités sans configuration manuelle fastidieuse.
+Le système de seeders automatiques peuple la base avec des données réalistes : exercices d'haltérophilie, athlètes fictifs, programmes d'entraînement types. Cette initialisation permet aux nouveaux développeurs de découvrir immédiatement les fonctionnalités.
 
-### Instructions d'installation standardisées
+### Installation standardisée
 
-Le README du projet détaille précisément la procédure d'installation :
+Le README détaille la procédure d'installation :
 
-1. **Prérequis** : Node.js v20+, pnpm, Docker et Docker Compose
-2. **Setup rapide** : Clone, `pnpm install`, `pnpm build`, configuration `.env`
+1. **Prérequis** : Node.js v20+, pnpm, Docker
+2. **Setup** : Clone, `pnpm install`, `pnpm build`, configuration `.env`
 3. **Démarrage** : `docker-compose up -d` puis `pnpm dev`
 
-Cette documentation vise à permettre la mise en route en moins de 10 minutes, benchmark que j'ai testé sur plusieurs machines pour valider la simplicité d'accès.
+Cette documentation vise une mise en route en moins de 10 minutes, benchmark testé sur plusieurs machines.
 
 ## Méthodologie de développement
 
-### Gestion de projet agile individuelle
+### Approche agile individuelle
 
-Bien que travaillant seul sur ce projet, j'ai appliqué une approche Kanban via Notion pour structurer le développement. Cette méthode me permet de décomposer les fonctionnalités complexes en tâches atomiques, facilitant le suivi de progression et la priorisation des développements.
+Bien que travaillant seul, j'ai appliqué une approche Kanban via Notion pour structurer le développement. Cette méthode me permet de décomposer les fonctionnalités complexes en tâches atomiques, facilitant le suivi et la priorisation.
 
-Mon expérience professionnelle en équipes agiles (2 à 5 développeurs) m'a familiarisé avec les methodes agiles Scrum et Kanban. Plus particulièrement Scrum, qui structure le développement en sprints de 2-4 semaines avec des cérémonies ritualisées (daily meetings, sprint planning, retrospectives), favorisant la collaboration et l'adaptation continue aux besoins métier.
-
-### Outils de gestion collaborative
-
-J'ai expérimenté différents outils de gestion de projet selon les contextes d'équipe : Jira pour les grandes organisations avec workflows complexes, ClickUp pour sa flexibilité et son interface moderne, et GitHub Projects pour l'intégration native avec le code. Cette diversité d'expérience me permet d'adapter mes méthodes selon les contraintes et préférences d'équipe.
+Mon expérience en équipes agiles m'a familiarisé avec Scrum et Kanban. J'ai expérimenté différents outils selon les contextes : Jira pour les grandes organisations, ClickUp pour sa flexibilité, GitHub Projects pour l'intégration native avec le code.
 
 ### Workflow Git structuré
 
-Mon flux de travail Git respecte les bonnes pratiques de développement collaboratif, même en contexte individuel, préparant l'évolution vers une équipe :
+Mon flux Git respecte les bonnes pratiques collaboratives, préparant l'évolution vers une équipe :
 
-**Stratégie de branches** : Une branche par fonctionnalité (`feature/auth-better-auth`, `feature/workout-builder`) permet l'isolation des développements et facilite les revues de code futures.
+**Stratégie de branches** : Une branche par fonctionnalité (`feature/auth-better-auth`) isole les développements et facilite les futures revues.
 
-**Protection des branches critiques** : Les branches `main` et `develop` sont protégées contre les push directs. Tout merge nécessite obligatoirement une Pull Request, même en tant que seul développeur du projet.
+**Protection des branches** : `main` et `develop` sont protégées contre les push directs. Tout merge nécessite une Pull Request.
 
-**Validation automatisée** : Chaque Pull Request vers `develop` déclenche automatiquement la suite complète de tests (unitaires, intégration, linting). Le merge n'est autorisé qu'après validation réussie de tous les checks.
+**Validation automatisée** : Chaque PR vers `develop` déclenche la suite complète de tests. Le merge n'est autorisé qu'après validation réussie.
 
-**Intégration via develop** : Toutes les features mergent d'abord dans `develop` via Pull Request pour validation et tests d'intégration avant promotion vers `main`.
+**Déploiement contrôlé** : Seul le merge `develop` → `main` déclenche le déploiement production via GitHub Actions.
 
-**Déploiement contrôlé** : Seul le merge de `develop` vers `main` (également via Pull Request) déclenche automatiquement le déploiement en production via GitHub Actions, garantissant que seul du code testé atteint l'environnement live.
+Cette discipline assure la traçabilité et prépare l'évolution collaborative.
 
-Cette discipline Git, acquise en environnement d'équipe, assure la traçabilité des modifications et prépare l'évolution vers un développement collaboratif avec plusieurs contributeurs.
+## Documentation technique
 
-## Documentation technique pour développeurs
+### README modulaires
 
-### README modulaires et organisés
+La documentation s'organise autour de README spécialisés par public. Le README principal fournit vue d'ensemble et installation rapide, chaque module (frontend, backend, mobile) dispose de sa documentation détaillée.
 
-La documentation technique de DropIt s'organise autour de README spécialisés selon les publics cibles. Le README principal du projet fournit une vue d'ensemble et les instructions d'installation rapide, tandis que chaque module (frontend, backend, mobile) dispose de sa propre documentation détaillée.
+Cette approche modulaire maintient une documentation pertinente sans duplication. Les développeurs frontend trouvent rapidement les informations React/TypeScript, les contributeurs backend accèdent aux spécificités NestJS et MikroORM.
 
-Cette approche modulaire me permet de maintenir une documentation pertinente sans duplication d'informations. Les développeurs frontend trouvent rapidement les informations sur la stack React/TypeScript, tandis que les contributeurs backend accèdent directement aux spécificités NestJS et MikroORM.
+### Documentation API Swagger
 
-### Documentation API automatisée avec Swagger
+L'API REST génère automatiquement sa documentation via Swagger/OpenAPI, garantissant la synchronisation code-documentation. Cette approche élimine les risques de désynchronisation classiques.
 
-L'API REST de DropIt génère automatiquement sa documentation via Swagger/OpenAPI, garantissant la synchronisation entre le code et la documentation. Cette approche élimine les risques de désynchronisation classiques entre l'implémentation et sa documentation.
+Better-Auth dispose de sa propre interface Swagger séparée, clarifiant la distinction entre endpoints métier DropIt et fonctionnalités d'authentification.
 
-La documentation Swagger couvre exhaustivement les endpoints de gestion des exercices, des programmes d'entraînement, et des données d'athlètes.
+## Perspectives
 
-### Intégration Better-Auth documentée
+Cette approche vise à réduire les barrières à la contribution, reflétant mon objectif de créer un projet maintenable et évolutif. L'expérience acquise constitue une base solide pour intégrer des équipes et contribuer positivement à des projets collaboratifs.
 
-Better-Auth disposant de sa propre interface Swagger, j'ai configuré un accès séparé à cette documentation spécialisée. Cette séparation clarifie la distinction entre les endpoints métier de DropIt et les fonctionnalités d'authentification, facilitant la compréhension pour les développeurs découvrant le projet.
-
-Cette documentation détaille les flux OAuth, la gestion des sessions et les permissions RBAC informations cruciales pour comprendre l'architecture de sécurité.
-
-## Perspectives de contribution
-
-Cette approche combinée à la documentation technique accessible vise à réduire les barrières à la contribution, reflétant mon objectif de créer un projet maintenable et évolutif. L'expérience acquise avec ces outils et méthodologies constitue une base solide pour intégrer efficacement des équipes de développement et contribuer positivement à des projets collaboratifs. 
+L'infrastructure technique étant en place, la section suivante aborde les aspects de documentation utilisateur et de support, éléments essentiels pour l'adoption par les clubs d'haltérophilie. 
 

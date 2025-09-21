@@ -5,7 +5,7 @@ description: Analyse des stratégies de test et retours d'expérience
 
 ## Tests unitaires
 
-### PermissionsGuard : validation RBAC
+### PermissionsGuard
 
 La validation du système de permissions représente un enjeu critique pour la sécurité. Mon approche teste exhaustivement les règles d'accès selon les rôles organisationnels (member, admin, owner) et les ressources métier (workout, exercise, athlete).
 
@@ -43,7 +43,7 @@ describe('PermissionsGuard', () => {
 
 Les tests couvrent systématiquement permissions accordées, refusées, utilisateurs sans organisation, sessions expirées, et tentatives d'escalade de privilèges. Cette batterie de plus de 40 tests unitaires valide la robustesse du système RBAC.
 
-### AuthGuard : sessions Better-Auth
+### AuthGuard
 
 L'AuthGuard gère l'intégration avec Better-Auth. Les tests vérifient la gestion des routes publiques, l'injection des données de session, et la différenciation entre utilisateurs standard et super-administrateurs.
 
@@ -72,7 +72,7 @@ Cette approche valide l'authentification sans dépendre du service Better-Auth r
 
 ## Tests d'intégration
 
-### Workouts : orchestration complexe
+### Workouts
 
 Les tests d'intégration de workouts représentent le défi le plus complexe car ils orchestrent l'ensemble de la logique métier d'haltérophilie. Un workout combine exercices simples et complexes dans une structure cohérente respectant les spécificités de l'entraînement.
 
