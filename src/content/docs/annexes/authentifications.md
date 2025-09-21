@@ -274,40 +274,6 @@ Implémentation PostgreSQL avec types de données optimisés et index de perform
 
 Les choix techniques incluent UUID pour les identifiants (sécurité), TIMESTAMP WITH TIME ZONE pour les dates (gestion multi-timezone), et TEXT pour la flexibilité des tokens de taille variable.
 
----
-
-### Entités d'autorisation (Plugin Organization)
-
-Le plugin Organization de Better-Auth ajoute la gestion des permissions granulaires via un système RBAC (Role-Based Access Control). Cette modélisation démontre ma compréhension des patterns d'autorisation complexes.
-
-#### Modèle Conceptuel de Données (MCD)
-
-Modélisation Merise du système RBAC si j'avais dû le concevoir manuellement :
-
-![Modèle Conceptuel de Données](../../../assets/mcd-autorization.png)
-
-**Analyse des relations RBAC :**
-- **User** appartient à une **Organization** (1,n)
-- **User** peut avoir plusieurs **Roles** via l'association **Member** (n,n)
-- **Role** dispose de plusieurs **Permissions** (n,n)
-- Relations many-to-many nécessitant des tables d'association pour la normalisation
-
-#### Modèle Logique de Données (MLD)
-
-Résolution des associations many-to-many par des tables intermédiaires :
-
-![Modèle Logique de Données](../../../assets/mld-autorization.png)
-
-Les tables `Member` et `RolePermission` matérialisent les associations many-to-many, respectant les règles de normalisation pour éviter les redondances.
-
-#### Modèle Physique de Données (MPD)
-
-Implémentation optimisée avec contraintes et index pour les performances des requêtes d'autorisation :
-
-![Modèle Physique de Données](../../../assets/mpd-autorization.png)
-
-Index composites sur (`userId`, `organizationId`) et (`roleId`, `permissionId`) pour optimiser les vérifications de permissions fréquentes dans l'application.
-
 --- 
 
 ## Configuration côté clients de Better-Auth
