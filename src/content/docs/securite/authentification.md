@@ -5,13 +5,11 @@ description: Mise en œuvre pratique du système d'authentification dans DropIt
 
 ## Introduction
 
-Après avoir justifié le choix de Better-Auth comme solution d'authentification, je détaille ici son implémentation concrète dans DropIt. Cette librairie m'offre une approche hybride combinant JWT et sessions révocables, répondant parfaitement aux besoins identifiés.
-
-L'implémentation de Better-Auth dans mon projet s'articule autour de plusieurs composants : la génération automatique d'entités de base de données, l'exposition d'endpoints d'authentification prêts à l'emploi, la protection des routes via un système de guards, et la configuration d'un middleware pour déléguer les requêtes d'authentification à la librairie.
+Cette section détaille l'implémentation technique de Better-Auth dans DropIt. L'intégration repose sur quatre composants principaux : les entités de base générées automatiquement, les endpoints d'authentification exposés sur `/auth`, le système de guards pour la protection des routes, et le middleware de délégation des requêtes d'authentification.
 
 ## Organisation modulaire de l'authentification
 
-Dans mon API NestJS, j'ai choisi d'isoler tout ce qui concerne l'authentification au sein d'un module dédié. Cette approche me permet de maintenir une séparation claire des responsabilités et facilite la maintenance du code d'authentification.
+J'ai isolé l'authentification dans un module NestJS dédié pour séparer les responsabilités et centraliser la configuration Better-Auth.
 
 ```
 modules/auth/
@@ -25,9 +23,9 @@ modules/auth/
 
 ## Entités générées par Better-Auth
 
-Better-Auth impose un schéma de base de données spécifique que j'ai dû intégrer dans mon système existant. Cette librairie génère automatiquement quatre entités principales : User, Session, Account, et Verification.
+Better-Auth impose un schéma de base de données spécifique avec quatre entités principales : `User`, `Session`, `Account`, et `Verification`. L'implémentation peut se faire manuellement selon la documentation ou via les scripts de génération fournis par la librairie.
 
-L'intégration de ces entités dans mon architecture existante s'est révélée simple. Seule la table User nécessitait une attention particulière car elle devait s'harmoniser avec mon modèle utilisateur existant. Les autres tables (Session, Account, Verification) sont autonomes et n'ont posé aucune difficulté d'implémentation.
+L'intégration dans mon architecture existante s'est concentrée sur la table `User` qui devait s'harmoniser avec mon modèle utilisateur, les autres tables (`Session`, `Account`, `Verification`) étant autonomes.
 
 Les schémas détaillés de ces entités (MCD, MLD, MPD) sont disponibles dans la section [Annexes authentification](/annexes/authentifications/) pour une vision complète de l'architecture de données.
 
@@ -37,11 +35,9 @@ L'entité **Session** gère les sessions actives des utilisateurs en stockant le
 
 L'entité **Verification** s'occupe des tokens temporaires utilisés pour la vérification d'email et la réinitialisation de mot de passe. Chaque token a une durée de vie limitée, gérant automatiquement l'expiration pour renforcer la sécurité.
 
-Dans mon implémentation, j'utilise l'approche code-first de NestJS avec MikroORM pour générer automatiquement ces entités. Il est aussi possible de les créer manuellement, mais il faut respecter scrupuleusement le schéma requis par Better-Auth. 
+## Endpoints d'authentification
 
-## Endpoints d'authentification automatiques
-
-L'un des avantages majeurs de Better-Auth est l'exposition automatique d'endpoints d'authentification complets sur le préfixe `/auth`. Cette fonctionnalité me fait gagner un temps considérable en évitant le développement manuel de ces routes critiques.
+Better-Auth expose automatiquement des endpoints d'authentification complets sur le préfixe `/auth`, évitant l'implémentation manuelle de ces routes critiques.
 
 | Route | Méthode | Description | Usage dans DropIt |
 |-------|---------|-------------|-------------------|
@@ -53,7 +49,7 @@ L'un des avantages majeurs de Better-Auth est l'exposition automatique d'endpoin
 | `/auth/verify` | GET | Vérification email | Sécurisation des comptes |
 | `/auth/reset-password` | POST | Réinitialisation | Récupération comptes oubliés |
 
-Cette standardisation me garantit l'implémentation des bonnes pratiques de sécurité sans effort supplémentaire. J'ai ajouté le plugin openAPI() à ma configuration Better-Auth, ce qui génère automatiquement la documentation Swagger de tous ces endpoints pour faciliter le développement côté client. 
+Cette standardisation garantit l'implémentation native des bonnes pratiques de sécurité. J'ai ajouté le plugin openAPI() à ma configuration Better-Auth, ce qui génère automatiquement la documentation Swagger de tous ces endpoints pour faciliter le développement côté client. 
 
 ## Configuration du middleware d'authentification
 
@@ -75,48 +71,7 @@ sequenceDiagram
     NestJS-->>Client: 200 + cookies
 ```
 
-Voici la configuration dans le point d'entrée de mon application : 
-
-```ts
-import { NestFactory } from '@nestjs/core';
-import { SwaggerModule } from '@nestjs/swagger';
-import * as dotenv from 'dotenv';
-import * as express from 'express';
-import { AppModule } from './app.module';
-import { config } from './config/env.config';
-import { openApiDocument } from './config/swagger.config';
-
-dotenv.config();
-
-const PREFIX = '/api';
-const PORT = process.env.API_PORT || 3000;
-
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    bodyParser: false,
-  });
-
-  // Conditional middleware for better auth
-  app.use(
-    (
-      req: express.Request,
-      res: express.Response,
-      next: express.NextFunction
-    ) => {
-      // If is routes of better auth, next
-      if (req.originalUrl.startsWith(`${PREFIX}/auth`)) {
-        return next();
-      }
-      // Else, apply the express json middleware
-      express.json()(req, res, next);
-    }
-  );
-
-  await app.listen(PORT, '0.0.0.0');
-}
-
-bootstrap();
-```
+La configuration se fait dans le point d'entrée de l'API via un middleware conditionnel qui détecte les requêtes commençant par `/api/auth` et les délègue directement à Better-Auth.
 
 ## Protection des routes
 
@@ -162,13 +117,13 @@ export const CurrentUser = createParamDecorator(
 );
 ```
 
-Ces décorateurs me permettent d'annoter facilement mes routes selon leur niveau de sécurité et d'injecter automatiquement les données de session dans mes contrôleurs.
+Ces décorateurs me permettent d'annoter mes routes avec des métadonnées de sécurité (`@Public()`, `@Optional()`) et d'injecter directement les données d'authentification dans les paramètres de méthode (`@CurrentUser()`, `@Session()`).
 
 ### Guards
 
 Les Guards sont des classes qui implémentent une logique de sécurité dans NestJS. Un Guard s'exécute avant chaque route pour déterminer si la requête peut y accéder. Dans le contexte de l'authentification, le Guard vérifie si l'utilisateur est connecté et dispose des droits nécessaires.
 
-Le Guard lit les métadonnées ajoutées par les décorateurs pour adapter son comportement. Par exemple, si une route est marquée `@Public()`, le Guard autorisera l'accès même sans authentification. 
+Le Guard utilise le service `Reflector` de NestJS pour lire les métadonnées ajoutées par les décorateurs et adapter son comportement. Par exemple, si une route est marquée `@Public()`, le Guard autorisera l'accès même sans authentification. 
 
 Voici une version allégée de mon AuthGuard qui montre la logique principale :
 
@@ -214,10 +169,9 @@ export class AuthGuard implements CanActivate {
 
 ### Exemple d'utilisation concrète
 
-Pour illustrer l'usage pratique de ces décorateurs et du système de Guards, voici un extrait simplifié de mon `WorkoutController`:
+Extrait du `WorkoutController` illustrant l'usage des décorateurs et Guards :
 
 ```typescript
-@UseGuards(PermissionsGuard)
 @Controller()
 export class WorkoutController {
   constructor(
@@ -232,21 +186,17 @@ export class WorkoutController {
 }
 ```
 
-Dans cet exemple, on voit comment :
-- L'`AuthGuard` global vérifie automatiquement l'authentification avant d'arriver au contrôleur
-- Le décorateur `@CurrentUser()` injecte automatiquement l'utilisateur connecté dans les paramètres
-- Aucune route n'est marquée `@Public()` donc toutes nécessitent une authentification
-- Le `@UseGuards(PermissionsGuard)` ajoute une couche de vérification des permissions (système qui sera détaillé dans la section suivante)
+Cet exemple montre l'`AuthGuard` global vérifiant l'authentification, le décorateur `@CurrentUser()` injectant l'utilisateur connecté, et l'absence de `@Public()` rendant l'authentification obligatoire.
 
 ## Gestion des sessions et sécurité
 
 ### Architecture hybride JWT/Sessions
 
-Better-Auth implémente une approche hybride qui combine les avantages des JWT et des sessions persistantes. Cette architecture répond parfaitement au besoin de révocation immédiate que j'ai identifié dans mes contraintes.
+Better-Auth implémente une approche hybride combinant JWT et sessions persistantes, répondant au besoin de révocation immédiate identifié dans mes contraintes.
 
-Concrètement, lors de la connexion, Better-Auth génère à la fois un JWT et enregistre une session en base de données. Le JWT permet une validation rapide côté serveur, tandis que la session en base permet la révocation instantanée si nécessaire (athlète quittant le club, changement de rôle).
+Lors de la connexion, Better-Auth génère un JWT pour la validation rapide côté serveur et enregistre une session en base de données pour permettre la révocation instantanée (départ d'un utilisateur, changement de rôle).
 
-Cette approche me donne la performance des tokens stateless avec la flexibilité de gestion des sessions traditionnelles. Les détails techniques de cette implémentation et la comparaison complète JWT vs Sessions sont disponibles dans les [Annexes authentification](/annexes/authentifications/).
+Cette architecture combine la performance des tokens stateless avec la flexibilité des sessions traditionnelles. Les détails techniques et la comparaison JWT vs Sessions sont disponibles dans les [Annexes authentification](/annexes/authentifications/).
 
 ## Stratégie de sécurisation côté client
 
@@ -254,7 +204,7 @@ Cette approche me donne la performance des tokens stateless avec la flexibilité
 
 La sécurisation du stockage des tokens varie selon la plateforme d'accès. Pour le backoffice web, j'utilise les cookies HttpOnly qui protègent contre les attaques XSS (vulnérabilité permettant l'injection de code JavaScript malveillant). Cette protection est cruciale car les coachs accèdent parfois au backoffice depuis des postes partagés.
 
-Pour l'application mobile, Better-Auth utilise automatiquement le stockage sécurisé natif via `expo-secure-store` : Keychain sur iOS et EncryptedSharedPreferences sur Android. Le plugin gère aussi le deep linking (redirection automatique vers l'app après authentification externe) pour les futures intégrations OAuth.
+Pour l'application mobile, Better-Auth utilise automatiquement le stockage sécurisé natif via `expo-secure-store` : Keychain sur iOS et EncryptedSharedPreferences sur Android. Le plugin gère aussi le deep linking (redirection automatique vers l'app après authentification externe) pour les eventuelles futures intégrations OAuth.
 
 ### Configuration des sessions
 
@@ -266,7 +216,7 @@ Les détails d'implémentation, la configuration complète des tokens et les sp�
 
 ### Protection unifiée API et interface
 
-L'un des avantages majeurs de Better-Auth est sa capacité à sécuriser à la fois l'accès aux APIs et le rendu conditionnel des interfaces utilisateur. Cette approche unifiée me permet de maintenir une cohérence de sécurité entre le backend et le frontend.
+L'un des avantages de Better-Auth est sa capacité à sécuriser à la fois l'accès aux APIs et le rendu conditionnel des interfaces utilisateur. Cette approche unifiée permet de maintenir une cohérence de sécurité entre le backend et le frontend.
 
 Côté backend, mes APIs sont protégées par les Guards comme nous l'avons vu. Côté frontend, Better-Auth fournit des hooks React pour conditionner l'affichage des composants selon l'état d'authentification :
 
@@ -287,17 +237,14 @@ function WorkoutForm() {
 
 ### Configuration multi-plateforme
 
-Better-Auth s'adapte automatiquement aux spécificités de chaque plateforme. Pour l'application mobile Expo, j'utilise le plugin dédié qui gère automatiquement le stockage sécurisé et les redirections. Pour le backoffice web, la configuration standard avec cookies HttpOnly suffit.
+Better-Auth s'adapte automatiquement aux spécificités de chaque plateforme. Pour l'application mobile Expo, j'utilise le plugin dédié qui gère le stockage sécurisé et les redirections. Pour le backoffice web, la configuration standard avec cookies HttpOnly suffit.
 
-Cette approche unifiée me garantit une expérience de sécurité cohérente entre le web et le mobile, tout en respectant les bonnes pratiques spécifiques à chaque plateforme. Les détails de configuration et exemples d'implémentation sont disponibles dans les [Annexes authentification](/annexes/authentifications/).
+Cette approche unifie l'expérience de sécurité entre web et mobile tout en respectant les bonnes pratiques spécifiques à chaque plateforme. Les détails de configuration sont disponibles dans les [Annexes authentification](/annexes/authentifications/).
 
 ## Conclusion
 
-L'implémentation de Better-Auth dans DropIt me fournit une base d'authentification solide qui répond aux contraintes identifiées : révocation immédiate, architecture multi-plateforme, et conformité RGPD. Cette fondation technique me permet maintenant de me concentrer sur la couche d'autorisation.
+L'implémentation de Better-Auth répond aux contraintes identifiées : révocation immédiate, architecture multi-plateforme, et conformité RGPD. Cette base d'authentification me permet de me concentrer sur la couche d'autorisation.
 
-La section suivante détaille comment j'enrichis cette base avec le plugin Organization de Better-Auth pour implémenter un système de permissions granulaire. Ce système RBAC (Role-Based Access Control) me permet de gérer finement les droits d'accès entre administrateurs, coachs et athlètes, garantissant que chaque utilisateur accède uniquement aux données et fonctionnalités de son périmètre d'action dans le club.
+La section suivante présente l'implémentation du système RBAC via le plugin Organization de Better-Auth, gérant les permissions granulaires entre administrateurs, coachs et athlètes selon leur périmètre d'action.
 
----
-
-*Note : L'intégration avec le système d'email, les configurations avancées et les détails d'implémentation techniques sont disponibles dans les [Annexes authentification](/annexes/authentifications/).*
 
