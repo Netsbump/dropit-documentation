@@ -169,6 +169,41 @@ Dans le cadre de ma formation, cette exploration d'une technologie émergente en
 
 Cette structure hiérarchique reflète l'organisation logique de l'application et facilite la gestion des layouts imbriqués. Le préfixe `__home` indique les routes protégées par authentification, simplifiant la logique de protection des pages.
 
+### Flux de données
+
+Pour mettre en perspectives tous ces élements voici un exemple de flux de données dans le client web:
+
+```mermaid
+sequenceDiagram
+    participant Coach as 👨 Coach (Utilisateur)
+    participant Router as 🌐 Tanstack Router
+    participant Page as 📄 WorkoutCreatePage
+    participant Form as 📝 React Hook Form
+    participant Validation as ✅ Zod Schema
+    participant Query as 🔄 Tanstack Query
+    
+    Coach->>Router: Navigation vers /workouts/create
+    Router->>Page: Rendu du composant
+    
+    Coach->>Form: Saisie données programme
+    Form->>Validation: Validation temps réel
+    Validation-->>Form: Erreurs ou succès
+    Form-->>Page: Mise à jour état formulaire
+    
+    Coach->>Form: Soumission formulaire
+    Form->>Validation: Validation finale
+    Validation-->>Form: Données validées
+    Form->>Query: useMutation('createWorkout')
+    Query-->>Page: État de soumission
+    Page-->>Coach: Feedback utilisateur
+    
+    Query-->>Router: Redirection après succès
+```
+
+L'application suit un flux de données unidirectionnel où Tanstack Query centralise la gestion de l'état serveur, tandis que React se charge de l'état local des composants. Cette séparation facilite la maintenance et le débogage et me permet d'isoler les problèmes selon leur nature.
+
+La structure respecte une séparation entre les différentes couches : présentation avec les composants UI, logique métier encapsulée dans des hooks personnalisés, et communication gérée par les clients API. Cette organisation facilite non seulement les tests unitaires en isolant chaque responsabilité, mais aussi l'évolution future du code en permettant de modifier une couche sans impacter les autres. Pour optimiser les performances de rendu, j'ai prévu d'implémenter une pagination progressive pour les longues listes d'athlètes et la technique de lazy loading pour les détails de programmes, évitant ainsi de charger l'intégralité des données au premier accès.
+
 ### Gestion des dates avec date-fns
 
 Dans DropIt, la manipulation des dates intervient fréquemment : planification des séances, formatage des dates d'entraînement, calculs de périodes. J'avais besoin d'une solution fiable pour éviter les pièges classiques de manipulation des objets Date JavaScript natifs.
@@ -329,7 +364,7 @@ Les fichiers de traduction sont organisés par domaines métier, permettant une 
 }
 ```
 
-### TailwindCSS : approche utility-first et optimisation
+### TailwindCSS
 
 Dans le contexte de DropIt, j'avais besoin d'une approche CSS permettant un développement rapide sans sacrifier la cohérence visuelle ni les performances finales. TailwindCSS répond précisément à cette problématique en inversant la logique traditionnelle du développement CSS.
 
@@ -391,7 +426,7 @@ Dans mon workflow de développement, Tailwind s'intègre harmonieusement avec le
 
 L'approche responsive de Tailwind facilite également le développement mobile-first que j'ai adopté. Les préfixes `sm:`, `md:`, `lg:` permettent d'adapter facilement les interfaces aux différentes tailles d'écran sans écrire de media queries CSS manuelles, aspect crucial pour une application utilisée à la fois sur desktop par les coachs et sur mobile par les athlètes.
 
-### Shadcn/ui : accessibilité RGAA et écosystème durable
+### Shadcn/ui
 
 Dans le développement de DropIt, j'ai privilégié Shadcn/ui non seulement pour sa productivité, mais surtout pour son approche fondamentale de l'accessibilité et de la durabilité numérique. Dans le contexte de ma formation, ces préoccupations d'accessibilité universelle et d'écoconception sont devenues centrales, particulièrement pour une application destinée à un public diversifié d'athlètes.
 
@@ -683,7 +718,9 @@ Cette réutilisation garantit une cohérence parfaite des règles métier entre 
 
 ### Adaptations spécifiques au mobile
 
-L'interface mobile privilégie une approche offline-first pour maintenir la continuité d'usage en salle de sport où la connectivité peut être instable. Cette stratégie permet aux athlètes de consulter leurs programmes et d'enregistrer leurs performances même sans connexion internet.
+## Async storage 
+
+//Todo : Expliquer ce que c'est. Et pouquoi on utilise pas httpOnly comme en web pour stocker dans un cookie
 
 ## Considérations de performance
 
@@ -707,6 +744,42 @@ const debouncedSearch = useDebounce(searchTerm, 300);
 ```
 
 Ces optimisations ciblent les problématiques courantes : chargement différé des composants lourds, évitement des calculs redondants, et limitation des appels réseau excessifs. Dans le contexte d'usage de DropIt (quelques dizaines d'utilisateurs par club), ces optimisations suffisent largement.
+
+#### Architecture mobile et flux de données
+
+```mermaid
+sequenceDiagram
+    participant Athlete as 🏋️ Athlète (Utilisateur)
+    participant App as 📱 React Native App
+    participant Storage as 💾 AsyncStorage
+    participant API as 🔄 API Client
+    participant Server as 🖥️ Backend NestJS
+    
+    Athlete->>App: Ouverture de l'application
+    
+    App->>API: Synchronisation programmes
+    API->>Server: GET /api/workouts
+    Server-->>API: Programmes de l'athlète
+    API-->>Storage: Cache local des données
+    Storage-->>App: Programmes disponibles hors ligne
+    
+    Athlete->>App: Consultation programme d'entraînement
+    App->>Storage: Lecture données locales
+    Storage-->>App: Détails du programme
+    App-->>Athlete: Affichage interface native
+    
+    Athlete->>App: Saisie performance réalisée
+    App->>Storage: Sauvegarde temporaire
+    Storage-->>App: Confirmation locale
+    
+    Note over App,Server: Synchronisation différée si réseau disponible
+    App->>API: Synchronisation performances
+    API->>Server: POST /api/performances
+    Server-->>API: Confirmation serveur
+```
+
+L'approche offline-first, bien que non implémenter pour l'instant consistue une piste d'évolution qui privilégiera le stockage local des données pour garantir une utilisation continue même sans connexion internet, contrainte fréquente en salle de sport. Les performances sont stockées localement puis synchronisées automatiquement avec le serveur.
+
 
 ## Bilan des choix architecturaux frontend
 

@@ -7,8 +7,6 @@ description: Conception technique de DropIt - justifications et mise en œuvre d
 
 Ma stratégie architecturale de l'application s'appuie sur un équilibre entre familiarité technique et découverte de nouveaux outils. J'ai privilégié des technologies que je maîtrise déjà pour les composants critiques, tout en intégrant des solutions nouvelles pour enrichir mon apprentissage sans compromettre la viabilité du projet.
 
-Cette approche me permet d'approfondir ma compréhension des enjeux d'architecture distribuée tout en maintenant un niveau de risque technique maîtrisable dans le cadre de ma formation.
-
 ## Vue d'ensemble architecturale
 
 Suite à l'analyse des besoins, j'ai choisi de structurer l'application selon une architecture distribuée séparant clairement les différentes parties : une interface web pour les coachs, une application mobile pour les athlètes, et un backend centralisé. Cette séparation permet de développer et maintenir chaque partie indépendamment, facilitant ainsi l'évolution future de l'application.
@@ -23,17 +21,6 @@ Cette architecture répond aux contraintes identifiées lors de l'analyse des be
 
 Pour structurer ce projet multi-plateformes, j'ai choisi une architecture monorepo utilisant pnpm workspaces.
 
-### Justification du choix monorepo
-
-Le monorepo assure une cohérence technique entre l'application web, mobile et l'API grâce au partage des types TypeScript, schémas de validation et contrats d'API. Cette approche élimine les divergences potentielles entre les différents clients et garantit une homogénéité architecturale sur l'ensemble du projet.
-
-Les packages partagés que j'ai mis en place (@dropit/schemas, @dropit/contract, @dropit/permissions) centralisent efficacement la logique métier commune. Cette mutualisation évite la duplication de code et garantit l'application des mêmes règles de validation sur toutes les plateformes, réduisant considérablement les risques d'incohérences fonctionnelles.
-
-Le développement coordonné bénéficie grandement de cette architecture : toute modification d'API impacte immédiatement tous les clients grâce aux types partagés. Cette synchronisation automatique réduit significativement les erreurs d'intégration et accélère les cycles de développement, aspect particulièrement appréciable dans le contexte temporel contraint de ma formation.
-
-La gestion des dépendances s'avère également optimisée grâce à pnpm workspaces qui permet une installation unique des dépendances communes, réduisant l'espace disque et accélérant les installations. Les packages internes sont liés symboliquement, facilitant le développement en temps réel et permettant de voir immédiatement l'impact des modifications sur l'ensemble des applications.
-
-
 ### Structure des workspaces
 
 Le monorepo est organisé en deux catégories principales :
@@ -42,206 +29,37 @@ Le monorepo est organisé en deux catégories principales :
 
 **Packages partagés (`packages/`)** : Ces modules centralisent la logique réutilisable entre toutes les applications, garantissant la cohérence et facilitant la maintenance.
 
-Cette organisation me permet de développer des fonctionnalités qui s'étendent sur plusieurs plateformes, tout en maintenant une base de code cohérente et facilement maintenable.
+### Justification du choix monorepo
+
+L'organisation en monorepo assure une cohérence technique entre l'application web, mobile et l'API grâce au partage des packages communs entre les différentes applications.
+
+Cette approche élimine les divergences potentielles entre les différents clients et garantit une homogénéité architecturale sur l'ensemble du projet. Par exemple, toute modification d'API impacte immédiatement tous les clients grâce aux types partagés. Cette synchronisation automatique réduit significativement les erreurs d'intégration et accélère les cycles de développement.
+
+La gestion des dépendances s'avère également optimisée grâce à pnpm workspaces qui permet une installation unique des dépendances communes, réduisant l'espace disque et accélérant les installations. Les packages internes sont liés symboliquement, facilitant le développement en temps réel et permettant de voir immédiatement l'impact des modifications sur l'ensemble des applications.
 
 ## Packages partagés
 
-Pour assurer la cohérence des types et de la logique métier entre les différentes applications, plusieurs approches étaient envisageables.
+Les **packages partagés** sont les suivants:
 
-**Option 1 - Duplication des types** : Redéfinir les types dans chaque application (web, mobile, API). Cette approche fonctionne parfaitement pour un développeur unique qui maîtrise l'ensemble du code. L'inconvénient principal réside dans la redondance : chaque modification d'un modèle `Athlete` côté API nécessite de répliquer manuellement les changements côté web et mobile. C'est fastidieux mais gérable. Dans une équipe avec des développeurs spécialisés frontend/backend, cette approche ralentirait davantage le développement en nécessitant une coordination constante.
+- **`@dropit/contract`** : Centralise les contrats d'API typés avec ts-rest pour garantir la cohérence entre frontend et backend
+- **`@dropit/schemas`** : Regroupe les schémas de validation Zod réutilisés sur toutes les plateformes
+- **`@dropit/permissions`** : Définit le système d'autorisation centralisé avec des rôles granulaires
+- **`@dropit/i18n`** : Mutualise les traductions multilingues et centralise les contenus textuels
+- **`@dropit/tsconfig`** : Fournit la configuration TypeScript de base partagée par toutes les applications
 
-**Option 2 - Package NPM publié** : Publier un package `@dropit/shared-types` sur le registre NPM. Cette solution fonctionne bien pour des projets open-source mais introduit une complexité de versioning et de publication qui ralentit le développement. Chaque modification nécessite une nouvelle version, un cycle de publication, puis une mise à jour dans chaque application consommatrice.
-
-**Option 3 - Monorepo avec packages internes** : Cette approche que j'ai retenue mutualise la logique commune via des packages partagés sans les inconvénients du versioning externe. Les modifications se propagent instantanément à toutes les applications grâce aux liens symboliques, accélérant considérablement les cycles de développement.
-
-L'architecture monorepo résout ces problématiques en centralisant les préoccupations transversales tout en préservant l'indépendance des applications. Cette approche garantit la cohérence technique sans compromettre la vélocité de développement.
-
-### @dropit/contract : Contrats API typés
-
-Ce package centralise la définition de toute l'API REST sous forme de contrats typés grâce à **ts-rest**, un outil **TypeScript** qui permet de définir des APIs type-safe. 
-
-Sans cet outil, j'aurais dû maintenir manuellement la cohérence entre les endpoints NestJS côté serveur et les appels API côté clients. L'approche classique consiste à définir les types TypeScript des requêtes et réponses de chaque côté, ce qui fonctionne mais demande une synchronisation constante lors des évolutions.
-
-ts-rest résout cette problématique en adoptant une approche "contract-first". Je définis une seule fois chaque endpoint avec ses schémas de validation Zod, et ce contrat devient la source de vérité partagée entre le serveur et tous les clients. Cette centralisation apporte plusieurs bénéfices immédiats : les types TypeScript sont générés automatiquement pour les requêtes et réponses, la validation Zod s'exécute côté client avant l'appel réseau (évitant des requêtes inutiles), toute divergence entre contrat et implémentation provoque une erreur TypeScript à la compilation, et l'IDE propose automatiquement l'auto-complétion des paramètres disponibles.
-
-```typescript
-// Exemple de contrat pour la gestion des athlètes
-export const athleteContract = {
-  getAthletes: {
-    method: 'GET',
-    path: '/athlete',
-    summary: 'Get all athletes',
-    responses: {
-      200: z.array(athleteDetailsSchema),
-      404: z.object({ message: z.string() })
-    }
-  },
-  createAthlete: {
-    method: 'POST',
-    path: '/athlete',
-    body: createAthleteSchema,
-    responses: {
-      201: athleteSchema,
-      400: z.object({ message: z.string() })
-    }
-  }
-}
-```
-
-Cette approche élimine les divergences entre frontend et backend : toute modification du contrat se répercute automatiquement sur tous les clients, garantissant la cohérence des types et réduisant les erreurs d'intégration.
-
-### @dropit/schemas : Validation centralisée avec Zod
-
-L'ensemble des schémas de validation sont centralisés dans ce package grâce à Zod, une solution TypeScript de validation de données à l'exécution.
-
-Traditionnellement, j'aurais dû définir des règles de validation séparées côté client (pour les formulaires React) et côté serveur (pour l'API NestJS), avec le risque d'incohérences entre ces validations. Zod me permet de définir une seule fois les règles de validation sous forme de schémas TypeScript, puis de les réutiliser partout où c'est nécessaire.
-
-```typescript
-export const createAthleteSchema = z.object({
-  firstName: z.string(),
-  lastName: z.string(),
-  birthday: z.string().or(z.date()),
-  country: z.string().optional(),
-});
-
-export const athleteDetailsSchema = z.object({
-  id: z.string(),
-  firstName: z.string(),
-  lastName: z.string(),
-  email: z.string().email(),
-  personalRecords: z.object({
-    snatch: z.number().optional(),
-    cleanAndJerk: z.number().optional(),
-  }).optional(),
-});
-
-export type AthleteDetailsDto = z.infer<typeof athleteDetailsSchema>;
-```
-
-Ces schémas sont utilisés à la fois pour la validation côté client (formulaires React), la validation côté serveur (NestJS), et la définition des contrats API. Cette triple utilisation garantit une cohérence parfaite des règles de validation.
-
-### @dropit/permissions : Contrôle d'accès granulaire
-
-Ce package implémente un système d'autorisation centralisé qui définit précisément les permissions selon les rôles utilisateurs.
-
-Sans centralisation, j'aurais dû gérer les autorisations séparément côté client et côté serveur, avec des enjeux différents selon le contexte. Côté React, les contrôles d'accès servent principalement à améliorer l'expérience utilisateur en masquant les boutons ou sections non autorisés. Côté API, les contrôles constituent une barrière de sécurité critique qui empêche l'accès non autorisé aux données, indépendamment de ce qui est affiché côté client.
-
-Le package utilise Better Auth pour définir un système de permissions où chaque rôle dispose d'actions spécifiques sur des ressources métier définies. Un membre peut gérer ses propres données d'athlète mais ne peut que consulter ses séances, tandis qu'un administrateur dispose d'un contrôle complet sur toutes les ressources. Cette approche garantit que les mêmes règles s'appliquent pour l'affichage côté client et la sécurisation côté serveur. La section [Sécurité et autorisation](/securite/autorisation) détaille en profondeur ce système.
-
-```typescript
-// Exemple simplifié de définition des rôles
-export const member = ac.newRole({
-  athlete: ["read", "create", "update"], // Peut gérer ses données
-  session: ["read"], // Lecture seule des sessions
-  personalRecord: ["read", "create"], // Peut créer ses records
-});
-
-export const admin = ac.newRole({
-  // Permissions complètes sur toutes les ressources métier
-  workout: ["read", "create", "update", "delete"],
-  athlete: ["read", "create", "update", "delete"],
-  trainingSession: ["read", "create", "update", "delete"],
-});
-```
-
-### @dropit/i18n : Internationalisation partagée
-
-Ce package centralise tous les textes de l'application, répondant à un double objectif : permettre la traduction multilingue et externaliser les contenus textuels du code.
-
-Au-delà de la simple traduction français/anglais, cette approche évite la dispersion des textes directement dans les composants React. Sans centralisation, modifier un libellé comme "Créer un programme" nécessiterait de parcourir potentiellement plusieurs fichiers pour trouver toutes ses occurrences. Le système i18n devient une source de vérité unique pour tous les contenus textuels, facilitant leur maintenance et leur évolution.
-
-Le package structure les traductions par domaines métier :
-
-```typescript
-// Configuration i18next partagée
-export const resources = {
-  fr: {
-    common: frCommon,
-    athletes: frAthletes,
-    planning: frPlanning,
-    auth: frAuth,
-  },
-  en: {
-    common: enCommon,
-    athletes: enAthletes,
-    planning: enPlanning,
-    auth: enAuth,
-  },
-};
-```
-
-Les traductions couvrent tous les aspects de l'application : authentification, gestion des athlètes, planification des séances, processus d'accueil. Cette approche centralisée facilite la maintenance des traductions et garantit une expérience utilisateur cohérente sur toutes les plateformes.
-
-### @dropit/tsconfig : Configuration TypeScript unifiée
-
-Ce package fournit la configuration TypeScript de base dont héritent toutes les applications du monorepo.
-
-Sans cette centralisation, chaque application (web, mobile, API) définirait ses propres règles TypeScript, avec le risque que du code valide dans une application provoque des erreurs dans une autre. Cette situation complique le partage de code entre applications et peut créer des incohérences lors du développement.
-
-La configuration de base définit les règles strictes communes (`strict: true`, `strictNullChecks: true`) qui garantissent un typage rigoureux à travers tout l'écosystème. Chaque application peut ensuite étendre cette base avec ses spécificités : le client web ajoute les configurations Vite pour les ES modules, l'API NestJS adapte pour CommonJS, et l'application mobile intègre les spécificités React Native.
-
-```json
-{
-  "compilerOptions": {
-    "strict": true,
-    "strictNullChecks": true,
-    "noImplicitReturns": true,
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
-  }
-}
-```
-
-Cette approche garantit que les packages partagés respectent les mêmes standards de qualité de code tout en laissant chaque application adapter les détails techniques selon son environnement d'exécution.
+Les détails techniques d'implémentation et des explications plus détaillées de chaque package sont documentés dans la section [Architecture technique](/annexes/architecture-technique).
 
 ## Client Web (Back Office) : React et TypeScript
 
-Pour le back office destiné aux coachs, j'ai choisi React associé à TypeScript. Ce choix s'appuie sur ma maîtrise de ces technologies acquise au cours de mes deux années d'expérience professionnelle, ainsi que sur la maturité de leur écosystème qui facilite le développement d'applications robustes.
+Pour le back office destiné aux coachs, j'ai choisi **React** associé à **TypeScript**. Cette technologie offre une architecture basée sur des composants réutilisables particulièrement adaptée aux interfaces de gestion nécessaires pour organiser les entraînements, suivre les performances et gérer les athlètes.
 
-### Justification du choix React/TypeScript
-
-Ma familiarité avec React me permet de me concentrer directement sur les enjeux métier spécifiques à l'haltérophilie plutôt que de consacrer du temps à l'apprentissage d'un nouveau framework. Cette technologie offre une architecture basée sur des composants réutilisables particulièrement adaptée aux interfaces de gestion nécessaires pour organiser les entraînements, suivre les performances et gérer les athlètes.
-
-L'ajout de TypeScript apporte une sécurité de typage dans un contexte où la manipulation des données d'entraînement doit être fiable. Les types stricts permettent de détecter les erreurs potentielles dès la phase de compilation, réduisant significativement les risques de bugs en production. Cette approche se révèle particulièrement critique pour les calculs de charges et la gestion des progressions d'athlètes, domaines où la précision des données conditionne la sécurité des utilisateurs.
+L'ajout de **TypeScript** apporte une sécurité de typage dans un contexte où la manipulation des données d'entraînement doit être fiable. Les **types stricts** permettent de **détecter les erreurs potentielles dès la phase de compilation**, réduisant significativement les risques de bugs en production. Cette approche se révèle particulièrement critique pour les calculs de charges et la gestion des progressions d'athlètes, domaines où la précision des données conditionne la sécurité des utilisateurs.
 
 ### Écosystème technique et bibliothèques
 
-Mon architecture frontend s'appuie sur un ensemble de bibliothèques modernes sélectionnées pour leurs avantages spécifiques : Tanstack Router pour le routage typé, Tanstack Query pour la synchronisation des données, React Hook Form intégré aux schémas Zod partagés, Shadcn/ui avec Tailwind CSS pour l'interface, et des solutions spécialisées pour le planning (FullCalendar) et le drag-and-drop (dnd-kit).
+Mon architecture frontend s'appuie sur un ensemble de bibliothèques sélectionnées pour leurs avantages spécifiques : **Tanstack Router** pour le routage typé, **Tanstack Query** pour la synchronisation des données, **React Hook Form** intégré aux schémas **Zod** partagés, **Shadcn/ui** avec **Tailwind CSS** pour l'interface, et des solutions spécialisées pour le planning (FullCalendar) et le drag-and-drop (dnd-kit).
 
 La justification de ces choix, l'implémentation détaillée et leur intégration concrète dans les composants React est présentée dans la section [couches de présentation](/conception/presentations).
-
-### Architecture frontend et flux de données
-
-```mermaid
-sequenceDiagram
-    participant Coach as 👨 Coach (Utilisateur)
-    participant Router as 🌐 Tanstack Router
-    participant Page as 📄 WorkoutCreatePage
-    participant Form as 📝 React Hook Form
-    participant Validation as ✅ Zod Schema
-    participant Query as 🔄 Tanstack Query
-    
-    Coach->>Router: Navigation vers /workouts/create
-    Router->>Page: Rendu du composant
-    
-    Coach->>Form: Saisie données programme
-    Form->>Validation: Validation temps réel
-    Validation-->>Form: Erreurs ou succès
-    Form-->>Page: Mise à jour état formulaire
-    
-    Coach->>Form: Soumission formulaire
-    Form->>Validation: Validation finale
-    Validation-->>Form: Données validées
-    Form->>Query: useMutation('createWorkout')
-    Query-->>Page: État de soumission
-    Page-->>Coach: Feedback utilisateur
-    
-    Query-->>Router: Redirection après succès
-```
-
-L'application suit un flux de données unidirectionnel où Tanstack Query centralise la gestion de l'état serveur, tandis que React se charge de l'état local des composants. Cette séparation facilite la maintenance et le débogage et me permet d'isoler les problèmes selon leur nature.
-
-La structure respecte une séparation entre les différentes couches : présentation avec les composants UI, logique métier encapsulée dans des hooks personnalisés, et communication gérée par les clients API. Cette organisation facilite non seulement les tests unitaires en isolant chaque responsabilité, mais aussi l'évolution future du code en permettant de modifier une couche sans impacter les autres. Pour optimiser les performances de rendu, j'ai prévu d'implémenter une pagination progressive pour les longues listes d'athlètes et la technique de lazy loading pour les détails de programmes, évitant ainsi de charger l'intégralité des données au premier accès.
 
 ### Structure du projet frontend
 
@@ -277,62 +95,17 @@ Le dossier `lib/` contient les clients configurés (authentification, API) et le
 
 Cette architecture frontend me permet de développer efficacement une interface tout en maintenant une base de code maintenable et évolutive. L'utilisation d'outils que je maîtrise, combinée à l'exploration de nouvelles bibliothèques comme Tanstack Router, constitue un équilibre raisonable entre productivité, apprentissage et besoins métier dans le cadre de ma formation.
 
-## Application Mobile (Front Office) : React Native et Expo
+## Application Mobile (Front Office) : React Native
 
-L'application mobile, développée avec React Native et Expo, constitue le point d'accès principal pour les athlètes. N'ayant aucune expérience en développement mobile natif, cette technologie permet de valoriser mes compétences React existantes.
+L'application mobile, développée avec **React Native**, constitue le point d'accès principal pour les athlètes. N'ayant aucune expérience en développement mobile natif, cette technologie permet de valoriser mes compétences React existantes tout en réduisant la courbe d'apprentissage.
 
-### Justification du choix React Native/Expo
+Cette approche multiplateforme répond au besoin d'atteindre les utilisateurs iOS et Android avec une base de code partagée.
 
-Ma familiarité avec React me permet de transposer mes compétences vers le développement mobile tout en réduisant la courbe d'apprentissage. Cette approche multiplateforme répond au besoin d'atteindre les utilisateurs iOS et Android avec une base de code partagée, ce qui s'avère adapté aux contraintes temporelles de ma formation.
-
-Expo facilite l'écosystème de développement mobile en automatisant la gestion des certificats, les builds natifs et le déploiement. Cette plateforme me permet de me concentrer sur l'implémentation des fonctionnalités métier plutôt que sur la configuration d'environnements de développement mobile.
-
-L'architecture monorepo permet le partage de logique métier entre les applications web et mobile via les packages communs (`@dropit/schemas`, `@dropit/contract`, `@dropit/permissions`). Cette mutualisation garantit la cohérence des règles de calcul et de validation des données entre les plateformes, aspect important dans un contexte où la précision des progressions impacte la sécurité des utilisateurs.
+L'architecture monorepo permet le partage de logique métier entre les applications web et mobile via les packages communs (`@dropit/schemas`, `@dropit/contract`, `@dropit/permissions`). Cette mutualisation garantit la cohérence des règles de calcul et de validation des données entre les plateformes.
 
 ### Écosystème technique mobile
 
-L'architecture mobile s'appuie sur des bibliothèques adaptées aux contraintes du développement mobile :
-
-**AsyncStorage pour la persistance locale** : Cette solution native stocke les données d'authentification et les informations de session.
-
-**ts-rest pour la cohérence API** : L'utilisation du même contrat d'API typé (@dropit/contract) entre les applications web et mobile garantit une interface cohérente avec le backend et facilite la maintenance.
-
-**React Native Web pour la portabilité** : Cette fonctionnalité permet de tester l'application mobile dans un navigateur pendant le développement, améliorant l'efficacité des cycles de test.
-
-#### Architecture mobile et flux de données
-
-```mermaid
-sequenceDiagram
-    participant Athlete as 🏋️ Athlète (Utilisateur)
-    participant App as 📱 React Native App
-    participant Storage as 💾 AsyncStorage
-    participant API as 🔄 API Client
-    participant Server as 🖥️ Backend NestJS
-    
-    Athlete->>App: Ouverture de l'application
-    
-    App->>API: Synchronisation programmes
-    API->>Server: GET /api/workouts
-    Server-->>API: Programmes de l'athlète
-    API-->>Storage: Cache local des données
-    Storage-->>App: Programmes disponibles hors ligne
-    
-    Athlete->>App: Consultation programme d'entraînement
-    App->>Storage: Lecture données locales
-    Storage-->>App: Détails du programme
-    App-->>Athlete: Affichage interface native
-    
-    Athlete->>App: Saisie performance réalisée
-    App->>Storage: Sauvegarde temporaire
-    Storage-->>App: Confirmation locale
-    
-    Note over App,Server: Synchronisation différée si réseau disponible
-    App->>API: Synchronisation performances
-    API->>Server: POST /api/performances
-    Server-->>API: Confirmation serveur
-```
-
-L'approche offline-first privilégie le stockage local des données pour garantir une utilisation continue même sans connexion internet, contrainte fréquente en salle de sport. Les performances sont stockées localement puis synchronisées automatiquement avec le serveur.
+L'architecture mobile s'appuie sur des bibliothèques adaptées aux contraintes du développement mobile notamment **Expo** qui facilite l'écosystème de développement mobile en automatisant la gestion des certificats, les builds natifs et le déploiement. Cette plateforme me permet de me concentrer sur l'implémentation des fonctionnalités métier plutôt que sur la configuration d'environnements de développement mobile.
 
 ### Structure du projet mobile
 
@@ -356,94 +129,37 @@ apps/mobile/
 
 La structure mobile reste volontairement simple avec une séparation entre les composants d'interface et la configuration des services externes. Cette simplicité architecturale facilite la maintenance et réduit la complexité cognitive, aspect important dans un contexte d'apprentissage du développement mobile.
 
-Le fichier `app.json` centralise l'ensemble des paramètres de build et de déploiement, facilitant la gestion des différentes plateformes cibles. Cette centralisation évite la dispersion de la configuration et simplifie les déploiements multi-plateformes.
-
 Les assets sont organisés selon les conventions Expo pour permettre une génération automatique des icônes et écrans de démarrage adaptés à chaque plateforme. Cette approche me fait économiser un temps précieux en automatisant les tâches répétitives de création d'assets spécifiques à chaque plateforme.
 
 Cette architecture répond aux contraintes spécifiques du mobile (offline-first, interface tactile) tout en maintenant la cohérence avec l'écosystème monorepo.
 
 ## API REST : NestJS
 
-Le backend repose sur NestJS, un framework Node.js que j'ai déjà eu l'occasion d'utiliser dans des projets précédents ainsi qu'en entreprise. Cette familiarité avec l'outil permet un développement plus efficace tout en m'offrant l'opportunité d'explorer des fonctionnalités plus avancées que je n'avais pas encore maîtrisées.
+Le backend repose sur NestJS, un framework Node.js que j'ai déjà eu l'occasion d'utiliser dans des projets précédents ainsi qu'en entreprise.
 
-### Justification du choix NestJS
+NestJS me fournit des patterns d'architecture éprouvés tels que les modules, services, guards et interceptors, évitant ainsi de réinventer la roue architecturale. Cette approche me permet de me concentrer directement sur la logique métier et d'utiliser leur architecture de base solide et éprouvée.
 
-NestJS me fournit des patterns d'architecture éprouvés tels que les modules, services, guards et interceptors, évitant ainsi de réinventer la roue architecturale. Cette approche me permet de me concentrer directement sur la logique métier plutôt que sur la mise en place d'une architecture de base, aspect crucial dans le contexte temporel contraint de ma formation.
+Le framework bénéficie d'une maintenance active avec des mises à jour régulières et dispose d'une forte communauté. Cette stabilité s'avère essentielle pour un projet qui doit rester fonctionnel sur la durée. L'écosystème mature de NestJS propose des modules officiels pour la plupart des besoins courants, qu'il s'agisse d'authentification, de validation ou d'intégration ORM.
 
-Le framework bénéficie d'une maintenance active avec des mises à jour régulières et dispose d'une communauté solide. Cette stabilité s'avère essentielle pour un projet d'apprentissage qui doit rester fonctionnel sur la durée. L'écosystème mature de NestJS propose des modules officiels pour la plupart des besoins courants, qu'il s'agisse d'authentification, de validation ou d'intégration ORM.
-
-Le système d'injection de dépendances natif facilite considérablement les tests unitaires en favorisant le principe d'inversion de contrôle. Cette approche me permet d'isoler facilement la logique métier des préoccupations techniques, aspect essentiel pour implémenter correctement l'architecture hexagonale sans configuration complexe supplémentaire.
+Le système d'injection de dépendances natif facilite considérablement les tests unitaires en favorisant le principe d'inversion de contrôle me permettant d'isoler facilement la logique métier des préoccupations techniques.
 
 ### Architecture hexagonale et Domain-Driven Design
 
-Le choix d'une architecture hexagonale (ports et adaptateurs) pour structurer l'application backend répond à un double objectif : répondre aux besoins du projet tout en saisissant l'opportunité d'apprentissage offerte par ce contexte de formation.
+J'ai structuré l'application backend selon deux principes complémentaires : l'**architecture hexagonale** pour l'organisation technique en couches, et les principes **Domain-Driven Design** pour l'organisation en modules métier.
 
-Initialement, j'avais opté pour une architecture n-tiers classique. Cependant, au fur et à mesure du développement, la complexité croissante des règles métier d'haltérophilie (calculs de charges, gestion des progressions, validation des performances) a révélé les limites de cette approche. L'évolution vers une architecture hexagonale s'est faite progressivement, motivée par le besoin concret d'isoler cette logique métier critique des préoccupations techniques.
+Initialement, j'avais opté pour une architecture n-tiers classique, pattern de base de NestJS. Au fur et à mesure du développement, j'ai évolué vers une architecture hexagonale pour faciliter les tests unitaires de la logique métier (calculs de charges, progressions d'athlètes) en l'isolant des dépendances externes, tout en me permettant d'acquérir des patterns architecturaux répandus en entreprise et d'anticiper les évolutions futures du projet.
 
-L'application s'organise autour de modules correspondant aux domaines métier identifiés : le module `identity` gère les utilisateurs, organisations et permissions, le module `training` centralise la logique d'entraînement avec les exercices, programmes et séances, tandis que le module `athletes` se concentre sur la gestion des athlètes et de leurs performances.
+**Organisation métier (DDD)** : J'ai structuré l'application autour de modules correspondant aux domaines métier identifiés : le module `identity` gère les utilisateurs, organisations et permissions, le module `training` centralise la logique d'entraînement avec les exercices, programmes et séances, tandis que le module `athletes` se concentre sur la gestion des athlètes et de leurs performances.
 
-Chaque module respecte une séparation stricte en quatre couches distinctes :
+**Organisation technique (Hexagonale)** : Chaque module respecte une séparation stricte en quatre couches distinctes qui isolent la logique métier des préoccupations techniques.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    🌐 Interface Layer                        │
-│                                                             │
-│  ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐│
-│  │ Controllers REST│ │ Guards &        │ │ DTOs &          ││
-│  │                 │ │ Middlewares     │ │ Validators      ││
-│  └─────────────────┘ └─────────────────┘ └─────────────────┘│
-└─────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────┐
-│                   📋 Application Layer                      │
-│                                                             │
-│  ┌─────────────────┐           ┌─────────────────┐          │
-│  │ Use Cases       │           │ Services        │          │
-│  │                 │           │ Applicatifs     │          │
-│  └─────────────────┘           └─────────────────┘          │
-└─────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────┐
-│                      💎 Domain Layer                        │
-│                                                             │
-│  ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐│
-│  │ Entités Métier  │ │ Règles Business │ │ Ports/Interfaces││
-│  │                 │ │                 │ │                 ││
-│  └─────────────────┘ └─────────────────┘ └─────────────────┘│
-└─────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────┐
-│                   🔧 Infrastructure Layer                   │
-│                                                             │
-│  ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐│
-│  │ Repositories    │ │ Services        │ │ Adaptateurs     ││
-│  │ MikroORM        │ │ Externes        │ │                 ││
-│  └─────────────────┘ └─────────────────┘ └─────────────────┘│
-└─────────────────────────────────────────────────────────────┘
-```
+Les détails de chacune des couches sont décrits dans la section [Architecture en couches et pattern Repository](/conception/acces-donnees/#architecture-en-couches-et-pattern-repository).
 
-Les ports définissent les contrats d'interface nécessaires aux repositories et services externes, tandis que les adaptateurs fournissent les implémentations concrètes correspondantes. Cette approche me donne la flexibilité de changer d'ORM, de base de données ou de services externes sans impacter la logique métier centrale.
+### ORM : MikroORM vs alternatives
 
-### Choix de l'ORM : MikroORM vs alternatives
+Dans le contexte de ma formation et face à un projet comportant des relations entre athlètes, programmes, exercices et séances, l'utilisation d'un ORM apporte une productivité significative en gérant automatiquement les jointures et relations. Le recours au SQL brut aurait nécessité un temps de développement considérable pour gérer manuellement les migrations, les relations et tout le mapping objet-relationnel.
 
-Dans le contexte de ma formation et face à un projet comportant des relations complexes entre athlètes, programmes, exercices et séances, l'utilisation d'un ORM apporte une productivité significative en gérant automatiquement les jointures et relations. Le recours au SQL brut aurait nécessité un temps de développement considérable pour gérer manuellement les migrations, les relations et tout le mapping objet-relationnel.
-
-J'ai opté pour MikroORM après avoir identifié des différences techniques concrètes avec TypeORM, pourtant plus répandu avec NestJS. MikroORM implémente nativement le pattern Unit of Work, contrairement à TypeORM qui utilise un pattern Repository plus basique. Cette approche Unit of Work optimise les performances en regroupant les opérations et en gérant automatiquement l'ordre des transactions, aspect crucial pour les opérations complexes de création de programmes d'entraînement dans DropIt.
-
-La gestion des relations bidirectionnelles et des cascades complexes se révèle également supérieure avec MikroORM. Dans mon application, les relations entre TrainingSession, Workout et AthleteTrainingSession nécessitent une gestion fine des dépendances que MikroORM gère plus élégamment. En termes de performance, MikroORM génère des requêtes SQL plus optimisées, particulièrement pour les requêtes avec jointures multiples fréquentes dans une application de gestion d'entraînements.
-
-Le typage TypeScript plus strict de MikroORM détecte les erreurs de relation dès la compilation, là où TypeORM peut laisser passer certaines incohérences qui ne sont détectées qu'à l'exécution. Cette exploration de MikroORM me permet d'approfondir ma compréhension des patterns avancés de gestion de données tout en découvrant des alternatives aux solutions les plus répandues.
-
-### Sécurité applicative et protection OWASP
-
-L'architecture que j'ai mise en place intègre des mesures de sécurité spécifiques pour contrer les principales vulnérabilités répertoriées par l'OWASP. L'utilisation de MikroORM avec des requêtes paramétrées, combinée à la validation stricte des entrées via les DTOs Zod, élimine efficacement les risques d'injection SQL (OWASP A03). Les schémas de validation partagés entre frontend et backend garantissent une validation cohérente à tous les niveaux de l'application.
-
-Concernant le contrôle d'accès (OWASP A01), chaque endpoint bénéficie de la protection des guards NestJS qui vérifient systématiquement les permissions utilisateur via le package `@dropit/permissions`. L'isolation par organisation garantit que les utilisateurs ne peuvent accéder qu'aux données de leur club respectif, empêchant tout accès transversal non autorisé.
-
-La validation et la sanitisation des données (OWASP A04) s'effectuent grâce aux schémas Zod stricts définis dans `@dropit/schemas`, assurant une validation uniforme entre toutes les couches applicatives. Cette approche centralisée évite les disparités de validation qui pourraient créer des failles de sécurité.
+J'ai opté pour MikroORM après avoir identifié des différences techniques avec TypeORM, pourtant plus répandu avec NestJS. MikroORM force à être explicite sur la définition des relations bidirectionnelles, ce qui évite des erreurs potentielles détectées seulement au runtime avec d'autres ORMs. Cette rigueur dans la déclaration des relations s'avère utile dans mon contexte d'apprentissage et pour les relations entre athlètes, programmes et séances d'entraînement.
 
 ### Structure du projet backend
 
@@ -468,101 +184,27 @@ apps/api/src/
 └── main.ts                    # Point d'entrée de l'application
 ```
 
-L'organisation modulaire que j'ai mise en place encapsule chaque domaine métier dans des boundaries clairement définies, facilitant ainsi la maintenance et permettant une évolution indépendante de chaque contexte. Cette approche s'avère particulièrement bénéfique dans le cadre de mon apprentissage, car elle me permet d'approfondir progressivement chaque domaine sans risquer d'impacter les autres parties de l'application.
-
-L'architecture hexagonale, combinée au système d'injection de dépendances de NestJS, facilite naturellement les tests unitaires en permettant le mock des couches externes comme la base de données ou les services tiers. Cette approche me permet d'acquérir de bonnes pratiques en matière de tests tout en développant une application réellement testable.
-
-Cette architecture backend constitue un excellent terrain d'apprentissage pour découvrir les principes du Domain-Driven Design et de l'architecture hexagonale dans un contexte concret. L'approche par ports et adaptateurs que j'ai adoptée garantit une flexibilité future non négligeable : si demain je souhaite migrer vers un autre ORM ou une base de données différente, cette transition pourra s'effectuer sans remettre en cause la logique métier, aspect crucial pour la maintenabilité à long terme d'un projet qui évoluera au-delà de ma formation.
+Cette architecture backend constitue un bon terrain pour les principes du Domain-Driven Design et de l'architecture hexagonale dans un contexte concret. L'approche par ports et adaptateurs que j'ai adoptée garantit une flexibilité future non négligeable : si demain je souhaite migrer vers un autre ORM ou une base de données différente, cette transition pourra s'effectuer sans remettre en cause la logique métier, aspect crucial pour la maintenabilité à long terme d'un projet qui évoluera au-delà de ma formation.
 
 ## Structure complète du projet monorepo
 
-Cette organisation optimise la réutilisabilité du code métier et garantit la cohérence des types entre frontend et backend. 
-L'organisation finale du projet DropIt :
-
-```
-dropit/
-├── apps/                          # Applications principales
-│   ├── web/                       # Interface web React/TypeScript
-│   │   ├── src/
-│   │   │   ├── features/          # Modules métier (athletes, exercises, workout, planning)
-│   │   │   ├── shared/            # Composants UI, hooks et utilitaires partagés
-│   │   │   ├── lib/               # Configuration des clients (API, auth)
-│   │   │   └── routes/            # Structure de routage Tanstack Router
-│   │   ├── package.json           # Dépendances spécifiques au web
-│   │   ├── vite.config.ts         # Configuration Vite
-│   │   └── tailwind.config.js     # Configuration Tailwind CSS
-│   ├── mobile/                    # Application mobile React Native/Expo
-│   │   ├── src/
-│   │   │   ├── components/        # Composants React Native
-│   │   │   └── lib/               # Configuration clients mobiles
-│   │   ├── assets/                # Ressources natives (icônes, splash screens)
-│   │   ├── app.json               # Configuration Expo
-│   │   ├── App.tsx                # Point d'entrée mobile
-│   │   └── package.json           # Dépendances React Native/Expo
-│   └── api/                       # Backend NestJS
-│       ├── src/
-│       │   ├── modules/           # Modules métier NestJS
-│       │   ├── common/            # Utilitaires et middlewares partagés
-│       │   └── config/            # Configuration application
-│       ├── package.json           # Dépendances backend
-│       └── nest-cli.json          # Configuration NestJS CLI
-├── packages/                      # Packages partagés entre applications
-│   ├── contract/                  # Contrats d'API typés avec ts-rest
-│   │   ├── src/api/               # Définitions des endpoints
-│   │   ├── index.ts               # Export principal des contrats
-│   │   └── package.json           # Configuration du package
-│   ├── schemas/                   # Schémas de validation Zod
-│   │   ├── src/                   # Schémas métier (User, Workout, Exercise)
-│   │   ├── index.ts               # Export des schémas
-│   │   └── package.json           # Configuration Zod
-│   ├── permissions/               # Système de rôles et permissions
-│   │   ├── src/                   # Définition des rôles et contrôles d'accès
-│   │   ├── index.ts               # Export des permissions
-│   │   └── package.json           # Configuration des permissions
-│   ├── i18n/                      # Internationalisation partagée
-│   │   ├── locales/               # Fichiers de traduction (fr, en)
-│   │   ├── index.ts               # Configuration i18next
-│   │   └── package.json           # Configuration i18n
-│   └── tsconfig/                  # Configurations TypeScript partagées
-│       ├── base.json              # Configuration TypeScript de base
-│       ├── nextjs.json            # Config spécifique React
-│       ├── react-native.json      # Config spécifique React Native
-│       └── package.json           # Configuration du package
-├── package.json                   # Configuration racine du monorepo
-├── pnpm-workspace.yaml           # Définition des workspaces pnpm
-├── pnpm-lock.yaml                # Verrouillage des dépendances
-├── biome.json                     # Configuration du linter/formatter
-├── docker-compose.yml            # Services de développement (PostgreSQL, Redis, MinIO)
-└── README.md                     # Documentation du projet
-```
-
-Cette architecture monorepo centralise la logique commune et garantit la cohérence des types à travers l'ensemble des applications.
+La structure détaillée du monorepo (applications, packages, configuration) est documentée dans la section [Architecture technique](/annexes/architecture-technique/#structure-complète-du-monorepo).
 
 ## Base de données : PostgreSQL
 
-### Justification du modèle relationnel
+Le choix d'une base de données relationnelle s'impose naturellement au regard de la nature des données manipulées dans DropIt. L'application gère des entités fortement structurées (utilisateurs, organisations, exercices, programmes, séances) avec des relations et des contraintes d'intégrité strictes. Les relations many-to-many entre exercices et programmes, ainsi que les associations entre athlètes et séances d'entraînement, nécessitent des jointures fréquentes et des requêtes que SQL maîtrise parfaitement.
 
-Le choix d'une base de données relationnelle s'impose naturellement au regard de la nature des données manipulées dans DropIt. L'application gère des entités fortement structurées (utilisateurs, organisations, exercices, programmes, séances) avec des relations complexes et des contraintes d'intégrité strictes. Les relations many-to-many entre exercices et programmes, ainsi que les associations entre athlètes et séances d'entraînement, nécessitent des jointures fréquentes et des requêtes complexes que SQL maîtrise parfaitement.
+Les alternatives NoSQL comme MongoDB auraient pu être envisagées, mais la dénormalisation des données aurait créé des problèmes de cohérence. Dans le contexte de l'haltérophilie, où la précision des données conditionne la sécurité des utilisateurs, maintenir l'intégrité référentielle via les contraintes de clés étrangères devient indispensable. Les propriétés ACID garantissent que les modifications de programmes d'entraînement restent cohérentes même en cas de modifications simultanées par plusieurs coachs. Pour optimiser les performances, j'ai prévu l'ajout d'index sur les colonnes fréquemment interrogées (user_id, organization_id, created_at) afin d'accélérer les requêtes de consultation des programmes et historiques d'entraînement si l'usage le necessite.
 
-Les alternatives NoSQL comme MongoDB auraient pu être envisagées, mais la dénormalisation des données aurait créé des problèmes de cohérence. Dans le contexte de l'haltérophilie, où la précision des données conditionne la sécurité des utilisateurs, maintenir l'intégrité référentielle via les contraintes de clés étrangères devient indispensable. Les propriétés ACID garantissent que les modifications de programmes d'entraînement restent cohérentes même en cas de modifications simultanées par plusieurs coachs. Pour optimiser les performances, j'ai prévu l'ajout d'index sur les colonnes fréquemment interrogées (user_id, organization_id, created_at) afin d'accélérer les requêtes de consultation des programmes et historiques d'entraînement.
-
-### Choix de PostgreSQL face aux alternatives
-
-Parmi les bases de données relationnelles disponibles, PostgreSQL présente des avantages déterminants face à ses concurrents.
-
-Face à SQL Server ou Oracle, PostgreSQL présente l'avantage d'être open-source, éliminant les contraintes de coûts de licence dans le contexte budgétaire contraint de ma formation. Cette caractéristique facilite également le déploiement sur différents environnements sans considération de licensing.
-
-La maturité de PostgreSQL dans l'écosystème Node.js constitue également un facteur décisif. Son intégration native avec MikroORM et les excellentes performances des drivers JavaScript modernes (pg, pg-pool) assurent une communication optimale entre l'API NestJS et la couche de persistance. Le connection pooling natif du driver PostgreSQL gère automatiquement les pics de charge en réutilisant les connexions existantes plutôt que d'en créer de nouvelles pour chaque requête, optimisation transparente qui améliore les performances sans configuration supplémentaire. Ma familiarité préalable avec PostgreSQL me permet de me concentrer sur les aspects métier de la modélisation plutôt que sur l'apprentissage d'un nouveau système de base de données.
+Mon choix s'est porté vers PostgreSQL pour son caractère open-source et sa maturité dans l'écosystème Node.js.
 
 ## Stratégie de cache : Redis
 
-Redis, bien que non implémenté dans le MVP, constitue une solution de cache envisagée pour optimiser les performances applicatives.
+Redis, bien que non implémenté dans le MVP, constitue une solution de cache côté serveur envisagée pour optimiser les performances de l'API.
 
-Les athlètes consultent fréquemment leurs programmes pendant l'entraînement, souvent dans des conditions de réseau instables. Redis permettrait de mettre en cache les données d'entraînement les plus consultées, réduisant les temps de réponse et améliorant l'expérience utilisateur en salle de sport. Cette stratégie de cache multi-niveaux (navigateur → Redis → PostgreSQL) optimiserait le parcours complet des données, particulièrement efficace pour les catalogues d'exercices et les programmes récurrents.
+Les catalogues d'exercices et programmes récurrents sont fréquemment consultés par l'API lors des requêtes des clients web et mobile. Redis permettrait de mettre en cache ces données côté serveur, réduisant les accès à PostgreSQL et améliorant les temps de réponse de l'API. Cette stratégie de cache multi-niveaux (AsyncStorage mobile → API → Redis → PostgreSQL) optimiserait le parcours complet des données.
 
 Le choix de Redis répond à des contraintes techniques spécifiques. Contrairement aux bases de données relationnelles optimisées pour la persistance, Redis privilégie la performance avec son stockage en mémoire et ses structures de données natives (strings, hashes, sets, lists). Cette architecture NoSQL clé-valeur s'avère particulièrement adaptée aux besoins de cache où la rapidité d'accès prime sur la complexité relationnelle.
-
-Cette intégration future me permettra d'approfondir les stratégies de cache et l'architecture hybride SQL/NoSQL, compétences recherchées dans le développement d'applications modernes à forte charge.
 
 ## Stockage de médias : MinIO
 
@@ -573,8 +215,6 @@ Le stockage en base de données via des champs BLOB aurait permis une cohérence
 Le stockage sur le système de fichiers local représente une alternative simple à implémenter, mais pose des problèmes de scalabilité et de résilience. Cette approche complique la sauvegarde des données, limite la montée en charge horizontale de l'API, et ne facilite pas la distribution de contenu via des CDN.
 
 MinIO résout ces limitations en proposant un stockage objet distribué compatible avec l'API S3 d'Amazon. Cette architecture sépare le stockage des médias de la base de données transactionnelle, optimisant les performances de chaque composant selon leur usage spécifique. L'API S3 standardisée garantit la portabilité vers des solutions cloud managées (AWS S3, Google Cloud Storage, Azure Blob Storage) sans modification du code applicatif.
-
-Cette approche me permet d'implémenter une solution complète en développement tout en acquérant une compréhension des principes du stockage objet, compétence essentielle dans l'écosystème cloud moderne. La compatibilité API facilite également l'évolution future vers des solutions de CDN pour optimiser la distribution des vidéos d'exercices.
 
 ## Recherche : Typesense
 

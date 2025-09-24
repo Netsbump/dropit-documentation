@@ -166,6 +166,51 @@ Les entités MikroORM définissent la structure des données, mais leur utilisat
 
 L'architecture que j'ai mise en place respecte une séparation stricte des responsabilités à travers plusieurs couches distinctes. Chaque composant a un rôle précis que je vais détailler avec des exemples concrets de l'implémentation DropIt.
 
+Chaque module respecte une séparation stricte en quatre couches distinctes :
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    🌐 Interface Layer                        │
+│                                                             │
+│  ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐│
+│  │ Controllers REST│ │ Guards &        │ │ DTOs &          ││
+│  │                 │ │ Middlewares     │ │ Validators      ││
+│  └─────────────────┘ └─────────────────┘ └─────────────────┘│
+└─────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   📋 Application Layer                      │
+│                                                             │
+│  ┌─────────────────┐           ┌─────────────────┐          │
+│  │ Use Cases       │           │ Services        │          │
+│  │                 │           │ Applicatifs     │          │
+│  └─────────────────┘           └─────────────────┘          │
+└─────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────┐
+│                      💎 Domain Layer                        │
+│                                                             │
+│  ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐│
+│  │ Entités Métier  │ │ Règles Business │ │ Ports/Interfaces││
+│  │                 │ │                 │ │                 ││
+│  └─────────────────┘ └─────────────────┘ └─────────────────┘│
+└─────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   🔧 Infrastructure Layer                   │
+│                                                             │
+│  ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐│
+│  │ Repositories    │ │ Services        │ │ Adaptateurs     ││
+│  │ MikroORM        │ │ Externes        │ │                 ││
+│  └─────────────────┘ └─────────────────┘ └─────────────────┘│
+└─────────────────────────────────────────────────────────────┘
+```
+
+Les ports définissent les contrats d'interface nécessaires aux repositories et services externes, tandis que les adaptateurs fournissent les implémentations concrètes correspondantes. Cette approche me donne la flexibilité de changer d'ORM, de base de données ou de services externes sans impacter la logique métier centrale.
+
 #### Interface Layer : exposition HTTP
 
 **Controllers** gèrent uniquement le protocole HTTP et orchestrent les vérifications de sécurité avant de déléguer la logique métier. Ils remplissent plusieurs rôles cruciaux :
@@ -598,6 +643,14 @@ Cette gestion manuelle me permet d'éviter les contraintes CASCADE au niveau SQL
 L'alternative serait de définir `onDelete: 'cascade'` sur la relation `@OneToMany`, ce qui déléguerait la suppression en cascade à MikroORM. Cependant, la suppression manuelle me donne plus de contrôle sur le processus : je peux facilement ajouter des logs pour tracer les suppressions, valider des règles métier avant chaque suppression, ou même implémenter une suppression "soft" en marquant les entités comme supprimées sans les effacer physiquement.
 
 Cette flexibilité s'avère particulièrement utile dans un contexte professionnel où les exigences de traçabilité et d'audit sont importantes pour la gestion des données sportives.
+
+## Sécurité applicative et protection OWASP
+
+L'architecture que j'ai mise en place intègre des mesures de sécurité spécifiques pour contrer les principales vulnérabilités répertoriées par l'OWASP. L'utilisation de MikroORM avec des requêtes paramétrées, combinée à la validation stricte des entrées via les DTOs Zod, élimine efficacement les risques d'injection SQL (OWASP A03). Les schémas de validation partagés entre frontend et backend garantissent une validation cohérente à tous les niveaux de l'application.
+
+Concernant le contrôle d'accès (OWASP A01), chaque endpoint bénéficie de la protection des guards NestJS qui vérifient systématiquement les permissions utilisateur via le package `@dropit/permissions`. L'isolation par organisation garantit que les utilisateurs ne peuvent accéder qu'aux données de leur club respectif, empêchant tout accès transversal non autorisé.
+
+La validation et la sanitisation des données (OWASP A04) s'effectuent grâce aux schémas Zod stricts définis dans `@dropit/schemas`, assurant une validation uniforme entre toutes les couches applicatives. Cette approche centralisée évite les disparités de validation qui pourraient créer des failles de sécurité.
 
 ## Configuration et optimisations
 
