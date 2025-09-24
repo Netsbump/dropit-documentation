@@ -13,17 +13,21 @@ Le domaine `dropit-app.fr` est géré chez le même fournisseur, simplifiant la 
 
 ### Sécurisation
 
-La sécurisation suit les bonnes pratiques DevSecOps : utilisateur non-root avec sudo, authentification par clés SSH uniquement, firewall restrictif autorisant les ports nécessaires (22, 80/443, ports Dokploy).
+La sécurisation suit les bonnes pratiques DevSecOps : utilisateur non-root avec sudo, authentification par clés SSH uniquement, firewall restrictif autorisant les ports nécessaires (22, 80/443 et 3000 pour le panel admin de Dokploy).
 
-Les credentials sont centralisés dans 1Password Business, permettant partage sécurisé et rotation des clés avec traçabilité des accès.
+### Sécurisation des secrets
+
+La gestion des credentials critiques suit une approche centralisée via 1Password Business, permettant partage sécurisé et rotation des clés avec traçabilité des accès. Cette solution garantit que les secrets de production (tokens API, mots de passe base de données, clés SSL) ne sont jamais stockés en dur dans le code.
+
+Les variables d'environnement sensibles sont injectées au runtime via Dokploy, évitant l'exposition des secrets dans les images Docker.
 
 ## Installation Dokploy
 
 ### Architecture Docker Swarm
 
-Dokploy s'installe via un script automatisé configurant Docker Swarm en mode single-node, créant un environnement d'orchestration simplifié mais évolutif. Cette architecture me permet de gérer les services (API NestJS, PostgreSQL, Redis) comme des stacks indépendantes.
+Dokploy est une plateforme open-source qui transforme un VPS en environnement de déploiement moderne, similaire à Vercel ou Netlify mais pouvant être hébergé sur mon propre serveur. L'installation de Dokploy configure automatiquement Docker Swarm comme orchestrateur de conteneurs et déploie Traefik comme reverse proxy, créant un environnement complet et fonctionnel en une seule commande.
 
-L'interface web centralise gestion des déploiements, logs, et monitoring, transformant la complexité de Docker Swarm en expérience similaire aux PaaS commerciaux.
+Concrètement, Dokploy fonctionne comme une image Docker d'administration qui s'exécute sur le port 3000 du serveur. Cette interface web permet de gérer les déploiements, déclencher des builds, configurer les domaines et surveiller les services. Chaque action effectuée via l'interface génère automatiquement les configurations appropriées dans Traefik pour le routage des requêtes et dans Docker Swarm pour l'orchestration des conteneurs.
 
 ### Services séparés
 
@@ -110,50 +114,59 @@ Cette segmentation facilite la gestion des certificats SSL automatiques et prép
 ## Architecture de production déployée
 
 ```mermaid
-graph TB
-    subgraph "Internet"
-        Users[Utilisateurs Web]
-        Mobile[App Mobile Future]
-    end
-
-    subgraph "DNS dropit-app.fr"
-        DNS[Enregistrements A]
-    end
-
-    subgraph "VPS Infomaniak - Debian Bookworm"
-        subgraph "Docker Swarm Dokploy"
-            Traefik[Traefik Reverse Proxy<br/>SSL automatique]
-
-            subgraph "Services Séparés"
-                Frontend[Frontend Statique<br/>Nginx auto]
-                API[API NestJS<br/>Container Docker]
-                DB[(PostgreSQL 16<br/>Service natif)]
-                Admin[Dokploy UI<br/>Port 3000]
-            end
-        end
-    end
-
-    subgraph "Services Externes"
-        Email[Brevo Email]
-        Backup[Backups S3 futurs]
-    end
-
-    Users --> DNS
-    Mobile --> DNS
+flowchart TB
+ subgraph Utilisateurs["Utilisateurs"]
+        Users["Utilisateurs Web"]
+        Mobile["App Mobile"]
+  end
+ subgraph subGraph1["DNS Infomaniak"]
+        DNS["Enregistrements A"]
+  end
+ subgraph subGraph2["Dokploy UI"]
+        DokployUI["Dokploy Dashboard<br>Port 3000"]
+  end
+ subgraph subGraph3["Traefik"]
+        Traefik["Port 80/443<br>SSL automatique"]
+  end
+ subgraph subGraph4["Docker Network - Dropit"]
+        Frontend["Frontend Statique<br>Nginx auto"]
+        API["API NestJS<br>Container Docker"]
+        DB[("PostgreSQL 16<br>Service natif")]
+  end
+  subgraph subGraph7["Docker Swarm"]
+        DockerSwarm["DockerSwarm"]
+  end
+ subgraph subGraph5["VPS Infomaniak - OS Debian Bookworm"]
+        subGraph2
+        subGraph3
+        subGraph4
+        subGraph7
+  end
+ subgraph subGraph6["Services Externes"]
+        Email["Brevo Email"]
+        Backup["Backups S3 futurs"]
+  end
+    Users -- "dropit-app.fr" --> DNS
+    Mobile -- "api.dropit-app.fr" --> DNS
     DNS --> Traefik
-
-    Traefik --> |dropit-app.fr| Frontend
-    Traefik --> |api.dropit-app.fr| API
-    Traefik --> |dokploy.dropit-app.fr| Admin
-
-    API --> DB
-    API --> Email
+    API --> DB & Email
     DB --> Backup
+    DokployUI -. Gestion des services<br>Déploiements, logs .-> DockerSwarm
+    subGraph3 -- "dropit-app.fr" --> Frontend
+    subGraph3 -- "api.dropit-app.fr" --> API
+    subGraph3 -- "dokploy.dropit-app.fr" --> DokployUI
+    subGraph7 -- Configuration dynamique des routes --> subGraph3
+    subGraph7 -- Déploiement, reload --> subGraph4
+    n1[" "] --> n2[" "]
 
+
+    n1@{ shape: anchor}
+    n2@{ shape: anchor}
+    style DokployUI fill:#fff3e0
+    style Traefik fill:#f0f8ff
     style Frontend fill:#e8f5e8
     style API fill:#e1f5fe
     style DB fill:#f3e5f5
-    style Admin fill:#fff3e0
 ```
 
 Cette architecture services séparés garantit la maintenabilité et la simplicité de gestion tout en conservant les performances et la sécurité nécessaires pour l'application DropIt.
