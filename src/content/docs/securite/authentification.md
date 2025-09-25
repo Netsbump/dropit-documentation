@@ -11,7 +11,7 @@ Cette section détaille l'implémentation technique de Better-Auth dans DropIt. 
 
 J'ai isolé l'authentification dans un module NestJS dédié pour séparer les responsabilités et centraliser la configuration Better-Auth.
 
-```
+```markdown
 modules/auth/
 ├── auth.decorator.ts  # Décorateurs pour l'authentification
 ├── auth.entity.ts     # Entités complémentaires 
@@ -39,15 +39,17 @@ L'entité **Verification** s'occupe des tokens temporaires utilisés pour la vé
 
 Better-Auth expose automatiquement des endpoints d'authentification complets sur le préfixe `/auth`, évitant l'implémentation manuelle de ces routes critiques.
 
-| Route | Méthode | Description | Usage dans DropIt |
-|-------|---------|-------------|-------------------|
-| `/auth/signup` | POST | Inscription utilisateur | Création comptes coachs/athlètes |
-| `/auth/login` | POST | Connexion | Accès quotidien à l'application |
-| `/auth/logout` | POST | Déconnexion | Sécurisation des sessions |
-| `/auth/me` | GET | Profil utilisateur | Données session courante |
-| `/auth/refresh` | POST | Renouvellement token | Maintien des sessions longues |
-| `/auth/verify` | GET | Vérification email | Sécurisation des comptes |
-| `/auth/reset-password` | POST | Réinitialisation | Récupération comptes oubliés |
+```html
+|       Route             | Méthode |        Description      |       Usage dans DropIt         |
+|------------------------ |---------|-------------------------|---------------------------------|
+| `/auth/signup`          | POST    | Inscription utilisateur | Création comptes coachs/athlètes|
+| `/auth/login`           | POST    | Connexion               | Accès quotidien à l'application |
+| `/auth/logout`          | POST    | Déconnexion             | Sécurisation des sessions       |
+| `/auth/me`              | GET     | Profil utilisateur      | Données session courante        |
+| `/auth/refresh`         | POST    | Renouvellement token    | Maintien des sessions longues   |
+| `/auth/verify`          | GET     | Vérification email      | Sécurisation des comptes        |
+| `/auth/reset-password`  | POST    | Réinitialisation        | Récupération comptes oubliés    |
+```
 
 Cette standardisation garantit l'implémentation native des bonnes pratiques de sécurité. J'ai ajouté le plugin openAPI() à ma configuration Better-Auth, ce qui génère automatiquement la documentation Swagger de tous ces endpoints pour faciliter le développement côté client. 
 
@@ -86,35 +88,35 @@ Dans mon projet, j'ai configuré l'authentification comme étant globale : par d
 Voici une version simplifiée de mes décorateurs principaux :
 
 ```typescript
-/**
- * Décorateur pour marquer une route comme publique (accessible sans authentification)
- */
-export const Public = () => SetMetadata('PUBLIC', true);
+  /**
+   * Décorateur pour marquer une route comme publique (accessible sans authentification)
+   */
+  export const Public = () => SetMetadata('PUBLIC', true);
 
-/**
- * Décorateur pour marquer une route comme optionnelle (accessible avec ou sans authentification)
- */
-export const Optional = () => SetMetadata('OPTIONAL', true);
+  /**
+   * Décorateur pour marquer une route comme optionnelle (accessible avec ou sans authentification)
+   */
+  export const Optional = () => SetMetadata('OPTIONAL', true);
 
-/**
- * Décorateur pour injecter la session dans un contrôleur
- */
-export const Session = createParamDecorator(
-  (_data: unknown, context: ExecutionContext) => {
-    const request = context.switchToHttp().getRequest();
-    return request.session;
-  }
-);
+  /**
+   * Décorateur pour injecter la session dans un contrôleur
+   */
+  export const Session = createParamDecorator(
+    (_data: unknown, context: ExecutionContext) => {
+      const request = context.switchToHttp().getRequest();
+      return request.session;
+    }
+  );
 
-/**
- * Décorateur pour injecter l'utilisateur connecté dans un contrôleur
- */
-export const CurrentUser = createParamDecorator(
-  (_data: unknown, context: ExecutionContext) => {
-    const request = context.switchToHttp().getRequest();
-    return request.user;
-  }
-);
+  /**
+   * Décorateur pour injecter l'utilisateur connecté dans un contrôleur
+   */
+  export const CurrentUser = createParamDecorator(
+    (_data: unknown, context: ExecutionContext) => {
+      const request = context.switchToHttp().getRequest();
+      return request.user;
+    }
+  );
 ```
 
 Ces décorateurs me permettent d'annoter mes routes avec des métadonnées de sécurité (`@Public()`, `@Optional()`) et d'injecter directement les données d'authentification dans les paramètres de méthode (`@CurrentUser()`, `@Session()`).

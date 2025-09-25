@@ -13,7 +13,7 @@ Après avoir détaillé l'[accès aux données](/conception/acces-donnees), cett
 
 Ma stratégie d'architecture frontend s'appuie sur une organisation par features qui traduit directement les domaines métier identifiés lors de l'analyse des besoins. Cette approche, inspirée des principes du Domain-Driven Design, établit un langage commun entre l'équipe technique et les coachs utilisateurs. Plutôt que de structurer le code selon des préoccupations purement techniques (composants, services, utils), j'ai privilégié une architecture qui reflète le vocabulaire métier : "athletes", "exercises", "workout", "planning". Cette correspondance directe facilite considérablement les échanges avec les utilisateurs finaux et réduit les incompréhensions lors des phases de validation fonctionnelle.
 
-```
+```markdown
 apps/web/src/
 ├── features/              # Modules métier isolés
 │   ├── athletes/          # Gestion des athlètes

@@ -157,7 +157,7 @@ Le décorateur `@Check` traduit la contrainte logique en contrainte PostgreSQL, 
 
 ### Diagramme de l'architecture
 
-```
+```markdown
 ┌─────────────────────────────────────────────────────────────┐
 │                    🌐 Interface Layer                        │
 │                                                             │

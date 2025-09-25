@@ -11,7 +11,7 @@ Cette annexe présente les détails techniques de l'implémentation des couches 
 
 ### Exemple basique de React Hook Form
 
-```typescript
+```tsx
 // Exemple basique de React Hook Form
 const form = useForm({
   mode: 'onChange', // Validation temps réel
@@ -47,7 +47,7 @@ Cette approche me permet de me concentrer sur la logique métier spécifique à 
 
 ### Gestion avancée des formulaires
 
-```typescript
+```tsx
 // Formulaire complexe avec validation conditionnelle
 const ComplexWorkoutForm = () => {
   const form = useForm<CreateWorkout>({
@@ -222,7 +222,7 @@ const ComplexWorkoutForm = () => {
 
 ### Intégration avec React Hook Form
 
-```typescript
+```tsx
 // Réutilisation des schémas définis dans @dropit/schemas
 import { CreateExercise, createExerciseSchema } from '@dropit/schemas';
 
@@ -331,7 +331,7 @@ export function ExerciseCreationForm() {
 
 ### Gestion des erreurs de validation
 
-```typescript
+```tsx
 // Hook personnalisé pour la gestion des erreurs Zod
 function useZodErrorHandling() {
   const handleZodError = useCallback((error: ZodError) => {
@@ -389,7 +389,7 @@ export function FormWithErrorHandling() {
 
 ### Configuration et utilisation de base
 
-```typescript
+```tsx
 // Récupération et cache des catégories d'exercices
 const { data: exerciseCategories, isLoading } = useQuery({
   queryKey: ['exercise-categories'],
@@ -418,7 +418,7 @@ const { mutateAsync: createExercise } = useMutation({
 
 ### Patterns avancés avec Tanstack Query
 
-```typescript
+```tsx
 // Hook personnalisé pour la gestion des exercices
 export function useExercises(filters?: ExerciseFilters) {
   const queryKey = ['exercises', filters];
@@ -540,7 +540,7 @@ export function useRealtimeWorkouts() {
 
 ### Structure de routes
 
-```typescript
+```markdown
 // Routes organisées hiérarchiquement
 ├── __home.tsx                    # Layout principal authentifié
 │   ├── __home.dashboard.tsx      # Page d'accueil
@@ -555,7 +555,7 @@ export function useRealtimeWorkouts() {
 
 ### Définition des routes avec validation
 
-```typescript
+```tsx
 // Route typée avec validation des paramètres
 const athleteDetailRoute = createFileRoute('/athletes/$athleteId')({
   parseParams: (params) => ({
@@ -625,7 +625,7 @@ function AthleteDetailPage() {
 
 ### Navigation programmatique typée
 
-```typescript
+```tsx
 // Hook personnalisé pour la navigation typée
 export function useTypedNavigation() {
   const router = useRouter();
@@ -675,7 +675,7 @@ export function WorkoutCard({ workout }: { workout: Workout }) {
 
 ### Fonctions de formatage
 
-```typescript
+```tsx
 import { format, addDays, isAfter, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
@@ -750,7 +750,7 @@ export function useDateFormatting() {
 
 ### Composant drag-and-drop avec dnd-kit
 
-```typescript
+```tsx
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -869,7 +869,7 @@ export function WorkoutElementsList({ elements, onReorder, onRemove }: WorkoutEl
 
 ### Configuration de base
 
-```typescript
+```tsx
 // Configuration FullCalendar pour les séances d'entraînement
 const calendarOptions = {
   plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
@@ -893,7 +893,7 @@ const calendarOptions = {
 
 ### Intégration avancée avec React
 
-```typescript
+```tsx
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -1011,7 +1011,7 @@ function getSessionTypeColor(type: WorkoutType): string {
 
 ### Configuration du client i18next
 
-```typescript
+```tsx
 // Configuration du client i18next
 import { resources } from '@dropit/i18n';
 
@@ -1062,7 +1062,7 @@ const CreateWorkoutButton = () => {
 
 ### Hook personnalisé pour l'internationalisation
 
-```typescript
+```tsx
 // Hook personnalisé pour les traductions contextuelles
 export function useWorkoutTranslations() {
   const { t } = useTranslation('workout');
@@ -1153,7 +1153,7 @@ export default {
 
 ### Exemples d'utilisation Tailwind
 
-```typescript
+```tsx
 // Approche traditionnelle que j'aurais pu utiliser
 <div className="workout-card"> // Nécessite définition CSS séparée
   <h3 className="workout-title">Programme Force</h3>
@@ -1229,7 +1229,7 @@ export function ResponsiveWorkoutGrid({ workouts }: { workouts: Workout[] }) {
 
 ### Composant accessible intégrant les bonnes pratiques RGAA
 
-```typescript
+```tsx
 // Composant accessible intégrant les bonnes pratiques RGAA
 <Dialog>
   <DialogTrigger asChild>
@@ -1283,7 +1283,7 @@ export function ResponsiveWorkoutGrid({ workouts }: { workouts: Workout[] }) {
 
 ### Import sélectif optimisant la taille du bundle
 
-```typescript
+```tsx
 // Import sélectif optimisant la taille du bundle
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
@@ -1295,7 +1295,7 @@ import { Form, FormControl, FormField } from "@/components/ui/form"
 
 ### Adaptation du composant Button pour les besoins spécifiques de DropIt
 
-```typescript
+```tsx
 // Adaptation du composant Button pour les besoins spécifiques de DropIt
 const WorkoutActionButton = React.forwardRef<
   HTMLButtonElement,
@@ -1355,7 +1355,7 @@ export function WorkoutActionButtons({ workout }: { workout: Workout }) {
 
 ### Vocabulaire iconographique structuré
 
-```typescript
+```tsx
 // Vocabulaire iconographique structuré pour DropIt
 import {
   // Actions de création et modification
@@ -1390,7 +1390,7 @@ import {
 
 ### Import optimisé
 
-```typescript
+```tsx
 // Import optimisé - seules les icônes utilisées sont bundlées
 import { Plus, Calendar, Dumbbell } from "lucide-react"
 
@@ -1400,7 +1400,7 @@ import { Plus, Calendar, Dumbbell } from "lucide-react"
 
 ### Accessibilité et conformité RGAA
 
-```typescript
+```tsx
 // Icônes décoratives - masquées pour les lecteurs d'écran
 <Button>
   <Plus className="h-4 w-4 mr-2" aria-hidden="true" />
@@ -1427,7 +1427,7 @@ import { Plus, Calendar, Dumbbell } from "lucide-react"
 
 ### Adaptation responsive et états dynamiques
 
-```typescript
+```tsx
 // Adaptation responsive et états dynamiques
 <Button 
   variant={isLoading ? "secondary" : "default"}
@@ -1548,7 +1548,7 @@ export default defineConfig({
 
 ### Même logique de validation côté mobile
 
-```typescript
+```tsx
 // Même logique de validation côté mobile
 import { createPerformanceSchema } from '@dropit/schemas';
 import { useForm } from 'react-hook-form';
@@ -1591,7 +1591,7 @@ export function PerformanceForm() {
 
 ### Gestion du stockage local mobile
 
-```typescript
+```tsx
 // Service de stockage local pour React Native
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -1729,7 +1729,7 @@ sequenceDiagram
 
 ### Lazy loading des composants volumineux
 
-```typescript
+```tsx
 // Lazy loading des composants volumineux
 const WorkoutEditor = lazy(() => import('./workout-editor'));
 
@@ -1818,7 +1818,7 @@ export const OptimizedWorkoutCard = memo(({
 
 ### Optimisation des requêtes avec Tanstack Query
 
-```typescript
+```tsx
 // Prefetching des données
 export function useWorkoutPrefetch() {
   const queryClient = useQueryClient();

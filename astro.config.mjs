@@ -86,9 +86,9 @@ export default defineConfig({
 				{
 					label: 'Annexes',
 					items: [
-						{ label: 'Analyse des besoins', link: '/annexes/analyse-besoins/' },
+						{ label: 'Analyse des besoins', link: '/annexes/analyses-besoins/' },
 						{ label: 'Architecture technique', link: '/annexes/architecture-technique/' },
-						{ label: 'Conception technique de la base de données', link: '/annexes/conception-base-donnees/' },
+						{ label: 'Conception technique base de données', link: '/annexes/conception-bdd-technique/' },
 						{ label: 'Implémentation accès aux données', link: '/annexes/implementation-acces-donnees/' },
 						{ label: 'Implémentation présentations', link: '/annexes/implementation-presentations/' },
 						{ label: 'Authentifications', link: '/annexes/authentifications/' },

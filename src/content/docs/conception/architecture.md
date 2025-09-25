@@ -63,7 +63,7 @@ La justification de ces choix, l'implémentation détaillée et leur intégratio
 
 ### Structure du projet frontend
 
-```
+```markdown
 apps/web/src/
 ├── features/              # Modules métier organisés par domaine
 │   ├── athletes/          # Gestion des athlètes
@@ -109,7 +109,7 @@ L'architecture mobile s'appuie sur des bibliothèques adaptées aux contraintes 
 
 ### Structure du projet mobile
 
-```
+```markdown
 apps/mobile/
 ├── src/
 │   ├── components/          # Composants React Native
@@ -163,7 +163,7 @@ J'ai opté pour MikroORM après avoir identifié des différences techniques ave
 
 ### Structure du projet backend
 
-```
+```markdown
 apps/api/src/
 ├── modules/                   # Modules métier organisés par domaine
 │   ├── identity/              # Authentification, autorisation, organisations

@@ -118,6 +118,7 @@ Better-Auth Organizations implémente nativement :
 4. **Intégration TypeScript** : types générés automatiquement
 
 **Implémentation dans DropIt :**
+
 ```typescript
 // Configuration automatique des permissions
 const organizationConfig = {

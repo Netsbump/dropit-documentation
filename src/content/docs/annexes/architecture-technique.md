@@ -161,7 +161,7 @@ Cette approche garantit que les packages partagés respectent les mêmes standar
 
 L'organisation finale du projet DropIt :
 
-```
+```markdown
 dropit/
 ├── apps/                          # Applications principales
 │   ├── web/                       # Interface web React/TypeScript

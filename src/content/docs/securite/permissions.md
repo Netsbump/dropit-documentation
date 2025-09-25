@@ -13,7 +13,7 @@ Dans DropIt, chaque utilisateur évolue au sein d'une organisation (club de d'ha
 
 Dans mon API, j'ai choisi d'intégrer la gestion des permissions au sein du module d'identité existant, aux côtés de l'authentification afin de maintenir une cohérence architecturale et de centraliser toutes les préoccupations liées à la sécurité.
 
-```
+```markdown
 modules/identity/
 ├── domain/
 │   ├── auth/                    # Entités d'authentification
@@ -76,15 +76,17 @@ Cette évolution architecturale n'a pas posé de problème de migration en prati
 
 Comme pour l'authentification, Better-Auth expose automatiquement des endpoints dédiés à la gestion des organisations et permissions sur le préfixe `/auth/organization`, évitant le développement manuel de ces routes critiques.
 
-| Route | Méthode | Description | Usage dans DropIt |
-|-------|---------|-------------|-------------------|
-| `/auth/organization/create` | POST | Création d'organisation | Nouveau club de sport |
-| `/auth/organization/invite-member` | POST | Invitation de membre | Ajout d'athlètes/coachs |
-| `/auth/organization/accept-invitation` | POST | Acceptation d'invitation | Adhésion au club |
-| `/auth/organization/get-invitations` | GET | Liste des invitations | Gestion des demandes |
-| `/auth/organization/remove-member` | POST | Exclusion de membre | Gestion des départs |
-| `/auth/organization/update-member-role` | POST | Modification de rôle | Promotion coach/admin |
-| `/auth/organization/set-active` | POST | Organisation active | Changement de club actif |
+```html
+|                    Route                     | Méthode |        Description        |       Usage dans DropIt         |
+|----------------------------------------------|---------|---------------------------|---------------------------------|
+| `/auth/organization/create`                  | POST    | Création d'organisation   | Nouveau club de sport           |
+| `/auth/organization/invite-member`           | POST    | Invitation de membre      | Ajout d'athlètes/coachs         |
+| `/auth/organization/accept-invitation`       | POST    | Acceptation d'invitation  | Adhésion au club                |
+| `/auth/organization/get-invitations`         | GET     | Liste des invitations     | Gestion des demandes            |
+| `/auth/organization/remove-member`           | POST    | Exclusion de membre       | Gestion des départs             |
+| `/auth/organization/update-member-role`      | POST    | Modification de rôle      | Promotion coach/admin           |
+| `/auth/organization/set-active`              | POST    | Organisation active       | Changement de club actif        |
+```
 
 Ces endpoints intègrent automatiquement les vérifications de permissions : seuls les utilisateurs autorisés peuvent effectuer ces actions selon leur rôle dans l'organisation. La documentation complète de ces APIs est générée automatiquement via le plugin openAPI() de Better-Auth.
 

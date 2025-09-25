@@ -282,7 +282,7 @@ Cette section détaille les configurations multi-plateforme mentionnées dans la
 
 ### Client web (React)
 
-```typescript
+```tsx
 // Configuration client web
 import { createAuthClient } from "@better-auth/react";
 
