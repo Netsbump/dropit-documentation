@@ -159,6 +159,7 @@ declare -a annexes_files=(
     "architecture-technique:Architecture technique"
     "conception-base-donnees:Conception technique de la base de données"
     "implementation-acces-donnees:Implémentation accès aux données"
+    "implementation-presentations:Implémentation présentations"
     "authentifications:Authentifications"
     "permissions:Permissions"
     "glossaire:Glossaire"

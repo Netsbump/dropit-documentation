@@ -90,6 +90,7 @@ export default defineConfig({
 						{ label: 'Architecture technique', link: '/annexes/architecture-technique/' },
 						{ label: 'Conception technique de la base de données', link: '/annexes/conception-base-donnees/' },
 						{ label: 'Implémentation accès aux données', link: '/annexes/implementation-acces-donnees/' },
+						{ label: 'Implémentation présentations', link: '/annexes/implementation-presentations/' },
 						{ label: 'Authentifications', link: '/annexes/authentifications/' },
 						{ label: 'Permissions', link: '/annexes/permissions/' },
 						{ label: 'Glossaire', link: '/annexes/glossaire/' },
