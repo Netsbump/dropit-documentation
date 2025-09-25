@@ -72,9 +72,11 @@ La configuration inclut des vérifications post-déploiement via health checks H
 
 ### Logging centralisé
 
-Dokploy agrège automatiquement les logs de tous les services dans son interface, facilitant debugging et surveillance. Cette centralisation permet de corréler rapidement les événements entre composants.
+Dokploy agrège automatiquement les logs de tous les services dans son interface, facilitant debugging et surveillance. Cette solution basique capturant les sorties stdout/stderr permet un premier niveau de débogage mais reste limitée : absence de structuration des logs, recherche difficile, pas de corrélation entre les événements.
 
-Pour l'évolution future, j'envisage l'intégration de SigNoz ou Grafana pour un monitoring avancé avec métriques customisées et alerting automatisé.
+L'implémentation d'une solution de logging structuré via Pino dans NestJS améliorerait la qualité des traces avec des logs JSON performants et des niveaux appropriés. Cette approche nécessiterait l'ajout d'une stack ELK ou similaire pour l'agrégation et la visualisation.
+
+Pour l'évolution future, j'envisage l'intégration de SignOz (alternative open-source complète avec support OpenTelemetry) ou Grafana pour un monitoring avancé avec métriques customisées et alerting automatisé.
 
 ### Surveillance performances
 
@@ -92,7 +94,9 @@ Les backups incluent configurations Dokploy et images Docker, permettant une res
 
 ### Plan de continuité
 
-En cas d'incident majeur, le plan prévoit la reconstruction complète sur un nouveau VPS en moins de 4 heures, incluant restauration des données et redirection DNS. L'anonymisation des données sensibles respecte les obligations RGPD en situation de crise.
+En cas d'incident majeur, le plan prévoit la reconstruction complète sur un nouveau VPS en moins de 4 heures, incluant restauration des données et redirection DNS. Les objectifs de continuité sont un RTO (Recovery Time Objective) de 4 heures maximum et un RPO (Recovery Point Objective) de 1 heure maximum, adaptés aux contraintes opérationnelles d'un club sportif.
+
+L'anonymisation des données sensibles respecte les obligations RGPD en situation de crise. La procédure complète est documentée dans le code source de l'application.
 
 ### Configuration DNS
 

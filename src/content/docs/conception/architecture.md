@@ -5,7 +5,7 @@ description: Conception technique de DropIt - justifications et mise en œuvre d
 
 ## Introduction
 
-Ma stratégie architecturale de l'application s'appuie sur un équilibre entre familiarité technique et découverte de nouveaux outils. J'ai privilégié des technologies que je maîtrise déjà pour les composants critiques, tout en intégrant des solutions nouvelles pour enrichir mon apprentissage sans compromettre la viabilité du projet.
+Ma stratégie architecturale répond aux besoins spécifiques d'une application de gestion de club d'haltérophilie : séparation des contextes d'usage (mobile pour les athlètes, web pour les coachs), cohérence des données d'entraînement, et maintenabilité pour un usage associatif sur la durée. J'ai privilégié des technologies éprouvées pour les composants critiques, tout en intégrant des solutions adaptées aux contraintes identifiées lors de l'analyse des besoins.
 
 ## Vue d'ensemble architecturale
 
@@ -216,67 +216,17 @@ Le stockage sur le système de fichiers local représente une alternative simple
 
 MinIO résout ces limitations en proposant un stockage objet distribué compatible avec l'API S3 d'Amazon. Cette architecture sépare le stockage des médias de la base de données transactionnelle, optimisant les performances de chaque composant selon leur usage spécifique. L'API S3 standardisée garantit la portabilité vers des solutions cloud managées (AWS S3, Google Cloud Storage, Azure Blob Storage) sans modification du code applicatif.
 
-## Recherche : Typesense
+## Recherche : SQL et Typesence
 
-Pour la fonctionnalité de recherche dans les catalogues d'exercices et programmes d'entraînement, plusieurs approches techniques s'offrent selon l'évolution du volume de données.
+Pour la fonctionnalité de recherche dans les catalogues d'exercices, j'ai privilégié une approche simple : recherche SQL basique via PostgreSQL pour le MVP.
 
-La recherche via requêtes SQL PostgreSQL avec LIKE ou ILIKE représente la solution la plus directe pour des catalogues de taille modeste. PostgreSQL propose également des fonctionnalités de recherche textuelle intégrées (Full Text Search) avec les types tsvector et tsquery, suffisantes pour des besoins basiques. Cette approche présente néanmoins des limitations : performances dégradées sur de gros volumes, absence de recherche floue (typos), et fonctionnalités limitées pour le ranking et la pertinence des résultats.
+La recherche avec LIKE ou ILIKE permet de rechercher des exercices par correspondance de texte (exemple : `WHERE name ILIKE '%squat%'` trouve "Back Squat", "Front Squat", etc.). Cette solution suffit pour des catalogues de taille modeste, mais pourrait nécessiter une évolution si les clubs accumulent de nombreux exercices personnalisés.
 
-Les solutions Elasticsearch ou Solr auraient pu être envisagées, mais leur complexité d'infrastructure et de configuration dépasse les besoins de DropIt. Ces outils requièrent une expertise approfondie et des ressources importantes pour une fonctionnalité non critique dans la phase initiale du projet.
-
-Typesense, bien que non implémenté dans le MVP, constitue une alternative moderne adaptée aux besoins futurs de DropIt. Cette solution open-source privilégie la simplicité de déploiement tout en offrant des fonctionnalités avancées : recherche typo-tolerante, faceting, auto-complétion et géolocalisation. Contrairement à Elasticsearch, Typesense se configure rapidement et consomme moins de ressources, caractéristiques appropriées pour un projet en phase d'apprentissage.
-
-L'architecture de Typesense permettrait une recherche instantanée dans les catalogues d'exercices enrichis (nom, groupe musculaire, équipement requis, niveau de difficulté) et faciliterait la découverte de programmes d'entraînement par les coachs. Cette solution anticipera l'évolution des besoins lorsque les clubs accumuleront des bibliothèques d'exercices conséquentes nécessitant une recherche performante et intuitive.
-
-## Stratégie de déploiement : Dokploy
-
-Pour le déploiement de l'application, plusieurs approches techniques étaient envisageables selon les contraintes budgétaires et les objectifs d'apprentissage du projet.
-
-Le déploiement manuel sur VPS avec orchestration via PM2 représentait l'option la plus économique et directe. Cette approche aurait consisté à installer directement Node.js, PostgreSQL et les dépendances système, puis utiliser PM2 pour la gestion des processus et le restart automatique. Cependant, cette méthode présente des risques significatifs : configuration non reproductible entre les environnements, gestion complexe des dépendances système, absence d'isolation des services, et difficulté de rollback en cas de problème.
-
-Les solutions cloud managées (Vercel, Railway, Render) auraient simplifié le déploiement mais introduisent des coûts récurrents incompatibles avec le budget étudiant. Ces plateformes masquent également les mécanismes de déploiement, limitant l'apprentissage des concepts d'infrastructure et d'orchestration.
-
-Dokploy sur VPS personnel résout ces contraintes en proposant une interface de gestion moderne s'appuyant sur Docker. Cette solution combine les avantages économiques du VPS avec les bonnes pratiques de containerisation, garantissant la reproductibilité des déploiements entre développement et production. L'isolation des services via conteneurs élimine les conflits de dépendances et facilite la maintenance.
-
-Cette plateforme offre un équilibre optimal pour l'apprentissage : elle expose suffisamment les mécanismes sous-jacents pour comprendre les enjeux d'infrastructure tout en automatisant les tâches répétitives. L'expérience acquise avec cette stack (Docker, reverse proxy, gestion des volumes) facilitera l'évolution future vers des solutions d'orchestration plus avancées comme Kubernetes si les besoins de scalabilité l'exigent.
-
-## Monitoring et observabilité
-
-Pour assurer la visibilité sur le comportement de l'application en production, plusieurs approches d'observabilité sont envisageables selon les besoins de maturité du projet.
-
-Les logs natifs de Dokploy constituent la base de l'observabilité actuelle, capturant les sorties stdout/stderr des conteneurs Docker. Cette solution basique permet un premier niveau de débogage mais reste limitée pour une analyse approfondie : absence de structuration des logs, recherche difficile, pas de corrélation entre les événements, et visualisation rudimentaire.
-
-L'implémentation d'une solution de logging structuré via Pino dans NestJS améliorerait significativement la qualité des traces. Pino génère des logs JSON performants avec des niveaux appropriés, facilitant l'analyse et la recherche. Cette approche nécessiterait cependant l'ajout d'une stack ELK (Elasticsearch, Logstash, Kibana) ou similaire pour l'agrégation et la visualisation, complexifiant l'infrastructure.
-
-SignOz constitue une alternative open-source complète implémentant la triade observabilité (logs, métriques, traces) avec support d'OpenTelemetry. Cette solution moderne permettrait une observabilité exhaustive mais introduit une complexité d'infrastructure significative pour un MVP, nécessitant des ressources serveur additionnelles.
-
-J'ai donc opté pour le monitoring d'erreurs immédiat avec Dokploy tout en me laissant la possibilité d'évoluer vers une solution complète (SignOz déployé via Dokploy ou stack ELK) selon les retours d'usage et la maturité du projet.
-
-## Stratégie de sauvegarde et plan de continuité
-
-Dans le contexte d'une application gérant des données critiques pour la sécurité des athlètes, j'ai conçu une stratégie de sauvegarde robuste et un plan de continuité d'activité pour minimiser les risques de perte de données et assurer la disponibilité du service.
-
-### Sauvegarde des données critiques
-
-La base de données PostgreSQL bénéficie d'une stratégie de sauvegarde automatisée à plusieurs niveaux. J'ai mis en place des dumps quotidiens complets via pg_dump, stockés avec rétention de 30 jours pour permettre la restauration à différents points dans le temps. Ces sauvegardes sont chiffrées et stockées sur un support séparé du serveur principal pour éviter la perte simultanée des données de production et des sauvegardes.
-
-Pour une granularité plus fine, j'ai configuré l'archivage des WAL (Write-Ahead Logs) de PostgreSQL, permettant une restauration point-in-time (PITR) avec une précision à la seconde. Cette fonctionnalité s'avère cruciale si une corruption de données est détectée après plusieurs heures d'activité, permettant de restaurer la base exactement avant l'incident.
-
-Les médias stockés dans MinIO font l'objet d'une réplication sur un second bucket avec politique de versioning. Cette approche protège contre les suppressions accidentelles de vidéos d'exercices et permet de récupérer des versions antérieures de contenus modifiés.
-
-### Plan de continuité et procédures d'urgence
-
-En cas de panne majeure du serveur principal, j'ai documenté une procédure de restauration complète qui comprend la réinstallation de l'environnement Docker, la restauration de la base de données depuis la sauvegarde la plus récente, et la resynchronisation des médias depuis le stockage de réplication.
-
-Les objectifs de continuité que je me suis fixés sont un RTO (Recovery Time Objective) de 4 heures maximum pour la remise en service complète, et un RPO (Recovery Point Objective) de 1 heure maximum pour la perte de données acceptable. Ces seuils correspondent aux contraintes opérationnelles d'un club sportif où l'indisponibilité prolongée impacterait directement les séances d'entraînement.
-
-Pour valider l'efficacité de cette stratégie, j'ai planifié des tests de restauration trimestriels sur un environnement de staging. Ces exercices pratiques permettent de vérifier l'intégrité des sauvegardes et d'ajuster les procédures selon les retours d'expérience.
-
-La documentation des procédures d'urgence est centralisée et accessible depuis différents supports (serveur principal, documentation externe, support mobile) pour garantir sa disponibilité même en cas de panne complète de l'infrastructure.
+Dans ce cas, l'ajout d'un moteur de recherche dédié comme Typesense (solution open-source spécialisée dans la recherche rapide) pourrait améliorer l'expérience utilisateur avec une recherche plus fluide, tolérante aux erreurs de frappe et capable de rechercher simultanément sur plusieurs critères (nom, groupe musculaire, équipement requis).
 
 ## Communication inter-composants et protocoles
 
-L'architecture distribuée que j'ai mise en place nécessite une communication fiable entre les différents composants de l'application. Cette section détaille les protocoles et mécanismes d'échange que j'ai choisis pour assurer la cohésion de l'ensemble du système.
+L'architecture distribuée que j'ai mise en place nécessite une communication fiable entre les différents composants de l'application.
 
 Le diagramme suivant illustre les interactions entre les clients (mobile et web), l'API REST, et les couches de cache et de persistance :
 
@@ -308,83 +258,44 @@ sequenceDiagram
     API-->>Mobile: Réponse JSON
 ```
 
-L'ensemble des communications repose sur HTTP/HTTPS pour garantir la sécurité des échanges entre les applications frontend et l'API. Cette approche standardisée facilite l'intégration et assure la compatibilité avec l'écosystème web existant. Le chiffrement HTTPS que j'ai mis en place protège la confidentialité des données sensibles échangées, particulièrement critiques dans un contexte de gestion d'entraînements où les informations personnelles des athlètes transitent régulièrement.
+L'ensemble des communications repose sur HTTP/HTTPS pour garantir la sécurité des échanges entre les applications frontend et l'API. Le chiffrement HTTPS protège la confidentialité des données sensibles échangées.
 
-Au niveau des couches de persistance, PostgreSQL et Redis utilisent leurs protocoles natifs optimisés, tous deux construits sur TCP/IP. Cette approche me permet de bénéficier des optimisations spécifiques à chaque système sans compromettre les performances par des couches d'abstraction supplémentaires.
+Au niveau des couches de persistance, PostgreSQL et Redis utilisent leurs protocoles natifs optimisés, tous deux construits sur TCP/IP.
 
 Le format JSON structure l'ensemble des échanges de données, offrant un équilibre optimal entre lisibilité humaine et performance machine. Cette standardisation facilite considérablement le débogage pendant le développement et simplifie l'intégration de nouveaux clients dans l'écosystème.
 
 ## Sécurité architecturale
 
-Dans ma démarche de conception, j'ai privilégié une approche "security by design" en intégrant les considérations de sécurité dès la phase d'architecture plutôt que de les traiter comme des ajouts a posteriori. Cette philosophie m'a amené à structurer l'application autour de principes de sécurité fondamentaux qui se traduisent concrètement à travers plusieurs mécanismes.
+L'architecture adopte une approche "security by design" en intégrant les considérations de sécurité dès la phase d'architecture plutôt que de les traiter comme des ajouts a posteriori. Cette approche se concrétise par un chiffrement HTTPS, une authentification centralisée, une autorisation granulaire par rôles, et une séparation des responsabilités entre services.
 
-L'authentification que j'ai mise en place repose sur une architecture hybride qui combine les avantages des tokens JWT pour la performance avec la sécurité des sessions révocables pour le contrôle d'accès. Cette approche me permet de maintenir une expérience utilisateur fluide tout en conservant la possibilité de révoquer immédiatement les accès en cas de compromission.
 
-L'ensemble des communications bénéficie d'un chiffrement bout en bout via HTTPS, complété par un système d'autorisation granulaire qui contrôle précisément l'accès aux différentes fonctionnalités selon le rôle utilisateur. Cette stratification des permissions évite les accès privilégiés non nécessaires et limite les risques d'escalade de privilèges.
-
-La séparation des responsabilités entre les différents services (authentification, cache, stockage) constitue une approche défensive qui limite la surface d'attaque et facilite l'application de mesures de sécurité spécifiques à chaque composant. Cette isolation me permet également d'appliquer des politiques de sécurité différenciées selon la sensibilité des données manipulées.
-
-Une description détaillée des mécanismes de sécurité mis en place est disponible dans la section [Conception sécurisée](/securite/conception).
+Les détails d'implémentation sont présentés dans la section [Conception sécurisée](/securite/conception).
 
 ## Stratégie de gestion d'erreurs
 
-L'architecture distribuée de DropIt nécessite une approche cohérente de gestion d'erreurs pour maintenir une expérience utilisateur stable et faciliter la maintenance. Ma stratégie repose sur plusieurs niveaux de traitement des erreurs selon leur contexte d'occurrence.
+L'architecture distribuée adopte une approche défensive multi-niveaux : Error Boundaries React pour isoler les pannes d'interface, exception filters NestJS pour standardiser les erreurs API, et patterns de résilience pour les services externes.
 
-Au niveau frontend, j'ai mis en place des Error Boundaries React qui isolent les pannes d'interface et empêchent qu'une erreur dans un composant provoque le crash complet de l'application. Cette approche défensive permet aux coachs de continuer à utiliser les autres fonctionnalités même en cas de problème sur un module spécifique, comme la visualisation d'un exercice ou l'édition d'un programme.
-
-Pour l'application mobile, la stratégie offline-first que j'ai adoptée constitue un mécanisme de fallback naturel. Lorsque les requêtes réseau échouent, l'application bascule automatiquement sur les données mises en cache localement, permettant aux athlètes de consulter leurs programmes même en cas de panne serveur ou de connexion instable. Les erreurs de synchronisation sont stockées localement et traitées automatiquement lors du retour de la connectivité.
-
-Au niveau de l'API, NestJS propose un système d'exception filters qui standardise la propagation d'erreurs vers les clients. J'ai configuré ces filters pour transformer les erreurs techniques internes en messages compréhensibles côté frontend, tout en préservant les détails techniques dans les logs pour le débogage. Cette approche évite l'exposition d'informations sensibles sur l'infrastructure tout en facilitant le diagnostic des problèmes.
-
-L'architecture hexagonale facilite également l'implémentation de patterns de résilience comme le circuit breaker au niveau des services externes. Si MinIO devient indisponible, l'application peut continuer à fonctionner en mode dégradé sans affichage de médias plutôt que de planter complètement.
+Les détails d'implémentation sont présentés dans les sections [Couches de présentation](/conception/presentations) et [Architecture en couches](/conception/acces-donnees).
 
 ## Perspectives d'évolution et scalabilité
 
-### Architecture évolutive
+L'une des préoccupations constantes lors de la conception de cette architecture a été d'anticiper les **évolutions futures** sans pour autant tomber dans la sur-ingénierie. La **séparation entre les clients applicatifs** constitue un atout majeur pour l'évolution fonctionnelle. Cette approche me permet d'enrichir l'application mobile avec de nouvelles fonctionnalités spécifiques aux athlètes sans impacter le back office des coachs, et inversement.
 
-L'une des préoccupations constantes lors de la conception de cette architecture a été d'anticiper les évolutions futures sans pour autant tomber dans la sur-ingénierie. Cette réflexion m'a conduit à structurer l'application de manière à faciliter son évolution selon plusieurs axes que j'ai identifiés comme critiques.
+Du point de vue de la **scalabilité horizontale**, l'**architecture stateless** de l'API facilite grandement la réplication et le déploiement de nouvelles instances selon l'évolution des besoins de charge. Les choix technologiques (**protocoles standardisés**, **API S3-compatible**, **containerisation**) anticipent une migration progressive vers des **solutions cloud managées**.
 
-La séparation franche entre les différentes parties de l'application constitue un atout majeur pour l'évolution fonctionnelle. Cette approche me permet d'enrichir l'application mobile avec de nouvelles fonctionnalités spécifiques aux athlètes sans impacter le back office des coachs, et inversement. Cette indépendance des clients facilite l'innovation sur chaque plateforme en répondant aux besoins spécifiques de chaque contexte d'usage.
-
-Du point de vue de la scalabilité horizontale, l'architecture stateless de l'API facilite grandement la réplication et le déploiement de nouvelles instances selon l'évolution des besoins de charge. Cette flexibilité opérationnelle s'avère particulièrement précieuse dans un contexte où la croissance de l'application reste imprévisible.
-
-Les choix technologiques que j'ai privilégiés (protocoles standardisés, API S3-compatible, containerisation) anticipent également une migration progressive vers des solutions cloud managées. Cette approche me donne la flexibilité d'évoluer vers des services AWS, Google Cloud ou Azure selon les besoins futurs, sans remettre en cause l'architecture fondamentale.
-
-### Intégration de nouvelles technologies
-
-Cette flexibilité architecturale ouvre la voie à plusieurs enrichissements fonctionnels que j'envisage selon l'évolution des besoins utilisateurs.
-
-L'intégration d'outils d'extraction de documents PDF et Excel constitue une évolution naturelle particulièrement intéressante. Dans mon observation du fonctionnement de mon club, j'ai remarqué que beaucoup de coachs disposent déjà de programmes d'entraînement sous ces formats. Un module d'import automatique pourrait considérablement accélérer leur adoption de DropIt en évitant la ressaisie manuelle de programmes existants.
-
-Le développement d'un module chronomètre intégré représente également une perspective attrayante. Ayant déjà expérimenté cette fonctionnalité lors d'un projet précédent, je dispose d'une base technique que je pourrais adapter aux besoins spécifiques de l'haltérophilie. Cette intégration directe dans l'interface de visualisation d'exercices améliorerait significativement l'expérience des athlètes en évitant le recours à des applications tierces.
-
-L'implémentation de dashboards de statistiques avancées pour les coachs constitue une évolution ambitieuse qui tirerait parti de l'accumulation progressive des données d'entraînement. Ces outils d'analyse permettraient d'optimiser les performances des athlètes grâce à des insights basés sur l'historique des séances et l'évolution des charges de travail.
+Cette flexibilité architecturale ouvre la voie à plusieurs enrichissements fonctionnels envisagés comme l'**import automatique** de programmes `PDF/Excel`, un **module chronomètre intégré** pour les athlètes, et des **dashboards d'analyse des performances** pour les coachs.
 
 ## Gestion des dépendances et sécurité
 
-L'utilisation de bibliothèques externes à travers le monorepo (frontend, backend, packages partagés) nécessite une surveillance des mises à jour et vulnérabilités de sécurité.
+L'utilisation de bibliothèques externes à travers le monorepo (frontend, backend, packages partagés) nécessite une surveillance des mises à jour et vulnérabilités de sécurité. Cette maintenance s'appuie sur trois piliers : **surveillance des mises à jour** via Dependabot, **audit automatisé des vulnérabilités** avec GitHub Actions, et **stratégie de mise à jour** coordonnée entre toutes les applications. Cette approche préventive garantit la sécurité des données personnelles d'athlètes.
 
-### Audit automatisé des vulnérabilités
-
-J'ai mis en place un système d'audit automatique via GitHub Actions qui exécute `pnpm audit` à chaque push et de manière hebdomadaire. Cette vérification détecte les vulnérabilités connues dans l'arbre de dépendances et génère des alertes par email en cas de faille critique. GitHub Security Advisories complète ce dispositif en surveillant automatiquement le repository et en proposant des pull requests de correction pour les vulnérabilités détectées.
-
-### Surveillance des mises à jour
-
-Pour rester informé des évolutions importantes, j'ai configuré Dependabot sur le repository GitHub qui propose automatiquement des pull requests pour les mises à jour de dépendances. Cette approche me permet de tester et valider chaque mise à jour dans un environnement contrôlé avant déploiement.
-
-Pour les bibliothèques critiques (React, NestJS, MikroORM, PostgreSQL driver), je surveille également les annonces de sécurité via leurs canaux officiels (Twitter, newsletters, GitHub releases). Cette veille proactive me permet d'anticiper les migrations importantes et de planifier les mises à jour selon leur criticité.
-
-### Stratégie de mise à jour
-
-Dans le contexte d'un monorepo, une vulnérabilité dans un package partagé impacte potentiellement toutes les applications. Cette centralisation présente l'avantage de pouvoir corriger une faille en un seul endroit, mais nécessite une coordination des tests sur l'ensemble de l'écosystème avant déploiement.
-
-Cette approche préventive de la sécurité des dépendances s'inscrit dans une démarche de développement responsable, particulièrement importante dans un contexte applicatif gérant des données personnelles d'athlètes.
+Les détails d'implémentation sont documentés dans la section annexe [Architecture technique](/annexes/architecture-technique/#gestion-des-dépendances-et-sécurité).
 
 ## Conclusion
 
-Cette démarche architecturale reflète ma stratégie d'équilibre entre pragmatisme et apprentissage dans le contexte de ma formation. En m'appuyant sur des technologies que je maîtrise déjà (React, NestJS, PostgreSQL) pour les composants critiques, j'ai pu garantir la viabilité technique du projet tout en me laissant l'opportunité d'explorer de nouveaux outils (MikroORM, React Native) qui enrichissent mes compétences.
+Cette architecture répond aux exigences spécifiques d'une application de gestion de club sportif : elle garantit la cohérence des données d'entraînement entre les différents utilisateurs, offre une expérience adaptée à chaque contexte d'usage (mobile pour les athlètes, web pour les coachs), et assure la maintenabilité nécessaire pour un usage associatif sur plusieurs années.
 
-L'approche monorepo et l'architecture hexagonale que j'ai progressivement adoptées constituent des apprentissages significatifs qui dépassent le cadre de ce projet. Ces patterns architecturaux me donnent une compréhension plus fine des enjeux de scalabilité et de maintenabilité qui caractérisent les applications modernes.
+L'approche monorepo et l'architecture hexagonale apportent des bénéfices concrets : synchronisation automatique des types entre clients et serveur, réduction des erreurs d'intégration, facilité de déploiement et évolutivité technique. Ces choix facilitent la maintenance pour les développeurs futurs qui pourraient reprendre le projet, aspect crucial dans un contexte associatif où les ressources techniques peuvent évoluer.
 
-La séparation claire des responsabilités entre les différentes couches facilite non seulement la maintenance actuelle, mais anticipe également l'évolution future de l'application selon les retours d'usage de mon club et l'évolution de mes compétences techniques.
+La séparation claire des responsabilités entre les différentes couches permet d'adapter l'application aux retours d'usage du club sans remettre en cause l'architecture globale. Cette flexibilité constitue un atout pour répondre aux évolutions des besoins métier et accompagner le développement du club sur le long terme.
 
