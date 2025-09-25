@@ -73,7 +73,6 @@ declare -a securite_files=(
     "conception:Conception sécurisée"
     "authentification:Authentification"
     "permissions:Gestion des rôles"
-    "owasp:OWASP"
 )
 
 for item in "${securite_files[@]}"; do
@@ -116,7 +115,6 @@ echo "" >> "$OUTPUT_FILE"
 declare -a deploiement_files=(
     "preparation:Préparation au déploiement"
     "production:Mise en production"
-    "performances:Performances globales"
 )
 
 for item in "${deploiement_files[@]}"; do
@@ -137,8 +135,7 @@ echo "" >> "$OUTPUT_FILE"
 
 declare -a gestion_files=(
     "contribution:Contribution au projet"
-    "documentation:Documentation et rapports"
-    "support:FAQ & Support"
+    "documentations:Documentations"
 )
 
 for item in "${gestion_files[@]}"; do
@@ -153,35 +150,17 @@ for item in "${gestion_files[@]}"; do
     fi
 done
 
-# Environnement de travail
-echo "# Environnement de travail" >> "$OUTPUT_FILE"
-echo "" >> "$OUTPUT_FILE"
-
-declare -a environnement_files=(
-    "installation:Installation et configuration"
-    "outils:Outils et technologies"
-)
-
-for item in "${environnement_files[@]}"; do
-    IFS=':' read -r filename title <<< "$item"
-    if [ -f "$DOCS_DIR/environnement/$filename.md" ]; then
-        echo "## $title" >> "$OUTPUT_FILE"
-        echo "" >> "$OUTPUT_FILE"
-        tail -n +4 "$DOCS_DIR/environnement/$filename.md" | sed '/^# /d' >> "$OUTPUT_FILE"
-        echo "" >> "$OUTPUT_FILE"
-        echo "\\newpage" >> "$OUTPUT_FILE"
-        echo "" >> "$OUTPUT_FILE"
-    fi
-done
-
-# Annexes
+# Annexes (placées à la fin comme demandé)
 echo "# Annexes" >> "$OUTPUT_FILE"
 echo "" >> "$OUTPUT_FILE"
 
 declare -a annexes_files=(
+    "architecture-technique:Architecture technique"
+    "authentifications:Authentifications"
+    "permissions:Permissions"
     "glossaire:Glossaire"
-    "references:Références" 
-    "roadmap:Roadmap"
+    "cahier-des-charges:Cahier des charges"
+    "bilan:Bilan"
 )
 
 for item in "${annexes_files[@]}"; do
