@@ -155,7 +155,10 @@ echo "# Annexes" >> "$OUTPUT_FILE"
 echo "" >> "$OUTPUT_FILE"
 
 declare -a annexes_files=(
+    "analyse-besoins:Analyse des besoins"
     "architecture-technique:Architecture technique"
+    "conception-base-donnees:Conception technique de la base de données"
+    "implementation-acces-donnees:Implémentation accès aux données"
     "authentifications:Authentifications"
     "permissions:Permissions"
     "glossaire:Glossaire"
