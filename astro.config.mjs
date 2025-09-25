@@ -88,6 +88,7 @@ export default defineConfig({
 					items: [
 						{ label: 'Analyse des besoins', link: '/annexes/analyse-besoins/' },
 						{ label: 'Architecture technique', link: '/annexes/architecture-technique/' },
+						{ label: 'Conception technique de la base de données', link: '/annexes/conception-base-donnees/' },
 						{ label: 'Authentifications', link: '/annexes/authentifications/' },
 						{ label: 'Permissions', link: '/annexes/permissions/' },
 						{ label: 'Glossaire', link: '/annexes/glossaire/' },

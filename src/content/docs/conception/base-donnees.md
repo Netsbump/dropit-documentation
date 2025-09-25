@@ -77,29 +77,7 @@ Le passage au MLD m'a demandé de résoudre plusieurs types de relations selon l
 
 Les entités de catégorisation (ExerciseCategory, WorkoutCategory, ComplexCategory) utilisent des relations one-to-many classiques pour organiser les données sans attributs supplémentaires.
 
-### Décisions de normalisation
-
-La normalisation consiste à organiser les données pour éviter les redondances et garantir la cohérence. J'ai appliqué la **troisième forme normale (3NF)**, qui élimine les dépendances transitives entre les données.
-
-**Principe appliqué** : Chaque information n'est stockée qu'à un seul endroit. Les caractéristiques d'un exercice (nom, description, catégorie) sont uniquement dans la table `Exercise`, et les autres tables y font simplement référence via `exercise_id`. Cette approche évite les incohérences et facilite les modifications.
-
-J'ai accepté quelques exceptions pour optimiser les performances :
-- Les `PersonalRecord` stockent directement la référence vers l'exercice ET l'athlète, ce qui évite des jointures complexes lors du calcul automatique des charges d'entraînement
-- Cette duplication contrôlée accélère une opération critique : quand un coach crée un programme, l'application peut immédiatement calculer les charges recommandées sans requête supplémentaire
-
-Les informations de base restent centralisées (un exercice = une seule définition), mais les données de performance sont optimisées pour un accès rapide lors de l'utilisation quotidienne de l'application.
-
-### Gestion des clés et contraintes
-
-J'ai opté pour des clés primaires UUID plutôt que des entiers auto-incrémentés pour des raisons pratiques liées au développement et au déploiement.
-
-Les UUID facilitent les opérations de développement en évitant les conflits d'identifiants lors de la synchronisation entre les environnements de développement, test et production. Quand plusieurs développeurs créent des données de test, les UUID évitent naturellement les collisions d'identifiants.
-
-Cette approche simplifie également les opérations de migration et d'import de données. Lors de la fusion de données de test ou de l'import de catalogues d'exercices externes, je n'ai pas à me soucier des conflits d'identifiants numériques.
-
-Le principal inconvénient reste l'espace de stockage plus important (16 bytes vs 4 bytes pour un integer), mais dans le contexte d'un club d'haltérophilie avec quelques centaines d'utilisateurs maximum, cet overhead reste négligeable face à la simplicité opérationnelle.
-
-Pour l'intégrité référentielle, j'ai identifié les stratégies de suppression nécessaires selon les types de relations. Les relations de composition nécessitent un comportement CASCADE : si un workout est supprimé, ses éléments doivent l'être automatiquement puisqu'ils n'ont pas de sens sans leur parent. À l'inverse, les relations de référence requièrent RESTRICT pour empêcher la suppression accidentelle d'un exercice encore utilisé dans des programmes actifs.
+> **Détails techniques** : Voir l'[Annexe - Conception technique de la base de données](/annexes/conception-bdd-technique/)
 
 ## Modèle Physique de Données (MPD)
 
@@ -107,145 +85,31 @@ Le MPD constitue l'aboutissement de ma démarche de modélisation, traduisant le
 
 ![Modèle Physique de Données DropIt](../../../assets/mpd-dropit.png)
 
-### Choix des types de données PostgreSQL
+### Choix techniques essentiels
 
-Ma sélection des types de données s'appuie sur les spécificités de PostgreSQL et les besoins métier de l'haltérophilie :
+**Types de données PostgreSQL** : J'ai sélectionné des types adaptés aux besoins métier de l'haltérophilie : UUID pour les identifiants (facilite la distribution), VARCHAR avec contraintes pour les textes, TIMESTAMP pour les dates, INTEGER pour les valeurs numériques, DECIMAL pour les charges et poids (précision exacte nécessaire aux calculs).
 
-**UUID pour les identifiants** : Comme évoqué précédemment, ce choix facilite la distribution et évite les conflits d'identifiants.
+**Gestion des médias** : Les ressources visuelles (photos, vidéos d'exercices) sont stockées sur un service externe (Cloudinary) et référencées par URL dans la base de données, optimisant les performances et simplifiant les sauvegardes.
 
-**VARCHAR avec contraintes de longueur** : Pour les champs textuels (noms, descriptions, titres), j'ai défini des longueurs appropriées plutôt que d'utiliser TEXT illimité. Les catégories restent extensibles par les coachs selon leurs besoins spécifiques.
+**Pattern de référence polymorphe** : Pour permettre aux programmes d'inclure exercices simples et complexes, j'utilise une table `WorkoutElement` avec un discriminant `element_type` et deux clés étrangères optionnelles. Une contrainte CHECK garantit l'intégrité référentielle.
 
-**TIMESTAMP** : Pour toutes les dates de création, modification et d'enregistrement. PostgreSQL offre une gestion native des fuseaux horaires.
+### Contraintes d'intégrité
 
-**INTEGER** : Pour les valeurs numériques comme les séries, répétitions, temps de repos, ordres de séquence.
+J'ai réparti les contraintes entre validation Zod (early validation) et contraintes de base de données selon leur nature :
 
-**DECIMAL** : Pour les charges, poids et valeurs de performance, garantissant une précision exacte nécessaire aux calculs de pourcentages et progressions.
+- **Contraintes structurelles** : En base de données pour garantir la cohérence (intégrité référentielle polymorphe)
+- **Contraintes métier** : En Zod pour l'expérience utilisateur (bornes de valeurs, messages d'erreur clairs)
+- **Contraintes temporelles** : Dans les use cases pour le contexte métier
 
-**BOOLEAN** : Pour les flags et statuts binaires présents dans le modèle.
-
-**TEXT** : Pour les URLs des fichiers média stockés en externe (photos d'exercices, vidéos de démonstration).
-
-Cette approche me permet de bénéficier des optimisations PostgreSQL tout en maintenant une flexibilité pour les évolutions futures du modèle.
-
-### Gestion des médias
-
-L'entité `Media` visible dans le MPD gère les ressources visuelles associées aux exercices : photos de démonstration, vidéos d'exécution correcte, schémas anatomiques. Ces médias sont stockés sur un service externe (Cloudinary ou similaire) et référencés par leur URL dans la base de données.
-
-Cette séparation entre données structurées (PostgreSQL) et fichiers média (service spécialisé) optimise les performances et simplifie la gestion des sauvegardes.
-
-### Pattern de référence polymorphe
-
-Pour permettre aux programmes d'entraînement d'inclure à la fois des exercices simples et des complexes, j'ai choisi un pattern de référence polymorphe dans la table `WorkoutElement`.
-
-**Principe retenu** : Une table unique avec un discriminant `element_type` et deux clés étrangères optionnelles (`exercise_id` et `complex_id`). Une contrainte CHECK garantit qu'exactement une des deux références est remplie selon le type.
-
-**Alternatives considérées** :
-
-*Option 1 - Tables séparées* : Créer `WorkoutExercise` et `WorkoutComplex` distinctes.
-- ✅ Avantages : Structure plus claire, pas de colonnes NULL, contraintes d'intégrité simples
-- ❌ Inconvénients : Duplication des colonnes communes (sets, reps, weight, rest_time, order_index) dans chaque table, duplication du code applicatif (2 repositories, 2 DTOs), complexité pour afficher une séquence ordonnée d'éléments mixtes
-
-*Option 2 - Table d'union* : Une table `WorkoutElement` générique pointant vers une table `TrainingElement` qui fait le lien.
-- ✅ Avantages : Extensibilité maximale  
-- ❌ Inconvénients : Sur-ingénierie pour mon cas d'usage, jointures supplémentaires
-
-**Justification du choix** : Le pattern polymorphe mutualise les colonnes communes (sets, reps, weight, etc.) qui s'appliquent aussi bien aux exercices qu'aux complexes, évite la duplication de code, et facilite l'affichage ordonné des programmes. Les contraintes CHECK compensent la flexibilité par la rigueur des validations.
-
-Le polymorphisme est contrôlé par une contrainte CHECK qui garantit qu'exactement une des deux références est renseignée selon le type déclaré, évitant ainsi les incohérences de données.
-
-### Contraintes d'intégrité spécifiques
-
-J'ai réfléchi à la répartition des contraintes entre la validation Zod (early validation) et les contraintes de base de données selon leur nature.
-
-**Contraintes structurelles en base de données** :
-Les contraintes qui garantissent la cohérence structurelle restent au niveau base de données car elles constituent le dernier rempart contre l'incohérence :
-
-```sql
--- Garantit l'intégrité référentielle polymorphe
-ALTER TABLE workout_element ADD CONSTRAINT valid_element_reference 
-  CHECK ((element_type = 'exercise' AND exercise_id IS NOT NULL AND complex_id IS NULL) 
-      OR (element_type = 'complex' AND complex_id IS NOT NULL AND exercise_id IS NULL));
-```
-
-**Contraintes métier déportées vers les couches applicatives** :
-
-J'ai réparti les autres contraintes selon leur nature entre Zod et les use cases pour optimiser l'expérience utilisateur et les performances.
-
-Les validations de bornes métier sont gérées par Zod dans les schémas partagés :
-
-```typescript
-// Exemple concret de validation Zod pour WorkoutElement
-const WorkoutElementSchema = z.object({
-  sets: z.number().min(1, "Au moins 1 série requise").max(10, "Maximum 30 séries"),
-  reps: z.number().min(1, "Au moins 1 répétition").max(50, "Maximum 50 répétitions"),
-  weight: z.number().min(0, "Le poids ne peut être négatif").max(300, "Poids maximum 300kg"),
-});
-```
-
-Cette approche présente plusieurs avantages :
-- Validation immédiate côté client et serveur
-- Messages d'erreur clairs pour les utilisateurs
-- Évolutivité sans migration de base de données
-
-Les contraintes temporelles comme `recorded_at <= NOW()` pour l'entité `PersonalRecord` sont quant à elles gérées dans les use cases qui contrôlent le contexte métier de création et modification des enregistrements. Cette logique appartient naturellement à la couche applicative qui maîtrise les règles business.
-
-Cette stratification respecte le principe de défense en profondeur : validation early avec Zod pour l'expérience utilisateur, validation métier dans les use cases, contraintes structurelles en base pour l'intégrité finale des données.
-
-### Stratégie d'optimisation par indexation
-
-Dans l'état actuel du MVP, je me contente des index automatiques sur les clés primaires et étrangères. Cette approche volontairement minimaliste évite l'optimisation prématurée et me permet de démarrer avec une base de données simple.
-
-Un index accélère les requêtes SELECT mais ralentit les écritures (INSERT, UPDATE, DELETE) car il doit être maintenu à jour. Pour un club avec quelques dizaines d'athlètes, cette optimisation n'est pas nécessaire au lancement.
-
-Cependant, j'ai identifié les requêtes qui pourraient devenir problématiques si le volume augmente :
-
-- **Consultation des séances d'un athlète** : Un coach consulte régulièrement l'historique des séances de ses athlètes
-- **Calcul des charges d'entraînement** : L'application récupère le record personnel le plus récent pour un exercice donné lors de la création d'un programme
-- **Liste des programmes publiés** : Les athlètes consultent leurs programmes actifs depuis l'application mobile
-
-Si les temps de réponse deviennent problématiques, j'ajouterai les index correspondants en me basant sur les requêtes lentes identifiées via les logs PostgreSQL.
-
-Cette approche pragmatique privilégie la simplicité initiale avec une possibilité d'optimisation guidée par les métriques réelles.
-
-### Préparation pour la mise en cache
-
-La structure que j'ai conçue anticipe l'intégration future de Redis comme système de cache. Cette solution me permettra d'améliorer les temps de réponse lorsque le nombre d'utilisateurs augmentera, sans modifier l'architecture de base de données existante.
-
-J'ai identifié les données qui bénéficieraient le plus de cette optimisation :
-- Catalogue d'exercices et complex complets (données qui changent rarement)
-- Programmes d'entraînement consultés quotidiennement par les athlètes  
-- Records personnels récents utilisés pour calculer les charges d'entraînement
-- Compositions des complex les plus populaires auprès des coachs
-
-Cette approche évolutive me convient parfaitement : commencer avec PostgreSQL seul pour le MVP, puis ajouter Redis si les métriques de performance le justifient en production.
+Cette stratification respecte le principe de défense en profondeur.
 
 ## Stratégie d'évolution
 
-Dans ma conception de la base de données, j'ai réfléchi aux fonctionnalités qui pourraient émerger après le lancement du MVP. Plutôt que de tout implémenter dès le départ, j'ai préféré identifier les extensions logiques que les retours utilisateurs du club pourraient justifier.
+L'architecture actuelle facilite l'ajout de nouvelles fonctionnalités selon les retours d'usage du club. J'ai identifié plusieurs extensions logiques qui pourraient émerger après le lancement du MVP : système de messages du coach, notifications push, catégorisation enrichie des exercices, indicateurs de difficulté, gestion des tempos avancés.
 
-### Extensions métier envisagées
+Ces extensions s'intègrent naturellement dans l'architecture existante sans remettre en cause les relations fondamentales. L'évolution du modèle utilisera le système de migrations de MikroORM pour préserver l'intégrité des données existantes.
 
-L'architecture actuelle facilite l'ajout de nouvelles fonctionnalités selon les retours d'usage du club :
-
-**Messages du coach** : Une entité `CoachMessage` permettrait de diffuser des annonces générales (événements particuliers, rappels globaux) aux athlètes d'une organisation. Cette table pourrait inclure un système de priorité et une date d'expiration pour gérer automatiquement la visibilité des messages.
-
-**Système de notifications** : Une entité `Notification` centralisée gérerait les alertés push vers les applications mobiles (nouveaux programmes assignés, rappels de séances, félicitations pour les records). Cette approche permettrait un historique des notifications et la gestion des préférences utilisateur.
-
-**Catégorisation enrichie des exercices** : L'ajout d'entités `MuscleGroup` et `Equipment` structurerait mieux le catalogue d'exercices. Ces références faciliteraient les recherches avancées (exercices pour les jambes, exercices nécessitant des haltères) et l'élaboration de programmes équilibrés.
-
-**Indicateurs de difficulté** : Une extension de `Workout` avec un champ difficulté aiderait les coachs à graduer leurs programmes selon le niveau des athlètes. Cette information pourrait également alimenter des statistiques de progression.
-
-**Gestion des tempos avancés** : Pour les coachs expérimentés, deux niveaux de tempo enrichiraient la programmation :
-- Macro tempo (EMOM, TABATA, AMRAP) au niveau des `Complex` pour structurer les séquences d'exercices
-- Micro tempo (2-2-1, 3-0-1) au niveau des `WorkoutElement` pour contrôler le rythme d'exécution de chaque exercice
-
-Ces extensions s'intègrent naturellement dans l'architecture existante sans remettre en cause les relations fondamentales.
-
-### Stratégie de migration
-
-L'évolution de ce modèle de données nécessitera une approche méthodique pour préserver l'intégrité des données existantes. J'ai prévu d'utiliser le système de migrations de MikroORM pour gérer ces évolutions de schéma de façon sécurisée.
-
-Cette stratégie inclut le versioning des modifications, la possibilité de rollback, et la validation des migrations avant déploiement en production.
+> **Extensions détaillées** : Voir l'[Annexe - Conception technique de la base de données](/annexes/conception-bdd-technique/)
 
 La section suivante sur l'[accès aux données](/conception/acces-donnees) détaille l'implémentation de ces modèles avec MikroORM et les patterns de développement adoptés.
 
