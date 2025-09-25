@@ -1,6 +1,6 @@
 ---
-title: Contexte métier et enjeux techniques
-description: Analyse du contexte, des enjeux et des choix stratégiques du projet DropIt
+title: Analyse technique et enjeux du projet
+description: Diagnostic technique, stratégie de développement et défis du projet DropIt
 ---
 
 ## Diagnostic de l'existant

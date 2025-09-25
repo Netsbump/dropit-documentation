@@ -1,6 +1,6 @@
 ---
 title: Présentation du projet DropIt
-description: Contextualisation du parcours professionnel et genèse d'un projet d'application de gestion de club d'haltérophilie
+description: Parcours professionnel et genèse du projet d'application de gestion de club d'haltérophilie
 ---
 
 ## Contexte professionnel
@@ -17,12 +17,4 @@ L'entreprise qui a accepté ma candidature, Lonestone, est une agence web spéci
 
 Sur mon temps libre, je fais partie d'un club d'haltérophilie. Ma pratique de ce sport depuis plusieurs années m'a placé dans une position privilégiée pour observer les défis organisationnels de ce type de structure. Cette immersion quotidienne dans cet environnement a fait naître l'idée d'aider les pratiquants et le coach en informatisant le suivi des entraînements.
 
-Le projet que j'ai décidé de nommer DropIt s'inscrit dans une démarche qui allie exigences pédagogiques et utilité pratique. Cette double contrainte influence profondément mes choix de conception : chaque décision technique doit démontrer ma compréhension des enjeux de développement d'applications complètes tout en apportant une réelle valeur ajoutée aux utilisateurs finaux de mon club.
-
-L'application se structure autour de deux interfaces complémentaires répondant aux besoins différenciés des utilisateurs. Le backoffice web, destiné aux coachs, permet la création, visualisation et la planification d'entraînements ainsi que le suivi des athlètes. L'application mobile, destinée aux athlètes, permet la consultation de l'entraînement adapté pour chaque utilisateur et l'enregistrement des performances lors des sessions.
-
-Ma méthodologie s'appuie sur une approche centrée sur l'utilisateur final que ma position d'athlète facilite considérablement. Cette proximité avec le terrain me permet d'itérer rapidement sur les fonctionnalités, en confrontant mes développements aux besoins réels exprimés par les autres membres du club.
-
-Ce projet me permet de développer une approche complète de la conception d'applications, depuis l'analyse des besoins jusqu'au déploiement en production. Les compétences visées s'articulent autour de trois axes principaux. D'abord, la maîtrise technique d'une stack moderne. Ensuite, l'appréhension des enjeux de sécurité et de performance dans des applications métier. Enfin, la capacité à gérer un projet en autonomie.
-
-Chaque section s'appuie sur des exemples tirés du développement de DropIt, permettant d'ancrer les concepts théoriques dans une réalité pratique.
+Le projet que j'ai décidé de nommer DropIt me permet de développer une approche complète de la conception d'applications, depuis l'analyse des besoins jusqu'au déploiement en production. Les compétences visées s'articulent autour de trois axes principaux : la maîtrise technique d'une stack moderne, l'appréhension des enjeux de sécurité et de performance dans des applications métier, et la capacité à gérer un projet en autonomie.
