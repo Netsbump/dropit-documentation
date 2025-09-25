@@ -131,7 +131,7 @@ La structure mobile reste volontairement simple avec une séparation entre les c
 
 Les assets sont organisés selon les conventions Expo pour permettre une génération automatique des icônes et écrans de démarrage adaptés à chaque plateforme. Cette approche me fait économiser un temps précieux en automatisant les tâches répétitives de création d'assets spécifiques à chaque plateforme.
 
-Cette architecture répond aux contraintes spécifiques du mobile (offline-first, interface tactile) tout en maintenant la cohérence avec l'écosystème monorepo.
+Cette architecture répond aux contraintes spécifiques du mobile (interface tactile, optimisations de performance) tout en maintenant la cohérence avec l'écosystème monorepo.
 
 ## API REST : NestJS
 

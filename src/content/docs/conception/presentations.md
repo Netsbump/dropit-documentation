@@ -761,7 +761,7 @@ sequenceDiagram
     API->>Server: GET /api/workouts
     Server-->>API: Programmes de l'athlète
     API-->>Storage: Cache local des données
-    Storage-->>App: Programmes disponibles hors ligne
+    Storage-->>App: Programmes mis en cache localement
     
     Athlete->>App: Consultation programme d'entraînement
     App->>Storage: Lecture données locales
@@ -778,7 +778,7 @@ sequenceDiagram
     Server-->>API: Confirmation serveur
 ```
 
-L'approche offline-first, bien que non implémenter pour l'instant consistue une piste d'évolution qui privilégiera le stockage local des données pour garantir une utilisation continue même sans connexion internet, contrainte fréquente en salle de sport. Les performances sont stockées localement puis synchronisées automatiquement avec le serveur.
+Le stockage local des données constitue une piste d'évolution future qui permettrait de garantir une utilisation continue même sans connexion internet, contrainte fréquente en salle de sport. Cette fonctionnalité n'est pas implémentée dans le MVP actuel.
 
 
 ## Bilan des choix architecturaux frontend
