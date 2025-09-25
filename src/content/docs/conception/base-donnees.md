@@ -5,11 +5,11 @@ description: Conception et modélisation de la base de données
 
 ## Approche de conception
 
-Pour concevoir la base de données de DropIt, j'ai choisi d'utiliser la méthode Merise, approche méthodologique française que j'ai étudiée dans ma formation et qui s'avère particulièrement adaptée aux projets avec des relations complexes entre entités.
+Pour concevoir la base de données de DropIt, j'ai choisi d'utiliser la méthode Merise, approche méthodologique française que j'ai étudiée dans ma formation et qui s'avère adaptée aux projets avec des relations complexes entre entités.
 
-Cette méthode structure la conception en trois niveaux d'abstraction successifs : conceptuel (MCD), logique (MLD) et physique (MPD). Cette progression méthodique m'a permis de partir des besoins métier exprimés lors de l'analyse fonctionnelle pour arriver progressivement à une structure de base de données optimisée pour PostgreSQL.
+Cette méthode structure la conception en trois niveaux d'abstraction successifs : conceptuel (MCD), logique (MLD) et physique (MPD). Cette méthodologie m'a permis de partir des besoins métier exprimés lors de l'analyse fonctionnelle pour arriver progressivement à une structure de base de données optimisée pour PostgreSQL.
 
-Merise me convenait pour structurer les relations métier de DropIt. Les principales interactions sont assez simples : un coach assigne des programmes à ses athlètes, ces programmes composent des exercices avec des paramètres spécifiques (séries, répétitions, charges). La méthode Merise m'aide à organiser ces données sans redondance.
+Les principales interactions sont assez simples : un coach assigne des programmes à ses athlètes, ces programmes composent des exercices avec des paramètres spécifiques (séries, répétitions, charges).
 
 ## Modèle Conceptuel de Données (MCD)
 
