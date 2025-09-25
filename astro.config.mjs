@@ -86,6 +86,7 @@ export default defineConfig({
 				{
 					label: 'Annexes',
 					items: [
+						{ label: 'Analyse des besoins', link: '/annexes/analyse-besoins/' },
 						{ label: 'Architecture technique', link: '/annexes/architecture-technique/' },
 						{ label: 'Authentifications', link: '/annexes/authentifications/' },
 						{ label: 'Permissions', link: '/annexes/permissions/' },
