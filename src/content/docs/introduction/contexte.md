@@ -7,9 +7,9 @@ description: Analyse du contexte, des enjeux et des choix stratégiques du proje
 
 Au sein de mon club d'haltérophilie, la gestion des entraînements repose actuellement sur l'utilisation d'une application de messagerie instantanée. Cette solution simple, bien que pratique à première vue, révèle des dysfonctionnements significatifs dans la pratique quotidienne que j'ai pu observer et analyser pendant mes années de pratique.
 
-Les programmes d'entraînement se retrouvent rapidement noyés dans le flux des conversations, rendant leur consultation difficile pour les athlètes. Cette dispersion de l'information génère régulièrement des incompréhensions sur les séances à réaliser, obligeant les coachs à répéter les mêmes informations à plusieurs reprises. Les annonces importantes, comme les dates de compétition ou les changements d'horaires, peuvent facilement être manquées dans ce flux continu de messages.
+Les programmes d'entraînement se retrouvent rapidement noyés dans le flux des conversations, rendant leur consultation difficile pour les athlètes. Cette dispersion de l'information génère régulièrement des incompréhensions sur les séances à réaliser, obligeant les coachs à répéter les mêmes informations à plusieurs reprises.
 
-Cette situation impacte particulièrement le travail des coachs, qui doivent consacrer un temps considérable à la gestion et à la communication des programmes d'entraînement. L'absence d'un outil dédié complique le suivi personnalisé des athlètes et la planification des cycles d'entraînement. J'ai pu observer que cette inefficacité organisationnelle constitue une source de frustration tant pour les entraîneurs que pour les pratiquants.
+Cette situation impacte le travail des coachs, qui doivent consacrer un temps considérable à la gestion et à la communication des programmes d'entraînement. L'absence d'un outil dédié complique le suivi personnalisé des athlètes et la planification des cycles d'entraînement.
 
 Cette observation du terrain m'a amené à m'interroger sur la possibilité de développer une solution plus adaptée aux besoins spécifiques de la gestion d'un club d'haltérophilie, en tirant parti de ma position de pratiquant pour mieux comprendre les enjeux utilisateur.
 
@@ -37,7 +37,7 @@ Le projet couvre l'ensemble des aspects techniques suivants :
 
 L'application s'adresse principalement aux membres du club qui ont besoin d'accéder facilement à leurs programmes d'entraînement personnalisés, de suivre leurs progressions et de rester informés des actualités importantes du club.
 
-L'accès rapide au programme du jour constitue leur besoin prioritaire. Entre chaque série, l'athlète doit pouvoir visualiser immédiatement l'exercice suivant et la charge à utiliser sur sa barre. Le support mobile s'impose naturellement par sa praticité dans l'environnement de la salle de sport, permettant une consultation rapide sans avoir à se déplacer vers un ordinateur fixe.
+L'accès au programme du jour constitue leur besoin prioritaire. Entre chaque série, l'athlète doit pouvoir visualiser immédiatement l'exercice suivant et la charge à utiliser sur sa barre. Le support mobile s'impose naturellement par sa praticité dans l'environnement de la salle de sport.
 
 Le suivi de progression représente un aspect motivationnel crucial pour maintenir l'engagement des pratiquants. Cette fonctionnalité doit permettre une visualisation claire des améliorations sans complexité excessive d'usage.
 
@@ -47,7 +47,7 @@ Les entraîneurs expriment des besoins différents, centrés sur l'efficacité d
 
 La création et la gestion efficaces des programmes d'entraînement constituent leur besoin principal. L'outil doit leur faire gagner du temps dans ces tâches administratives pour qu'ils puissent se concentrer sur l'accompagnement technique des athlètes.
 
-Le suivi des performances de leurs athlètes nécessite des outils de visualisation et d'analyse adaptés à la planification des cycles d'entraînement. Cette fonctionnalité doit s'intégrer naturellement dans leur méthodologie d'entraînement.
+Le suivi des performances de leurs athlètes nécessite des outils de visualisation et d'analyse adaptés à la planification des cycles d'entraînement.
 
 La communication avec l'ensemble du groupe doit être simplifiée et ciblée, évitant la dispersion actuelle de l'information.
 
@@ -59,20 +59,10 @@ Dans un second temps, l'application évoluera en fonction des retours d'usage r�
 
 ## Défis techniques
 
-SL'interface doit être accessible sur différents supports, avec une version mobile optimisée pour les athlètes et une interface web complète pour les coachs. Cette exigence multi-plateforme m'amène à réfléchir aux choix technologiques cohérents et à l'architecture adaptée.
+L'interface doit être accessible sur différents supports, avec une version mobile pour les athlètes et une interface web pour les coachs.
 
-La synchronisation des données entre l'application mobile et le backoffice web nécessitera une architecture API robuste pour gérer les accès concurrents aux programmes. Par exemple, lorsqu'un coach modifie un programme pendant qu'un athlète consulte ses séances, l'application doit garantir la cohérence des informations affichées sans perturber l'expérience utilisateur.
-
-La protection des données personnelles constitue un enjeu majeur que je ne peux ignorer. L'application devra respecter scrupuleusement les normes RGPD et intégrer des mesures de sécurité robustes, particulièrement importantes dans le contexte de données de performance sportive qui peuvent révéler des informations sensibles sur la condition physique des utilisateurs.
-
-Les performances revêtent une importance particulière dans le contexte d'usage spécifique de DropIt. L'application mobile doit rester réactive dans l'environnement de la salle de sport, souvent caractérisé par des connexions internet limitées ou instables.
-
-L'accessibilité représente un autre aspect important du projet, avec ma volonté de respecter les normes WCAG pour garantir une utilisation inclusive de l'application. Cette exigence s'intègre dans ma démarche de conception responsable et professionnelle.
+La protection des données personnelles constitue un enjeu majeur. L'application devra respecter les normes RGPD et intégrer des mesures de sécurité robustes, particulièrement importantes dans le contexte de données de performance sportive qui peuvent révéler des informations sensibles sur les données de santé des utilisateurs.
 
 ## Perspectives d'évolution
 
-La conception modulaire de l'application que j'envisage permettra son évolution future selon les besoins exprimés par les utilisateurs. Des fonctionnalités plus avancées pourront être ajoutées progressivement, comme des outils d'analyse de performance détaillés ou une possible extension à d'autres clubs de la région.
-
-L'architecture que je choisirai devra faciliter ces évolutions tout en maintenant la stabilité du système existant.
-
-Par ailleurs, les retours d'usage réels m'aideront à mieux comprendre les enjeux de développement d'applications métier et à découvrir de nouvelles problématiques techniques selon les besoins qui émergeront.
+La conception de l'application devra permettre son évolution future selon les besoins exprimés par les utilisateurs.
