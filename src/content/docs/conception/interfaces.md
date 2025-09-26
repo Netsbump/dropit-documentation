@@ -49,7 +49,7 @@ Le wireframe révèle les éléments structurants :
 
 Dans le MVP, j'ai fait le choix de ne pas optimiser l'interface web pour les mobiles. Les coachs utilisent principalement des ordinateurs de bureau ou tablettes pour créer leurs programmes, contexte qui permet une interface riche en interactions complexes. Cette décision me permet de concentrer l'effort sur une expérience optimale desktop plutôt que de multiplier les compromis.
 
-### Interface mobile athlète (Front office)
+### Wireframe mobile athlète (Front office)
 
 #### Page d'accueil
 
@@ -67,37 +67,12 @@ L'interface mobile présente les exercices de manière séquentielle, avec les i
 
 <img src="/src/assets/wireframe-mobile-training-detail.png" alt="Wireframe visualisation détail exercice mobile" width="300" />
 
-## Design system et cohérence visuelle
+## Design system
 
 Pour le design system, j'ai choisi Shadcn/ui (pour l'interface web) après avoir analysé les enjeux d'accessibilité et de maintenabilité que présentait DropIt. Cette décision s'appuie sur plusieurs arguments techniques décisifs pour un projet professionnel détaillés dans la partie [présentations](/conception/presentations).
 
-## Implémentations visuelles finales
-
-Cette section présente le rendu final des interfaces après itération sur les wireframes et intégration du design system.
-
-### Maquette de programmation coach
-
-<img src="/src/assets/maquette-biblio-entrainement.png" alt="Screenshot dashboard principal coach" width="900" />
-
-### Maquette de création de programme 
-
-<img src="/src/assets/maquette-creation-entrainement.png" alt="Screenshot stepper création programme" width="900" />
-
-L'interface multi-étapes guide le coach dans la composition avec un workflow intuitif :
-- **Étape 1** : Informations générales de l'entrainement
-- **Étape 2** : Construction du programme via drag-and-drop
-- **Étape 3** : Planification et assignation aux athlètes 
-
-### Maquette mobile de dashboard 
-
-<img src="/src/assets/maquette-mobile-dashboard.jpg" alt="Screenshots interface mobile" width="350" />
-
-### Maquette mobile de l'entrainement 
-
-<img src="/src/assets/maquette-mobile-training.jpg" alt="Screenshots interface mobile" width="350" />
-
 ## Conclusion
 
-Ces maquettes, wireframes achèvent la conception technique de DropIt. L'ensemble de cette démarche établit les fondations nécessaires à l'implémentation de l'application.
+Ces wireframes achèvent la conception technique de DropIt. L'ensemble de cette démarche établit les fondations nécessaires à l'implémentation de l'application.
 
 La suite de ce dossier aborde les aspects sécuritaires, dimension critique pour une application gérant des données personnelles d'athlètes. 
