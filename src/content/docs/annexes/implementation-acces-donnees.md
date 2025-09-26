@@ -7,74 +7,15 @@ description: Détails techniques et exemples d'implémentation de la couche d'ac
 
 ### Database First
 
-Cette approche aurait consisté à créer directement les tables PostgreSQL via des scripts SQL, puis générer les entités TypeScript à partir du schéma existant. Voici comment j'aurais pu créer la table `workout` :
-
-```sql
-CREATE TABLE workout (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    title VARCHAR(255) NOT NULL,
-    description TEXT NOT NULL,
-    category_id UUID NOT NULL,
-    created_by UUID,
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW(),
-    FOREIGN KEY (category_id) REFERENCES workout_category(id),
-    FOREIGN KEY (created_by) REFERENCES users(id)
-);
-
--- Table de jointure polymorphe pour les éléments de workout
-CREATE TABLE workout_element (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    workout_id UUID NOT NULL,
-    type VARCHAR(20) NOT NULL CHECK (type IN ('exercise', 'complex')),
-    exercise_id UUID,
-    complex_id UUID,
-    order_position INTEGER NOT NULL,
-    sets INTEGER DEFAULT 1,
-    reps INTEGER DEFAULT 1,
-    rest INTEGER,
-    start_weight_percent DECIMAL(5,2),
-    FOREIGN KEY (workout_id) REFERENCES workout(id) ON DELETE CASCADE,
-    FOREIGN KEY (exercise_id) REFERENCES exercise(id),
-    FOREIGN KEY (complex_id) REFERENCES complex(id),
-    CONSTRAINT check_one_element_type CHECK (
-        (type = 'exercise' AND exercise_id IS NOT NULL AND complex_id IS NULL) OR
-        (type = 'complex' AND complex_id IS NOT NULL AND exercise_id IS NULL)
-    )
-);
-```
-
-**Avantages** :
-- Contrôle total sur la structure de la base de données
-- Performances optimales grâce à la maîtrise fine des index et contraintes
-
-**Inconvénients** :
-- Synchronisation problématique entre schéma de base de données et code applicatif
-- Maintenance complexe des migrations
-- Risque de divergence entre environnements
+Cette approche aurait consisté à créer directement les tables PostgreSQL puis générer les entités TypeScript. L'avantage principal est le contrôle total sur la structure et les performances, mais elle pose des problèmes de synchronisation entre schéma de base et code applicatif, complique la maintenance des migrations et risque des divergences entre environnements.
 
 ### Schema First
 
-Une approche intermédiaire utilise un fichier de définition de schéma central pour générer à la fois la base de données et les entités TypeScript.
-
-**Avantages** :
-- Source de vérité unique
-- Résout les problèmes de cohérence de l'approche Database First
-
-**Inconvénients** :
-- Redondance avec les schémas Zod existants dans le monorepo
-- Intégration native TypeScript compromise
-- Complexité de maintenance accrue
+Approche intermédiaire utilisant un fichier de définition central (ex: Prisma schema) pour générer base et entités. L'avantage est la source de vérité unique, mais elle nécessite de maintenir un schéma séparé en plus des validations Zod déjà existantes dans le monorepo et limite l'utilisation native des types TypeScript dans la logique métier.
 
 ### Code First
 
-J'ai retenu l'approche Code First qui définit les entités directement en TypeScript avec les décorateurs MikroORM.
-
-**Avantages** :
-- Intégration native dans l'écosystème du monorepo
-- Génération automatique des migrations
-- Auto-complétion et vérification de types TypeScript
-- Cohérence technique complète avec les packages partagés
+J'ai retenu l'approche Code First qui définit les entités directement en TypeScript avec les décorateurs MikroORM. Cette approche offre une intégration native dans l'écosystème du monorepo, génère automatiquement les migrations, fournit l'auto-complétion et la vérification de types TypeScript, et assure une cohérence technique complète avec les packages partagés.
 
 ## Exemples complets d'entités MikroORM
 
@@ -178,50 +119,37 @@ Cette architecture backend constitue un bon terrain pour les principes du Domain
 
 ### Diagramme de l'architecture
 
-```markdown
-┌─────────────────────────────────────────────────────────────┐
-│                    🌐 Interface Layer                        │
-│                                                             │
-│  ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐│
-│  │ Controllers REST│ │ Guards &        │ │ DTOs &          ││
-│  │                 │ │ Middlewares     │ │ Validators      ││
-│  └─────────────────┘ └─────────────────┘ └─────────────────┘│
-└─────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────┐
-│                   📋 Application Layer                      │
-│                                                             │
-│  ┌─────────────────┐           ┌─────────────────┐          │
-│  │ Use Cases       │           │ Services        │          │
-│  │                 │           │ Applicatifs     │          │
-│  └─────────────────┘           └─────────────────┘          │
-└─────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────┐
-│                      💎 Domain Layer                        │
-│                                                             │
-│  ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐│
-│  │ Entités Métier  │ │ Règles Business │ │ Ports/Interfaces││
-│  │                 │ │                 │ │                 ││
-│  └─────────────────┘ └─────────────────┘ └─────────────────┘│
-└─────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────┐
-│                   🔧 Infrastructure Layer                   │
-│                                                             │
-│  ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐│
-│  │ Repositories    │ │ Services        │ │ Adaptateurs     ││
-│  │ MikroORM        │ │ Externes        │ │                 ││
-│  └─────────────────┘ └─────────────────┘ └─────────────────┘│
-└─────────────────────────────────────────────────────────────┘
-```
+```mermaid
+graph LR
+    Client[🌐 Client] --> Controller[🎛️ Controller]
+
+    subgraph API["🏗️ API Backend"]
+        Controller --> UseCase[📋 Use Case]
+        UseCase --> Repo[📦 Repository]
+        Repo --> ORM[🔄 MikroORM]
+
+        Repo --> UseCase
+        UseCase --> Mapper[🔄 Mapper]
+        Mapper --> Presenter[📤 Presenter]
+        Presenter --> Controller
+    end
+
+    ORM --> DB[(💾 PostgreSQL)]
+    DB --> ORM
+
+    Controller --> Client
+
+    style Client fill:#e1f5fe
+    style Controller fill:#fff3e0
+    style UseCase fill:#f3e5f5
+    style Repo fill:#e8f5e8
+    style ORM fill:#fff8e1
+    style DB fill:#fce4ec
+``` 
 
 ### Interface Layer : exposition HTTP
 
-#### Controllers avec exemples complets
+#### Controllers
 
 ```typescript
 @UseGuards(PermissionsGuard) // 1. Garde globale sur toutes les méthodes
@@ -230,25 +158,13 @@ export class WorkoutController {
   
   @TsRestHandler(c.getWorkout) // 2. Respect du contrat ts-rest
   @RequirePermissions('read')  // 3. Permission spécifique requise
-  getWorkout(
+  async getWorkout(
     @CurrentOrganization() organizationId: string, // 4. Extraction contexte organisation
     @CurrentUser() user: AuthenticatedUser         // 5. Extraction utilisateur authentifié
-  ): ReturnType<typeof tsRestHandler<typeof c.getWorkout>> {
-    return tsRestHandler(c.getWorkout, async ({ params }) => {
-      // 6. Délégation immédiate vers la logique métier
-      return await this.workoutUseCases.getWorkoutWithDetails(params.id, organizationId, user.id);
-    });
-  }
-
-  @TsRestHandler(c.createWorkout)
-  @RequirePermissions('create') // Permission différente pour la création
-  createWorkout(
-    @CurrentOrganization() organizationId: string,
-    @CurrentUser() user: AuthenticatedUser
-  ): ReturnType<typeof tsRestHandler<typeof c.createWorkout>> {
-    return tsRestHandler(c.createWorkout, async ({ body }) => {
-      return await this.workoutUseCases.createWorkout(body, organizationId, user.id);
-    });
+    { params }
+  ) {
+    // 6. Délégation immédiate vers la logique métier
+    return await this.workoutUseCases.getWorkoutWithDetails(params.id, organizationId, user.id);
   }
 }
 ```
@@ -260,7 +176,7 @@ Le controller orchestre plusieurs mécanismes de sécurité en cascade :
 - **Niveau 3 - Permissions granulaires** : `@RequirePermissions('read')` vérifie les droits spécifiques
 - **Niveau 4 - Contrat d'API** : `@TsRestHandler(c.getWorkout)` assure la type safety
 
-#### Mappers avec exemples
+#### Mappers
 
 ```typescript
 export const WorkoutMapper = {
@@ -268,7 +184,7 @@ export const WorkoutMapper = {
     return {
       id: workout.id,
       title: workout.title,
-      workoutCategory: workout.category.name, // Simplification : juste le nom au lieu de l'objet complet
+      workoutCategoryName: workout.category.name, // Simplification : juste le nom au lieu de l'objet complet
       description: workout.description,
       elements: workout.elements.getItems().map(/* transformation des éléments */),
     };
@@ -289,36 +205,12 @@ export const WorkoutPresenter = {
     return { status: 200 as const, body: workout };
   },
   
-  // Succès avec liste
-  presentList(workouts: WorkoutDto[]) {
-    return { 
-      status: 200 as const, 
-      body: workouts 
-    };
-  },
-
-  // Succès de création (code différent)
-  presentCreationSuccess(message: string) {
-    return { 
-      status: 201 as const, 
-      body: { message } 
-    };
-  },
-
   // Gestion centralisée des erreurs
   presentError(error: Error) {
-    if (error instanceof BadRequestException) {
-      return { status: 400 as const, body: { message: error.message } };
-    }
-    if (error instanceof ForbiddenException) {
-      return { status: 403 as const, body: { message: error.message } };
-    }
     if (error instanceof NotFoundException) {
       return { status: 404 as const, body: { message: error.message } };
     }
     
-    // Masquage des erreurs internes en production
-    console.error('Workout error:', error);
     return {
       status: 500 as const,
       body: { message: 'An error occurred while processing the request' }
@@ -327,7 +219,7 @@ export const WorkoutPresenter = {
 }
 ```
 
-Le Presenter joue un rôle crucial dans :
+Le Presenter joue les rôles de :
 - **Normalisation des codes de statut** : Codes HTTP appropriés pour chaque type d'opération
 - **Sécurisation des messages d'erreur** : Filtrage des erreurs techniques internes
 - **Centralisation du formatage** : Format de réponse cohérent pour l'ensemble de l'API
@@ -346,41 +238,22 @@ async createWorkout(workout: CreateWorkout, organizationId: string, userId: stri
   // 2. Vérification de l'existence de la catégorie avec filtres organisationnels
   const coachFilterConditions = await this.memberUseCases.getCoachFilterConditions(organizationId);
   const category = await this.workoutCategoryRepository.getOne(workout.workoutCategory, coachFilterConditions);
-
   if (!category) {
-    throw new NotFoundException(
-      `Workout category with ID ${workout.workoutCategory} not found or access denied`
-    );
+    throw new NotFoundException(`Workout category not found or access denied`);
   }
 
   // 3. Vérification de l'existence et de l'accès aux exercices/complexes
   for (const element of workout.elements) {
-    if (element.type === WORKOUT_ELEMENT_TYPES.EXERCISE) {
-      const exercise = await this.exerciseRepository.getOne(element.id, coachFilterConditions);
-      if (!exercise) {
-        throw new NotFoundException(`Exercise with ID ${element.id} not found or access denied`);
-      }
-    } else {
-      const complex = await this.complexRepository.getOne(element.id, coachFilterConditions);
-      if (!complex) {
-        throw new NotFoundException(`Complex with ID ${element.id} not found or access denied`);
-      }
-    }
-  }
+    const resource = element.type === WORKOUT_ELEMENT_TYPES.EXERCISE
+      ? await this.exerciseRepository.getOne(element.id, coachFilterConditions)
+      : await this.complexRepository.getOne(element.id, coachFilterConditions);
 
-  // 4. Si une session d'entraînement est demandée, vérifier l'existence des athlètes
-  if (workout.trainingSession) {
-    for (const athleteId of workout.trainingSession.athleteIds) {
-      const athlete = await this.athleteRepository.getOne(athleteId);
-      if (!athlete) {
-        throw new NotFoundException(`Athlete with ID ${athleteId} not found`);
-      }
-    }
+    if (!resource) throw new NotFoundException(`${element.type} not found or access denied`);
   }
 
   // 4. Création avec logique d'orchestration
   const createdWorkout = await this.workoutRepository.save(workoutToCreate);
-  
+
   // 5. Transformation pour l'exposition
   const workoutDto = WorkoutMapper.toDto(createdWorkout);
   return WorkoutPresenter.presentOne(workoutDto);
@@ -430,6 +303,8 @@ Chaque décorateur MikroORM a un rôle spécifique :
 - `@Check()` : Traduit une règle métier en contrainte PostgreSQL
 - `@Property({ onCreate: () => new Date() })` : Configure des comportements de lifecycle
 
+**Note** : Dans une architecture hexagonale pure, ces entités devraient être découplées de MikroORM avec des entités domaine séparées et un système de mapping. Cette séparation constitue un objectif d'évolution future pour renforcer l'indépendance de la couche métier vis-à-vis des détails d'infrastructure.
+
 ### Infrastructure Layer : accès aux données
 
 #### Repositories personnalisés
@@ -467,109 +342,10 @@ export class MikroWorkoutRepository extends EntityRepository<Workout> implements
 
 Cette approche hybride donne le meilleur des deux mondes : l'héritage d'`EntityRepository<Workout>` conserve l'accès aux méthodes MikroORM optimisées, tandis que l'implémentation de `IWorkoutRepository` garantit le respect du contrat métier.
 
-## Pattern Unit of Work et gestion transactionnelle
 
-### Le pattern Unit of Work
+## Gestion des migrations en production
 
-Le pattern Unit of Work consiste à maintenir une liste de tous les objets modifiés pendant une transaction et à coordonner leur écriture en base de données en une seule fois.
-
-MikroORM implémente nativement ce pattern : lorsque je modifie une entité chargée, elle est automatiquement marquée comme "dirty" sans déclencher immédiatement une requête SQL. C'est seulement lors de l'appel à `flush()` que toutes les modifications sont synchronisées avec la base de données.
-
-### Transactions et propriétés ACID
-
-Les transactions garantissent les propriétés ACID essentielles pour l'intégrité des données :
-
-- **Atomicité** : Soit toutes les opérations réussissent, soit aucune n'est appliquée
-- **Cohérence** : Les contraintes de base de données sont respectées à la fin de la transaction
-- **Isolation** : Les transactions concurrentes n'interfèrent pas entre elles
-- **Durabilité** : Une fois validée, la transaction persiste même en cas de panne système
-
-### Fonctionnement automatique avec NestJS
-
-MikroORM s'intègre avec le système d'intercepteurs de NestJS pour fournir automatiquement une transaction par requête HTTP :
-
-```typescript
-async save(workout: Workout): Promise<Workout> {
-  await this.em.persistAndFlush(workout); // Persiste et flush dans la transaction courante
-  return workout;
-}
-```
-
-L'`EntityManager` suit automatiquement les modifications apportées aux entités chargées et génère les requêtes SQL optimales lors du flush.
-
-### Gestion des suppressions en cascade
-
-```typescript
-async remove(id: string, coachFilterConditions: CoachFilterConditions): Promise<void> {
-  const workoutToDelete = await this.em.findOne(
-    Workout,
-    { id, $or: coachFilterConditions.$or },
-    { populate: ['elements'] }
-  );
-  
-  if (!workoutToDelete) {
-    return;
-  }
-
-  // Suppression explicite des éléments pour respecter les contraintes
-  const elements = workoutToDelete.elements.getItems();
-  for (const element of elements) {
-    this.em.remove(element);
-  }
-
-  await this.em.removeAndFlush(workoutToDelete);
-}
-```
-
-Cette gestion manuelle permet d'éviter les contraintes CASCADE au niveau SQL et donne plus de contrôle sur le processus de suppression.
-
-## Configuration et optimisations
-
-### Configuration MikroORM adaptée aux environnements
-
-```typescript
-export function createMikroOrmOptions(options?: CreateMikroOrmOptions) {
-  const { isTest, ...restOptions } = options ?? {};
-  const isTestEnvironment = isTest || config.env === 'test';
-
-  return defineConfig({
-    entities: ['./dist/**/*.entity.js'],
-    entitiesTs: ['./src/**/*.entity.ts'],
-    dbName: config.database.name,
-    host: config.database.host,
-    port: config.database.port,
-    user: config.database.user,
-    password: config.database.password,
-    metadataProvider: TsMorphMetadataProvider,
-    forceUtcTimezone: true,
-    extensions: [SeedManager, Migrator],
-    debug: config.env === 'development', // Logs SQL uniquement en développement
-    allowGlobalContext: isTestEnvironment,
-  });
-}
-```
-
-Cette configuration révèle plusieurs optimisations importantes :
-- **Découverte automatique des entités** : Via l'analyse des patterns de fichiers
-- **Analyse statique performante** : Le `TsMorphMetadataProvider` analyse le code TypeScript à la compilation
-- **Cohérence temporelle** : `forceUtcTimezone: true` garantit que toutes les dates sont en UTC
-
-### Gestion des migrations en production
-
-```typescript
-migrations: {
-  path: './dist/modules/db/migrations',
-  pathTs: './src/modules/db/migrations',
-  allOrNothing: true, // Transactions atomiques
-  disableForeignKeys: false, // Préservation de l'intégrité
-},
-```
-
-**Stratégie de migration** :
-- **Génération automatique** : Le processus `npm run db:migration:create` génère automatiquement les fichiers
-- **Application atomique** : `allOrNothing: true` encapsule toutes les migrations en attente dans une transaction unique
-- **Préservation des contraintes** : `disableForeignKeys: false` maintient l'intégrité référentielle
-- **Traçabilité complète** : Chaque migration appliquée est enregistrée dans une table système
+Lorsqu'un développeur modifie une entité, il génère la migration correspondante via `pnpm db:migration:create`. MikroORM analyse automatiquement les changements et produit le script SQL nécessaire.
 
 ### Exemple de migration générée
 
@@ -587,123 +363,7 @@ export class Migration20240115000000 extends Migration {
     this.addSql('alter table "workout" drop constraint "workout_difficulty_level_check";');
     this.addSql('alter table "workout" drop column "difficulty_level";');
   }
-
 }
 ```
 
-## Seeders et données de test
-
-### Système de seeders modulaire
-
-```typescript
-export async function seedComplexes(em: EntityManager): Promise<Complex[]> {
-  const exercisesMap = await seedExercises(em); // Dépendance des exercices
-
-  const complexCategories = [
-    { name: 'Arraché', description: "Exercices focalisés sur la technique de l'arraché" },
-    { name: 'Épaulé', description: "Exercices focalisés sur la technique de l'épaulé-jeté" },
-    { name: 'Renforcement', description: 'Exercices de musculation spécifiques' },
-  ];
-
-  // Création des catégories
-  const complexCategoriesMap: Record<string, ComplexCategory> = {};
-  for (const complexCategory of complexCategories) {
-    const categoryToCreate = new ComplexCategory();
-    categoryToCreate.name = complexCategory.name;
-    categoryToCreate.createdBy = null;
-    await em.persistAndFlush(categoryToCreate);
-    complexCategoriesMap[complexCategory.name] = categoryToCreate;
-  }
-
-  // Création des complexes avec leurs exercices
-  const complexesToCreate = [
-    {
-      category: 'Arraché',
-      description: "Focus sur la technique de l'arraché",
-      exercises: [
-        { name: 'Arraché Debout', reps: 3 },
-        { name: 'Tirage Nuque', reps: 5 },
-        { name: 'Squat Clavicule', reps: 2 },
-      ],
-    },
-    // Autres complexes...
-  ];
-
-  const complexesCreated: Complex[] = [];
-  for (const complexData of complexesToCreate) {
-    const complex = new Complex();
-    complex.description = complexData.description;
-    complex.complexCategory = complexCategoriesMap[complexData.category];
-    
-    await em.persistAndFlush(complex);
-
-    // Création des relations exercice-complexe avec ordre
-    for (let i = 0; i < complexData.exercises.length; i++) {
-      const exerciseData = complexData.exercises[i];
-      const exerciseComplex = new ExerciseComplex();
-      exerciseComplex.complex = complex;
-      exerciseComplex.exercise = exercisesMap[exerciseData.name];
-      exerciseComplex.order = i;
-      exerciseComplex.reps = exerciseData.reps;
-      
-      await em.persistAndFlush(exerciseComplex);
-    }
-    
-    complexesCreated.push(complex);
-  }
-
-  return complexesCreated;
-}
-```
-
-Ce système de seeders respecte les contraintes d'intégrité référentielle et garantit un environnement de développement reproductible. La structure modulaire permet de réutiliser les données entre différents seeders tout en maintenant la cohérence des relations.
-
-L'aspect particulièrement intéressant est le rôle des seeders dans la création de ressources partagées via `createdBy = null`. Ces entités publiques constituent un socle commun d'exercices officiels d'haltérophilie que tous les clubs peuvent utiliser.
-
-## Flux de données
-
-### Diagramme de séquence
-
-```mermaid
-sequenceDiagram
-    participant Client as 🌐 Client Web
-    participant Controller as 🎛️ WorkoutController
-    participant UseCase as 📋 WorkoutUseCases
-    participant Repo as 📦 MikroWorkoutRepository
-    participant ORM as 🔄 MikroORM
-    participant DB as 💾 PostgreSQL
-    participant Mapper as 🔄 WorkoutMapper
-    participant Presenter as 📤 WorkoutPresenter
-
-    Client->>Controller: GET /api/workouts/123
-    Controller->>UseCase: getWorkoutWithDetails(id, orgId, userId)
-    
-    UseCase->>UseCase: Vérification permissions coach
-    UseCase->>Repo: getOneWithDetails(id, filterConditions)
-    
-    Repo->>ORM: em.findOne(Workout, conditions, populate)
-    ORM->>DB: SELECT avec LEFT JOIN (auto-générée)
-    DB-->>ORM: Résultat SQL brut
-    ORM-->>Repo: Entité Workout hydratée
-    
-    Repo-->>UseCase: Workout avec relations
-    UseCase->>Mapper: WorkoutMapper.toDto(workout)
-    Mapper-->>UseCase: WorkoutDto typé
-    
-    UseCase->>Presenter: WorkoutPresenter.presentOne(dto)
-    Presenter-->>UseCase: Response formatée
-    UseCase-->>Controller: Response
-    Controller-->>Client: HTTP 200 + JSON
-```
-
-Ce diagramme illustre comment chaque couche a sa responsabilité spécifique et comment les données circulent de manière structurée à travers l'architecture.
-
-## Sécurité applicative et protection OWASP
-
-L'architecture intègre des mesures de sécurité spécifiques pour contrer les principales vulnérabilités répertoriées par l'OWASP :
-
-- **OWASP A03 (Injection SQL)** : MikroORM avec requêtes paramétrées + validation Zod
-- **OWASP A01 (Contrôle d'accès)** : Guards NestJS + isolation par organisation
-- **OWASP A04 (Validation)** : Schémas Zod stricts dans `@dropit/schemas`
-
-Cette approche centralisée évite les disparités de validation qui pourraient créer des failles de sécurité.
+Lors du processus de mise en production, la CI vérifie l'application de ces migrations avant le déploiement complet par mesure de sécurité.

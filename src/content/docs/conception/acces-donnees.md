@@ -59,6 +59,8 @@ Cette approche donne la flexibilité de changer d'ORM, de base de données ou de
 
 **Presenters** standardisent le formatage des réponses et gèrent la logique de présentation des données, normalisant les codes de statut et sécurisant les messages d'erreur.
 
+> **Exemples détaillés d'implémentation** : Voir l'[Annexe - Implémentation accès aux données](/annexes/implementation-acces-donnees/)
+
 
 ### Application Layer : orchestration métier
 
@@ -70,6 +72,8 @@ Cette approche donne la flexibilité de changer d'ORM, de base de données ou de
 - Orchestration de plusieurs règles d'autorisation combinées
 
 Cette approche centralise la logique métier critique tout en la gardant indépendante de l'infrastructure technique.
+
+> **Exemple complet de Use Case** : Voir l'[Annexe - Implémentation accès aux données](/annexes/implementation-acces-donnees/)
 
 ### Domain Layer : modèle métier
 
@@ -91,7 +95,9 @@ Pour certains cas spécifiques, j'étends ces repositories automatiques avec des
 
 Cette approche hybride conserve l'accès aux méthodes MikroORM optimisées tout en respectant les contrats métier définis dans l'Application Layer.
 
-> **Structure complète de l'API** : Voir l'[Annexe - Implémentation accès aux données](/annexes/implementation-acces-donnees/structure-du-projet-backend)
+> **Exemples de Repositories personnalisés** : Voir l'[Annexe - Implémentation accès aux données](/annexes/implementation-acces-donnees/)
+
+> **Structure complète de l'API** : Voir l'[Annexe - Implémentation accès aux données](/annexes/implementation-acces-donnees/)
 
 ### Gestion du multi-tenancy
 
@@ -117,8 +123,6 @@ Le trajet d'une requête illustre comment chaque couche a sa responsabilité sp�
 
 Cette approche technique avec MikroORM privilégie la productivité de développement et la sécurité du typage strict, tout en restant flexible pour des optimisations spécifiques via l'EntityManager.
 
-> **Diagramme de séquence détaillé** : Voir l'[Annexe - Implémentation accès aux données](/annexes/implementation-acces-donnees/)
-
 ## Pattern Unit of Work et gestion transactionnelle
 
 ### Le pattern Unit of Work
@@ -136,8 +140,6 @@ MikroORM s'intègre avec le système d'intercepteurs de NestJS pour fournir auto
 ### Gestion des suppressions en cascade
 
 La suppression d'entités avec des relations nécessite une gestion particulière pour respecter l'intégrité référentielle. J'ai opté pour une approche explicite qui donne le contrôle total sur l'ordre des opérations, permettant d'ajouter des logs, valider des règles métier ou implémenter une suppression "soft".
-
-> **Détails techniques et exemples** : Voir l'[Annexe - Implémentation accès aux données](/annexes/implementation-acces-donnees/)
 
 ## Sécurité applicative et protection OWASP
 
@@ -163,16 +165,16 @@ La configuration centralisée dans `mikro-orm.config.ts` s'adapte selon l'enviro
 
 La stratégie de migration privilégie la sécurité et la traçabilité :
 
-- **Génération automatique** : Le processus `npm run db:migration:create` génère automatiquement les fichiers
+- **Génération automatique** : Le processus `pnpm run db:migration:create` génère automatiquement les fichiers
 - **Application atomique** : `allOrNothing: true` encapsule toutes les migrations en attente dans une transaction unique
 - **Préservation des contraintes** : `disableForeignKeys: false` maintient l'intégrité référentielle
 - **Traçabilité complète** : Chaque migration appliquée est enregistrée dans une table système
 
+> **Exemple de migration** : Voir l'[Annexe - Implémentation accès aux données](/annexes/implementation-acces-donnees/Exemple-de-migration-générée)
+
 ### Stratégie différenciée selon l'environnement
 
 En développement, j'ai privilégié une approche de reconstruction complète via les seeders pour tester rapidement les modifications de schéma. En production, le système de migrations devient indispensable pour faire évoluer le schéma tout en préservant l'intégrité des données.
-
-> **Configuration détaillée et exemples** : Voir l'[Annexe - Implémentation accès aux données](/annexes/implementation-acces-donnees/)
 
 ## Seeders et données de test
 
@@ -181,8 +183,6 @@ J'ai implémenté un système de seeders qui peuple la base avec des données co
 Ce système respecte les contraintes d'intégrité référentielle et garantit un environnement de développement reproductible. La structure modulaire permet de réutiliser les données entre différents seeders tout en maintenant la cohérence des relations.
 
 L'aspect particulièrement intéressant est le rôle des seeders dans la création de ressources partagées via `createdBy = null`. Ces entités publiques constituent un socle commun d'exercices officiels d'haltérophilie que tous les clubs peuvent utiliser, évitant la duplication des données de base.
-
-> **Exemples complets de seeders** : Voir l'[Annexe - Implémentation accès aux données](/annexes/implementation-acces-donnees/)
 
 ## Conclusion
 
