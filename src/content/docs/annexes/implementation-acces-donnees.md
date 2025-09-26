@@ -3,10 +3,6 @@ title: Implémentation accès aux données - Détails techniques
 description: Détails techniques et exemples d'implémentation de la couche d'accès aux données avec MikroORM
 ---
 
-## Introduction
-
-Cette annexe présente les détails techniques de l'implémentation de la couche d'accès aux données dans DropIt, incluant la comparaison des approches, les exemples complets d'entités, l'architecture en couches détaillée et les patterns avancés.
-
 ## Comparaison des approches d'implémentation
 
 ### Database First

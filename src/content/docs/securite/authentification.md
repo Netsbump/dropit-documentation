@@ -3,10 +3,6 @@ title: Implémentation de l'authentification
 description: Mise en œuvre pratique du système d'authentification dans DropIt
 ---
 
-## Introduction
-
-Cette section détaille l'implémentation technique de Better-Auth dans DropIt. L'intégration repose sur quatre composants principaux : les entités de base générées automatiquement, les endpoints d'authentification exposés sur `/auth`, le système de guards pour la protection des routes, et le middleware de délégation des requêtes d'authentification.
-
 ## Organisation modulaire de l'authentification
 
 J'ai isolé l'authentification dans un module NestJS dédié pour séparer les responsabilités et centraliser la configuration Better-Auth.

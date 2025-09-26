@@ -3,12 +3,6 @@ title: Analyses des besoins - Flux d'interactions détaillés
 description: Spécifications fonctionnelles détaillées des parcours utilisateurs pour DropIt
 ---
 
-## Introduction
-
-Cette annexe présente les flux d'interactions détaillés entre les utilisateurs et le système DropIt. Ces spécifications fonctionnelles permettent de comprendre précisément les étapes de chaque action et d'identifier les entités métier nécessaires à la conception de la base de données.
-
-Chaque flux décrit les échanges entre l'utilisateur et le système, révélant ainsi les besoins en données (exercices, programmes, maximums, athlètes) et les règles métier à implémenter (calculs de charges, validations, contraintes d'intégrité).
-
 ## Flux d'interactions détaillés
 
 ### 1. Accéder à son entraînement personnalisé (Athlète)

@@ -3,12 +3,6 @@ title: Implémentation des autorisations
 description: Mise en œuvre du système de permissions granulaires dans DropIt
 ---
 
-## Introduction
-
-Après avoir établi une base d'authentification avec Better-Auth, cette section présente la couche d'autorisation dans l'application. Cette étape transforme l'identification des utilisateurs en contrôle d'accès granulaire aux ressources.
-
-Dans DropIt, chaque utilisateur évolue au sein d'une organisation (club de d'haltérophilie) avec un rôle spécifique : coach ou athlète. Ces rôles déterminent les actions autorisées sur chaque ressource métier. 
-
 ## Organisation modulaire des permissions
 
 Dans mon API, j'ai choisi d'intégrer la gestion des permissions au sein du module d'identité existant, aux côtés de l'authentification afin de maintenir une cohérence architecturale et de centraliser toutes les préoccupations liées à la sécurité.

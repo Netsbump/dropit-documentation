@@ -3,10 +3,6 @@ title: Conception technique de la base de données
 description: Détails techniques et décisions d'implémentation pour la base de données DropIt
 ---
 
-## Introduction
-
-Cette annexe présente les détails techniques de la conception de la base de données DropIt, incluant les décisions de normalisation, la gestion des clés et contraintes, les choix d'optimisation et les extensions métier envisagées.
-
 ## Décisions de normalisation
 
 La normalisation consiste à organiser les données pour éviter les redondances et garantir la cohérence. J'ai appliqué la **troisième forme normale (3NF)**, qui élimine les dépendances transitives entre les données.

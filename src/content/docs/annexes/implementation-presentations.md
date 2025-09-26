@@ -3,10 +3,6 @@ title: Implémentation des présentations - Détails techniques
 description: Détails techniques et exemples d'implémentation des couches de présentation web et mobile
 ---
 
-## Introduction
-
-Cette annexe présente les détails techniques de l'implémentation des couches de présentation dans DropIt, incluant les exemples complets de code, les configurations et les patterns d'implémentation pour les applications web et mobile.
-
 ## Gestion des formulaires avec React Hook Form
 
 ### Exemple basique de React Hook Form

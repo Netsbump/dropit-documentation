@@ -3,10 +3,6 @@ title: Architecture logicielle et choix technologiques
 description: Conception technique de DropIt - justifications et mise en œuvre de l'architecture
 ---
 
-## Introduction
-
-Ma stratégie architecturale répond aux besoins spécifiques d'une application de gestion de club d'haltérophilie : séparation des contextes d'usage (mobile pour les athlètes, web pour les coachs), cohérence des données d'entraînement, et maintenabilité pour un usage associatif sur la durée. J'ai privilégié des technologies éprouvées pour les composants critiques, tout en intégrant des solutions adaptées aux contraintes identifiées lors de l'analyse des besoins.
-
 ## Vue d'ensemble architecturale
 
 Suite à l'analyse des besoins, j'ai choisi de structurer l'application selon une architecture distribuée séparant clairement les différentes parties : une interface web pour les coachs, une application mobile pour les athlètes, et un backend centralisé. Cette séparation permet de développer et maintenir chaque partie indépendamment, facilitant ainsi l'évolution future de l'application.

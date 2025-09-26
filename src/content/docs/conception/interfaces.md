@@ -3,10 +3,6 @@ title: Interfaces utilisateur
 description: De l'analyse des besoins aux wireframes - conception centrée utilisateur
 ---
 
-## Introduction
-
-Ma démarche de conception d'interfaces s'inscrit dans une approche centrée utilisateur que j'ai adaptée aux contraintes de mon projet de formation. N'étant pas designer de formation, j'ai privilégié une méthodologie structurée : partir des personas utilisateurs, concevoir des wireframes basse fidélité pour valider les flux et enfin puis définir un design system cohérent.
-
 ## Personas utilisateurs
 
 L'analyse fonctionnelle détaillée précédemment m'a permis d'identifier deux profils utilisateurs distincts que je synthétise ici sous forme de personas pour guider mes choix d'interface :

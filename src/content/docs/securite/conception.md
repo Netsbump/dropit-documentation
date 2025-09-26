@@ -3,10 +3,6 @@ title: Conception
 description: Analyse des besoins sécuritaires et choix d'architecture d'authentification pour DropIt
 ---
 
-## Introduction
-
-Après avoir défini l'architecture globale de DropIt, j'aborde maintenant la conception de la sécurité applicative. Cette réflexion m'a amenée à analyser les besoins d'authentification et d'autorisation de l'application, puis à choisir une stratégie technique adaptée aux contraintes du projet.
-
 ## Analyse des besoins d'authentification
 
 L'architecture multi-plateforme de DropIt impose de gérer trois profils d'utilisateurs distincts : les administrateurs depuis le backoffice web, les coachs depuis l'interface de gestion, et les athlètes via l'application mobile React Native.

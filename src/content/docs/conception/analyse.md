@@ -3,10 +3,6 @@ title: Analyse des besoins fonctionnels
 description: Analyse des besoins utilisateurs et conception des interactions pour DropIt
 ---
 
-## Introduction
-
-Ma position d'utilisateur final facilite cette analyse, mais je dois éviter de projeter mes propres habitudes sur l'ensemble des utilisateurs. J'ai donc multiplié les échanges avec les autres membres du club pour valider mes hypothèses et enrichir ma compréhension des besoins diversifiés selon les profils d'utilisateurs.
-
 ## Méthodologie d'analyse
 
 Ma démarche s'articule autour d'une approche centrée utilisateur adaptée aux contraintes de mon projet de formation. Les échanges informels avec les membres du club lors des entraînements m'ont permis de recueillir des retours spontanés sur leurs difficultés actuelles et leurs attentes concernant un outil numérique.

@@ -3,10 +3,6 @@ title: Accès aux données
 description: Implémentation de la couche d'accès aux données avec MikroORM
 ---
 
-## Introduction
-
-Cette section détaille l'implémentation concrète de la couche d'accès aux données dans DropIt. Après avoir présenté l'[architecture logicielle](/conception/architecture) d'ensemble et établi le [modèle de données](/conception/base-donnees), nous explorons ici comment transformer ces concepts en code fonctionnel avec MikroORM et l'architecture hexagonale que j'ai adoptée dans l'API NestJS.
-
 ## Approches d'implémentation de la couche de données
 
 Après avoir établi le modèle conceptuel avec la méthode Merise, plusieurs approches s'offraient à moi pour implémenter la couche d'accès aux données dans DropIt : Database First, Schema First et Code First.
