@@ -86,6 +86,7 @@ export default defineConfig({
 				{
 					label: 'Annexes',
 					items: [
+						{ label: 'Bilan', link: '/annexes/bilan/' },
 						{ label: 'Analyse des besoins', link: '/annexes/analyses-besoins/' },
 						{ label: 'Architecture technique', link: '/annexes/architecture-technique/' },
 						{ label: 'Conception technique base de données', link: '/annexes/conception-bdd-technique/' },
@@ -94,8 +95,6 @@ export default defineConfig({
 						{ label: 'Authentifications', link: '/annexes/authentifications/' },
 						{ label: 'Permissions', link: '/annexes/permissions/' },
 						{ label: 'Glossaire', link: '/annexes/glossaire/' },
-						{ label: 'Cahier des charges', link: '/annexes/cahier-des-charges/' },
-						{ label: 'Bilan', link: '/annexes/bilan/' },
 					],
 				},
 			],
