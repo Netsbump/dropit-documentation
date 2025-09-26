@@ -38,18 +38,7 @@ modules/identity/
 
 ### Plugin Organization
 
-Mon système intègre le plugin Organization de Better-Auth qui étend l'infrastructure d'authentification avec la gestion native des organisations multi-utilisateurs. Cette extension se configure simplement en ajoutant le plugin à ma configuration Better-Auth existante :
-
-```typescript
-// Configuration Better-Auth avec plugin Organization
-export const auth = betterAuth({
-  // ... configuration de base
-  plugins: [
-    organization(), // Plugin pour les organisations
-    // ... autres plugins
-  ],
-});
-```
+Mon système intègre le plugin Organization de Better-Auth qui étend l'infrastructure d'authentification avec la gestion native des organisations multi-utilisateurs. Cette extension se configure simplement en ajoutant le plugin à ma configuration Better-Auth existante.
 
 Le plugin génère automatiquement trois nouvelles entités qui s'intègrent avec les entités d'authentification :
 
