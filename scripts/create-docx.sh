@@ -196,6 +196,41 @@ if command -v magick &> /dev/null; then
     done
     
     echo "✅ Recadrage automatique terminé!"
+    
+    # Recadrage des images Whimsical spécifiques
+    echo "🎨 Recadrage des images Whimsical..."
+    
+    # Liste des images Whimsical à recadrer
+    whimsical_images=(
+        "../src/assets/auth-better-auth.png"
+        "../src/assets/better-auth-login.png"
+        "../src/assets/better-auth-logout.png"
+        "../src/assets/better-auth-ressource-prot.png"
+        "../src/assets/global-architecture.png"
+        "../src/assets/pipeline-auth.png"
+    )
+    
+    for image_file in "${whimsical_images[@]}"; do
+        if [ -f "$image_file" ]; then
+            # Créer un fichier temporaire
+            temp_file="${image_file}.tmp"
+            
+            # Recadrer automatiquement autour du contenu (supprime les bords vides)
+            magick "$image_file" -trim +repage "$temp_file"
+            
+            # Supprimer la zone "Made with Whimsical" en bas (couper 60px en bas)
+            magick "$temp_file" -gravity south -chop 0x60 "$image_file"
+            
+            # Nettoyer le fichier temporaire
+            rm -f "$temp_file"
+            
+            echo "✅ Image Whimsical recadrée: $(basename "$image_file")"
+        else
+            echo "⚠️  Image non trouvée: $image_file"
+        fi
+    done
+    
+    echo "✅ Recadrage des images Whimsical terminé!"
 else
     echo "⚠️  ImageMagick non détecté, installation recommandée:"
     echo "   sudo pacman -S imagemagick"
