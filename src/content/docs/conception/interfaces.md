@@ -32,13 +32,13 @@ L'architecture de DropIt se décline en deux interfaces distinctes : une applica
 
 #### Page de bibliothèque d'entrainement
 
-<img src="src/assets/wireframe-web-prog.png" alt="Wireframe vue générale bibliothèque" width="800" />
+<img src="/src/assets/wireframe-web-prog.png" alt="Wireframe vue générale bibliothèque" width="800" />
 
 La vue générale présente l'interface globale avec une navigation latérale permanente donnant accès aux trois catalogues : exercices, complexes et programmes d'entraînement. Cette organisation facilite la navigation entre les différents types de contenus que le coach manipule quotidiennement.
 
 #### Page de formulaire de création d'un entrainement
 
-<img src="src/assets/wireframe-web-form-training.png" alt="Wireframe page création exercice" width="800" />
+<img src="/src/assets/wireframe-web-form-training.png" alt="Wireframe page création exercice" width="800" />
 
 Le wireframe révèle les éléments structurants :
 - Etape du formulaire dans lequel on peut composer l'entrainement avec un des exercices et/ou des complexS
@@ -53,19 +53,19 @@ Dans le MVP, j'ai fait le choix de ne pas optimiser l'interface web pour les mob
 
 #### Page d'accueil
 
-<img src="src/assets/wireframe-mobile-dashboard.png" alt="Wireframe page accueil mobile" width="300" />
+<img src="/src/assets/wireframe-mobile-dashboard.png" alt="Wireframe page accueil mobile" width="300" />
 
 Carousel pour visualiser l'entrainement, l'actualité du club et l'hitorique d'entrainement + menubottom avec acceuil au milieu (le caroussel), a droite navigation vers account, a gauche le bouton de navigation vers l'enristrement des record de l'athlète.
 
 #### Page de visualisation d'entraînement
 
-<img src="src/assets/wireframe-mobile-training.png" alt="Wireframe visualisation programme mobile" width="300" />
+<img src="/src/assets/wireframe-mobile-training.png" alt="Wireframe visualisation programme mobile" width="300" />
 
 L'interface mobile présente les exercices de manière séquentielle, avec les infos les importantes, au click sur un des éléments on aura une navigation vers le détails de l'exercice/complex
 
 #### Page de visualisation détaillée d'un exercice
 
-<img src="src/assets/wireframe-mobile-training-detail.png" alt="Wireframe visualisation détail exercice mobile" width="300" />
+<img src="/src/assets/wireframe-mobile-training-detail.png" alt="Wireframe visualisation détail exercice mobile" width="300" />
 
 ## Design system et cohérence visuelle
 
@@ -77,11 +77,11 @@ Cette section présente le rendu final des interfaces après itération sur les 
 
 ### Maquette de programmation coach
 
-<img src="src/assets/maquette-biblio-entrainement.png" alt="Screenshot dashboard principal coach" width="900" />
+<img src="/src/assets/maquette-biblio-entrainement.png" alt="Screenshot dashboard principal coach" width="900" />
 
 ### Maquette de création de programme 
 
-<img src="src/assets/maquette-creation-entrainement.png" alt="Screenshot stepper création programme" width="900" />
+<img src="/src/assets/maquette-creation-entrainement.png" alt="Screenshot stepper création programme" width="900" />
 
 L'interface multi-étapes guide le coach dans la composition avec un workflow intuitif :
 - **Étape 1** : Informations générales de l'entrainement
@@ -90,11 +90,11 @@ L'interface multi-étapes guide le coach dans la composition avec un workflow in
 
 ### Maquette mobile de dashboard 
 
-<img src="src/assets/maquette-mobile-dashboard.jpg" alt="Screenshots interface mobile" width="350" />
+<img src="/src/assets/maquette-mobile-dashboard.jpg" alt="Screenshots interface mobile" width="350" />
 
 ### Maquette mobile de l'entrainement 
 
-<img src="src/assets/maquette-mobile-training.jpg" alt="Screenshots interface mobile" width="350" />
+<img src="/src/assets/maquette-mobile-training.jpg" alt="Screenshots interface mobile" width="350" />
 
 ## Conclusion
 
