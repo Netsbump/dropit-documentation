@@ -3,8 +3,14 @@
 # Script pour combiner la documentation DropIt dans l'ordre du sidebar
 # Basé sur astro.config.mjs sidebar structure
 
-DOCS_DIR="src/content/docs"
-OUTPUT_FILE="DropIt-Documentation-Complete.md"
+DOCS_DIR="../src/content/docs"
+OUTPUT_FILE="../DropIt-Documentation-Complete.md"
+
+# Fonction pour convertir les balises <img> en Markdown
+convert_img_to_markdown() {
+    # Convertir <img src="..." alt="..." width="..." /> en ![alt](src)
+    sed -E 's|<img[^>]*src="([^"]*)"[^>]*alt="([^"]*)"[^>]*/?>|![\2](\1)|g'
+}
 
 echo "🚀 Création du document combiné DropIt Documentation..."
 
@@ -25,7 +31,7 @@ if [ -f "$DOCS_DIR/introduction/presentation.md" ]; then
     echo "## Présentation du projet" >> "$OUTPUT_FILE"
     echo "" >> "$OUTPUT_FILE"
     # Supprimer le titre frontmatter et le premier titre
-    tail -n +4 "$DOCS_DIR/introduction/presentation.md" | sed '/^# /d' | sed 's|../../../assets/|src/assets/|g' >> "$OUTPUT_FILE"
+    tail -n +4 "$DOCS_DIR/introduction/presentation.md" | sed '/^# /d' | sed 's|../../../assets/|src/assets/|g' | sed 's|src="/src/assets/|src="src/assets/|g' | convert_img_to_markdown >> "$OUTPUT_FILE"
     echo "" >> "$OUTPUT_FILE"
     echo "\\newpage" >> "$OUTPUT_FILE"
     echo "" >> "$OUTPUT_FILE"
@@ -34,7 +40,7 @@ fi
 if [ -f "$DOCS_DIR/introduction/contexte.md" ]; then
     echo "## Contexte et enjeux" >> "$OUTPUT_FILE"
     echo "" >> "$OUTPUT_FILE"
-    tail -n +4 "$DOCS_DIR/introduction/contexte.md" | sed '/^# /d' | sed 's|../../../assets/|src/assets/|g' >> "$OUTPUT_FILE"
+    tail -n +4 "$DOCS_DIR/introduction/contexte.md" | sed '/^# /d' | sed 's|../../../assets/|src/assets/|g' | sed 's|src="/src/assets/|src="src/assets/|g' | convert_img_to_markdown >> "$OUTPUT_FILE"
     echo "" >> "$OUTPUT_FILE"
     echo "\\newpage" >> "$OUTPUT_FILE"
     echo "" >> "$OUTPUT_FILE"
@@ -58,7 +64,7 @@ for item in "${conception_files[@]}"; do
     if [ -f "$DOCS_DIR/conception/$filename.md" ]; then
         echo "## $title" >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
-        tail -n +4 "$DOCS_DIR/conception/$filename.md" | sed '/^# /d' | sed 's|../../../assets/|src/assets/|g' >> "$OUTPUT_FILE"
+        tail -n +4 "$DOCS_DIR/conception/$filename.md" | sed '/^# /d' | sed 's|../../../assets/|src/assets/|g' | sed 's|src="/src/assets/|src="src/assets/|g' | convert_img_to_markdown >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
         echo "\\newpage" >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
@@ -80,7 +86,7 @@ for item in "${securite_files[@]}"; do
     if [ -f "$DOCS_DIR/securite/$filename.md" ]; then
         echo "## $title" >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
-        tail -n +4 "$DOCS_DIR/securite/$filename.md" | sed '/^# /d' | sed 's|../../../assets/|src/assets/|g' >> "$OUTPUT_FILE"
+        tail -n +4 "$DOCS_DIR/securite/$filename.md" | sed '/^# /d' | sed 's|../../../assets/|src/assets/|g' | sed 's|src="/src/assets/|src="src/assets/|g' | convert_img_to_markdown >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
         echo "\\newpage" >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
@@ -101,7 +107,7 @@ for item in "${tests_files[@]}"; do
     if [ -f "$DOCS_DIR/tests/$filename.md" ]; then
         echo "## $title" >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
-        tail -n +4 "$DOCS_DIR/tests/$filename.md" | sed '/^# /d' | sed 's|../../../assets/|src/assets/|g' >> "$OUTPUT_FILE"
+        tail -n +4 "$DOCS_DIR/tests/$filename.md" | sed '/^# /d' | sed 's|../../../assets/|src/assets/|g' | sed 's|src="/src/assets/|src="src/assets/|g' | convert_img_to_markdown >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
         echo "\\newpage" >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
@@ -122,7 +128,7 @@ for item in "${deploiement_files[@]}"; do
     if [ -f "$DOCS_DIR/deploiement/$filename.md" ]; then
         echo "## $title" >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
-        tail -n +4 "$DOCS_DIR/deploiement/$filename.md" | sed '/^# /d' | sed 's|../../../assets/|src/assets/|g' >> "$OUTPUT_FILE"
+        tail -n +4 "$DOCS_DIR/deploiement/$filename.md" | sed '/^# /d' | sed 's|../../../assets/|src/assets/|g' | sed 's|src="/src/assets/|src="src/assets/|g' | convert_img_to_markdown >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
         echo "\\newpage" >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
@@ -143,7 +149,7 @@ for item in "${gestion_files[@]}"; do
     if [ -f "$DOCS_DIR/gestion/$filename.md" ]; then
         echo "## $title" >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
-        tail -n +4 "$DOCS_DIR/gestion/$filename.md" | sed '/^# /d' | sed 's|../../../assets/|src/assets/|g' >> "$OUTPUT_FILE"
+        tail -n +4 "$DOCS_DIR/gestion/$filename.md" | sed '/^# /d' | sed 's|../../../assets/|src/assets/|g' | sed 's|src="/src/assets/|src="src/assets/|g' | convert_img_to_markdown >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
         echo "\\newpage" >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
@@ -155,6 +161,7 @@ echo "# Annexes" >> "$OUTPUT_FILE"
 echo "" >> "$OUTPUT_FILE"
 
 declare -a annexes_files=(
+    "bilan:Bilan"
     "analyse-besoins:Analyse des besoins"
     "architecture-technique:Architecture technique"
     "conception-base-donnees:Conception technique de la base de données"
@@ -163,8 +170,6 @@ declare -a annexes_files=(
     "authentifications:Authentifications"
     "permissions:Permissions"
     "glossaire:Glossaire"
-    "cahier-des-charges:Cahier des charges"
-    "bilan:Bilan"
 )
 
 for item in "${annexes_files[@]}"; do
@@ -172,7 +177,7 @@ for item in "${annexes_files[@]}"; do
     if [ -f "$DOCS_DIR/annexes/$filename.md" ]; then
         echo "## $title" >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
-        tail -n +4 "$DOCS_DIR/annexes/$filename.md" | sed '/^# /d' | sed 's|../../../assets/|src/assets/|g' >> "$OUTPUT_FILE"
+        tail -n +4 "$DOCS_DIR/annexes/$filename.md" | sed '/^# /d' | sed 's|../../../assets/|src/assets/|g' | sed 's|src="/src/assets/|src="src/assets/|g' | convert_img_to_markdown >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
         echo "\\newpage" >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
@@ -182,38 +187,6 @@ done
 echo "✅ Document combiné créé: $OUTPUT_FILE"
 echo "📄 Nombre de lignes: $(wc -l < "$OUTPUT_FILE")"
 echo ""
-echo "🔄 Pour convertir en Word avec Pandoc:"
-echo "pandoc '$OUTPUT_FILE' \\"
-echo "  --toc \\"
-echo "  --number-sections \\"
-echo "  --variable fontsize=11pt \\"
-echo "  --variable linestretch=1.2 \\"
-echo "  --variable margin-left=2cm \\"
-echo "  --variable margin-right=2cm \\"
-echo "  --variable margin-top=2cm \\"
-echo "  --variable margin-bottom=2cm \\"
-echo "  -o 'DropIt-Documentation.docx'"
+echo "📄 Pour créer un DOCX complet avec images Mermaid, code et images intégrées:"
+echo "./create-docx-transparent.sh"
 echo ""
-echo "📄 Pour créer un DOCX complet avec images Mermaid intégrées:"
-echo "./create-docx-complete.sh"
-echo ""
-echo "📄 Pour convertir en PDF avec support Mermaid:"
-echo "./convert-to-pdf.sh"
-echo ""
-echo "📄 Ou directement avec Pandoc:"
-echo "pandoc '$OUTPUT_FILE' \\"
-echo "  --toc \\"
-echo "  --number-sections \\"
-echo "  --variable fontsize=11pt \\"
-echo "  --variable linestretch=1.2 \\"
-echo "  --variable margin-left=2cm \\"
-echo "  --variable margin-right=2cm \\"
-echo "  --variable margin-top=2cm \\"
-echo "  --variable margin-bottom=2cm \\"
-echo "  --pdf-engine=xelatex \\"
-echo "  --filter mermaid-filter \\"
-echo "  --standalone \\"
-echo "  -o 'DropIt-Documentation.pdf'"
-echo ""
-echo "🎨 Pour convertir avec un style personnalisé:"
-echo "pandoc '$OUTPUT_FILE' --reference-doc=template.docx -o 'DropIt-Documentation.docx'"
