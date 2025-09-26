@@ -37,7 +37,6 @@ Les **packages partagés** sont les suivants:
 - **`@dropit/schemas`** : Regroupe les schémas de validation Zod réutilisés sur toutes les plateformes
 - **`@dropit/permissions`** : Définit le système d'autorisation centralisé avec des rôles granulaires
 - **`@dropit/i18n`** : Mutualise les traductions multilingues et centralise les contenus textuels
-- **`@dropit/tsconfig`** : Fournit la configuration TypeScript de base partagée par toutes les applications
 
 Les détails techniques d'implémentation et des explications plus détaillées de chaque package sont documentés dans la section [Architecture technique](/annexes/architecture-technique).
 

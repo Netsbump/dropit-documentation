@@ -3,11 +3,7 @@ title: Architecture technique
 description: Détails techniques d'implémentation de l'architecture DropIt - packages partagés, justifications et exemples de code
 ---
 
-## Packages partagés - Détails d'implémentation
-
-Cette section présente les détails techniques d'implémentation des packages partagés mentionnés dans l'[architecture logicielle](/conception/architecture#packages-partagés).
-
-### Justification des approches alternatives
+### Approches alternatives
 
 Pour assurer la cohérence des types et de la logique métier entre les différentes applications, plusieurs approches étaient envisageables.
 
@@ -134,91 +130,6 @@ export const resources = {
 ```
 
 Les traductions couvrent tous les aspects de l'application : authentification, gestion des athlètes, planification des séances, processus d'accueil. Cette approche centralisée facilite la maintenance des traductions et garantit une expérience utilisateur cohérente sur toutes les plateformes.
-
-## @dropit/tsconfig : Configuration TypeScript unifiée
-
-Ce package fournit la configuration TypeScript de base dont héritent toutes les applications du monorepo.
-
-Sans cette centralisation, chaque application (web, mobile, API) définirait ses propres règles TypeScript, avec le risque que du code valide dans une application provoque des erreurs dans une autre. Cette situation complique le partage de code entre applications et peut créer des incohérences lors du développement.
-
-La configuration de base définit les règles strictes communes (`strict: true`, `strictNullChecks: true`) qui garantissent un typage rigoureux à travers tout l'écosystème. Chaque application peut ensuite étendre cette base avec ses spécificités : le client web ajoute les configurations Vite pour les ES modules, l'API NestJS adapte pour CommonJS, et l'application mobile intègre les spécificités React Native.
-
-```json
-{
-  "compilerOptions": {
-    "strict": true,
-    "strictNullChecks": true,
-    "noImplicitReturns": true,
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
-  }
-}
-```
-
-Cette approche garantit que les packages partagés respectent les mêmes standards de qualité de code tout en laissant chaque application adapter les détails techniques selon son environnement d'exécution.
-
-## Structure complète du monorepo
-
-L'organisation finale du projet DropIt :
-
-```markdown
-dropit/
-├── apps/                          # Applications principales
-│   ├── web/                       # Interface web React/TypeScript
-│   │   ├── src/
-│   │   │   ├── features/          # Modules métier (athletes, exercises, workout, planning)
-│   │   │   ├── shared/            # Composants UI, hooks et utilitaires partagés
-│   │   │   ├── lib/               # Configuration des clients (API, auth)
-│   │   │   └── routes/            # Structure de routage Tanstack Router
-│   │   ├── package.json           # Dépendances spécifiques au web
-│   │   ├── vite.config.ts         # Configuration Vite
-│   │   └── tailwind.config.js     # Configuration Tailwind CSS
-│   ├── mobile/                    # Application mobile React Native/Expo
-│   │   ├── src/
-│   │   │   ├── components/        # Composants React Native
-│   │   │   └── lib/               # Configuration clients mobiles
-│   │   ├── assets/                # Ressources natives (icônes, splash screens)
-│   │   ├── app.json               # Configuration Expo
-│   │   ├── App.tsx                # Point d'entrée mobile
-│   │   └── package.json           # Dépendances React Native/Expo
-│   └── api/                       # Backend NestJS
-│       ├── src/
-│       │   ├── modules/           # Modules métier NestJS
-│       │   ├── common/            # Utilitaires et middlewares partagés
-│       │   └── config/            # Configuration application
-│       ├── package.json           # Dépendances backend
-│       └── nest-cli.json          # Configuration NestJS CLI
-├── packages/                      # Packages partagés entre applications
-│   ├── contract/                  # Contrats d'API typés avec ts-rest
-│   │   ├── src/api/               # Définitions des endpoints
-│   │   ├── index.ts               # Export principal des contrats
-│   │   └── package.json           # Configuration du package
-│   ├── schemas/                   # Schémas de validation Zod
-│   │   ├── src/                   # Schémas métier (User, Workout, Exercise)
-│   │   ├── index.ts               # Export des schémas
-│   │   └── package.json           # Configuration Zod
-│   ├── permissions/               # Système de rôles et permissions
-│   │   ├── src/                   # Définition des rôles et contrôles d'accès
-│   │   ├── index.ts               # Export des permissions
-│   │   └── package.json           # Configuration des permissions
-│   ├── i18n/                      # Internationalisation partagée
-│   │   ├── locales/               # Fichiers de traduction (fr, en)
-│   │   ├── index.ts               # Configuration i18next
-│   │   └── package.json           # Configuration i18n
-│   └── tsconfig/                  # Configurations TypeScript partagées
-│       ├── base.json              # Configuration TypeScript de base
-│       ├── nextjs.json            # Config spécifique React
-│       ├── react-native.json      # Config spécifique React Native
-│       └── package.json           # Configuration du package
-├── package.json                   # Configuration racine du monorepo
-├── pnpm-workspace.yaml           # Définition des workspaces pnpm
-├── pnpm-lock.yaml                # Verrouillage des dépendances
-├── biome.json                     # Configuration du linter/formatter
-├── docker-compose.yml            # Services de développement (PostgreSQL, Redis, MinIO)
-└── README.md                     # Documentation du projet
-```
-
-Cette architecture monorepo centralise la logique commune et garantit la cohérence des types à travers l'ensemble des applications.
 
 ## Gestion des dépendances et sécurité
 
