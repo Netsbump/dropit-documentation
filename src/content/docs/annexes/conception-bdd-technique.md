@@ -24,17 +24,7 @@ Les informations de base restent centralisées (un exercice = une seule définit
 
 ### Choix des clés primaires UUID
 
-J'ai opté pour des clés primaires UUID plutôt que des entiers auto-incrémentés pour des raisons pratiques liées au développement et au déploiement.
-
-**Avantages des UUID :**
-- Facilitent les opérations de développement en évitant les conflits d'identifiants lors de la synchronisation entre les environnements de développement, test et production
-- Quand plusieurs développeurs créent des données de test, les UUID évitent naturellement les collisions d'identifiants
-- Simplifient les opérations de migration et d'import de données
-- Lors de la fusion de données de test ou de l'import de catalogues d'exercices externes, je n'ai pas à me soucier des conflits d'identifiants numériques
-
-**Inconvénients :**
-- Espace de stockage plus important (16 bytes vs 4 bytes pour un integer)
-- Dans le contexte d'un club d'haltérophilie avec quelques centaines d'utilisateurs maximum, cet overhead reste négligeable face à la simplicité opérationnelle
+J'ai opté pour des clés primaires UUID plutôt que des entiers auto-incrémentés pour faciliter le développement : éviter les conflits d'identifiants lors de la synchronisation entre environnements (dev, test, prod) et simplifier les imports de données de test. L'overhead de stockage (16 vs 4 bytes) reste négligeable pour un club avec quelques centaines d'utilisateurs maximum.
 
 ### Stratégies de suppression
 
@@ -43,64 +33,17 @@ Pour l'intégrité référentielle, j'ai identifié les stratégies de suppressi
 - **Relations de composition** : Comportement CASCADE - si un workout est supprimé, ses éléments doivent l'être automatiquement puisqu'ils n'ont pas de sens sans leur parent
 - **Relations de référence** : Comportement RESTRICT - empêche la suppression accidentelle d'un exercice encore utilisé dans des programmes actifs
 
-## Choix des types de données PostgreSQL
-
-Ma sélection des types de données s'appuie sur les spécificités de PostgreSQL et les besoins métier de l'haltérophilie :
-
-### Types principaux
-
-**UUID pour les identifiants** : Comme évoqué précédemment, ce choix facilite la distribution et évite les conflits d'identifiants.
-
-**VARCHAR avec contraintes de longueur** : Pour les champs textuels (noms, descriptions, titres), j'ai défini des longueurs appropriées plutôt que d'utiliser TEXT illimité. Les catégories restent extensibles par les coachs selon leurs besoins spécifiques.
-
-**TIMESTAMP** : Pour toutes les dates de création, modification et d'enregistrement. PostgreSQL offre une gestion native des fuseaux horaires.
-
-**INTEGER** : Pour les valeurs numériques comme les séries, répétitions, temps de repos, ordres de séquence.
-
-**DECIMAL** : Pour les charges, poids et valeurs de performance, garantissant une précision exacte nécessaire aux calculs de pourcentages et progressions.
-
-**BOOLEAN** : Pour les flags et statuts binaires présents dans le modèle.
-
-**TEXT** : Pour les URLs des fichiers média stockés en externe (photos d'exercices, vidéos de démonstration).
-
-Cette approche me permet de bénéficier des optimisations PostgreSQL tout en maintenant une flexibilité pour les évolutions futures du modèle.
-
 ## Pattern de référence polymorphe
 
 Pour permettre aux programmes d'entraînement d'inclure à la fois des exercices simples et des complexes, j'ai choisi un pattern de référence polymorphe dans la table `WorkoutElement`.
 
-### Principe retenu
-
 Une table unique avec un discriminant `element_type` et deux clés étrangères optionnelles (`exercise_id` et `complex_id`). Une contrainte CHECK garantit qu'exactement une des deux références est remplie selon le type.
 
-### Alternatives considérées
+### Alternative considérée
 
-**Option 1 - Tables séparées** : Créer `WorkoutExercise` et `WorkoutComplex` distinctes.
+**Tables séparées** (`WorkoutExercise` et `WorkoutComplex`) : Structure plus claire mais duplication des colonnes communes (sets, reps, weight) et du code applicatif, plus complexité pour l'affichage ordonné d'éléments mixtes.
 
-✅ **Avantages** :
-- Structure plus claire
-- Pas de colonnes NULL
-- Contraintes d'intégrité simples
-
-❌ **Inconvénients** :
-- Duplication des colonnes communes (sets, reps, weight, rest_time, order_index) dans chaque table
-- Duplication du code applicatif (2 repositories, 2 DTOs)
-- Complexité pour afficher une séquence ordonnée d'éléments mixtes
-
-**Option 2 - Table d'union** : Une table `WorkoutElement` générique pointant vers une table `TrainingElement` qui fait le lien.
-
-✅ **Avantages** :
-- Extensibilité maximale
-
-❌ **Inconvénients** :
-- Sur-ingénierie pour mon cas d'usage
-- Jointures supplémentaires
-
-### Justification du choix
-
-Le pattern polymorphe mutualise les colonnes communes (sets, reps, weight, etc.) qui s'appliquent aussi bien aux exercices qu'aux complexes, évite la duplication de code, et facilite l'affichage ordonné des programmes. Les contraintes CHECK compensent la flexibilité par la rigueur des validations.
-
-Le polymorphisme est contrôlé par une contrainte CHECK qui garantit qu'exactement une des deux références est renseignée selon le type déclaré, évitant ainsi les incohérences de données.
+Le pattern polymorphe choisi mutualise les colonnes communes dans `WorkoutElement` et facilite l'affichage ordonné. Le polymorphisme est contrôlé par une contrainte CHECK garantissant qu'exactement une référence est renseignée selon le type.
 
 ## Contraintes d'intégrité spécifiques
 
@@ -121,8 +64,6 @@ ALTER TABLE workout_element ADD CONSTRAINT valid_element_reference
 
 J'ai réparti les autres contraintes selon leur nature entre Zod et les use cases pour optimiser l'expérience utilisateur et les performances.
 
-**Validations de bornes métier gérées par Zod** :
-
 ```typescript
 // Exemple concret de validation Zod pour WorkoutElement
 const WorkoutElementSchema = z.object({
@@ -132,10 +73,7 @@ const WorkoutElementSchema = z.object({
 });
 ```
 
-**Avantages de cette approche** :
-- Validation immédiate côté client et serveur
-- Messages d'erreur clairs pour les utilisateurs
-- Évolutivité sans migration de base de données
+Les avantages de cette approche sont la validation immédiate côté client et serveur, des messages d'erreur clairs pour les utilisateurs et une évolutivité sans migration de base de données.
 
 **Contraintes temporelles dans les use cases** :
 
@@ -167,79 +105,14 @@ Cette approche pragmatique privilégie la simplicité initiale avec une possibil
 
 La structure que j'ai conçue anticipe l'intégration future de Redis comme système de cache. Cette solution me permettra d'améliorer les temps de réponse lorsque le nombre d'utilisateurs augmentera, sans modifier l'architecture de base de données existante.
 
-### Données candidates pour la mise en cache
-
-J'ai identifié les données qui bénéficieraient le plus de cette optimisation :
-
-- **Catalogue d'exercices et complex complets** : Données qui changent rarement
-- **Programmes d'entraînement consultés quotidiennement** : Par les athlètes
-- **Records personnels récents** : Utilisés pour calculer les charges d'entraînement
-- **Compositions des complex les plus populaires** : Auprès des coachs
+Les données qui bénéficieraient le plus de cette optimisation sont potentiellement les catalogue d'exercices et complex complets qui changent rarement ou encore les records personnels récents utilisés pour calculer les charges d'entraînement
 
 ### Stratégie évolutive
 
 Cette approche évolutive me convient parfaitement : commencer avec PostgreSQL seul pour le MVP, puis ajouter Redis si les métriques de performance le justifient en production.
 
-## Extensions métier envisagées
-
-Dans ma conception de la base de données, j'ai réfléchi aux fonctionnalités qui pourraient émerger après le lancement du MVP. Plutôt que de tout implémenter dès le départ, j'ai préféré identifier les extensions logiques que les retours utilisateurs du club pourraient justifier.
-
-### Messages du coach
-
-Une entité `CoachMessage` permettrait de diffuser des annonces générales (événements particuliers, rappels globaux) aux athlètes d'une organisation. Cette table pourrait inclure :
-
-- Système de priorité pour gérer l'importance des messages
-- Date d'expiration pour gérer automatiquement la visibilité des messages
-- Statut de lecture pour chaque athlète
-
-### Système de notifications
-
-Une entité `Notification` centralisée gérerait les alertes push vers les applications mobiles :
-
-- Nouveaux programmes assignés
-- Rappels de séances
-- Félicitations pour les records
-- Historique des notifications
-- Gestion des préférences utilisateur
-
-### Catégorisation enrichie des exercices
-
-L'ajout d'entités `MuscleGroup` et `Equipment` structurerait mieux le catalogue d'exercices :
-
-- **MuscleGroup** : Faciliterait les recherches avancées (exercices pour les jambes)
-- **Equipment** : Exercices nécessitant des haltères, barres, etc.
-- Ces références faciliteraient l'élaboration de programmes équilibrés
-
-### Indicateurs de difficulté
-
-Une extension de `Workout` avec un champ difficulté aiderait les coachs à graduer leurs programmes selon le niveau des athlètes. Cette information pourrait également alimenter des statistiques de progression.
-
-### Gestion des tempos avancés
-
-Pour les coachs expérimentés, deux niveaux de tempo enrichiraient la programmation :
-
-**Macro tempo** au niveau des `Complex` :
-- EMOM (Every Minute On the Minute)
-- TABATA (20s travail / 10s repos)
-- AMRAP (As Many Rounds As Possible)
-
-**Micro tempo** au niveau des `WorkoutElement` :
-- Tempo 2-2-1 (2s excentrique, 2s isométrique, 1s concentrique)
-- Tempo 3-0-1 (3s excentrique, pas de pause, 1s concentrique)
-
-Ces extensions s'intègrent naturellement dans l'architecture existante sans remettre en cause les relations fondamentales.
-
 ## Stratégie de migration
 
 L'évolution de ce modèle de données nécessitera une approche méthodique pour préserver l'intégrité des données existantes. J'ai prévu d'utiliser le système de migrations de MikroORM pour gérer ces évolutions de schéma de façon sécurisée.
 
-### Fonctionnalités de migration
-
-Cette stratégie inclut :
-
-- **Versioning des modifications** : Historique complet des changements de schéma
-- **Possibilité de rollback** : Retour en arrière en cas de problème
-- **Validation des migrations** : Tests avant déploiement en production
-- **Migration des données** : Transformation des données existantes lors des changements de structure
-
-Cette approche garantit la continuité du service et la préservation des données utilisateur lors des évolutions du modèle.
+Cette stratégie inclut le versioning des modifications avec historique complet, la possibilité de rollback en cas de problème, la validation des migrations avant déploiement en production, et la migration des données existantes lors des changements de structure, garantissant ainsi la continuité du service et la préservation des données utilisateur.

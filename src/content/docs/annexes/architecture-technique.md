@@ -5,23 +5,19 @@ description: Détails techniques d'implémentation de l'architecture DropIt - pa
 
 ### Approches alternatives
 
-Pour assurer la cohérence des types et de la logique métier entre les différentes applications, plusieurs approches étaient envisageables.
+Pour assurer la cohérence des types entre applications, j'ai comparé trois approches :
 
-**Option 1 - Duplication des types** : Redéfinir les types dans chaque application (web, mobile, API). Cette approche fonctionne parfaitement pour un développeur unique qui maîtrise l'ensemble du code. L'inconvénient principal réside dans la redondance : chaque modification d'un modèle `Athlete` côté API nécessite de répliquer manuellement les changements côté web et mobile. C'est fastidieux mais gérable. Dans une équipe avec des développeurs spécialisés frontend/backend, cette approche ralentirait davantage le développement en nécessitant une coordination constante.
+**Duplication des types** : Redéfinir dans chaque app - simple mais nécessite synchronisation manuelle.
 
-**Option 2 - Package NPM publié** : Publier un package `@dropit/shared-types` sur le registre NPM. Cette solution fonctionne bien pour des projets open-source mais introduit une complexité de versioning et de publication qui ralentit le développement. Chaque modification nécessite une nouvelle version, un cycle de publication, puis une mise à jour dans chaque application consommatrice.
+**Package NPM publié** : Centralisation mais complexité de versioning/publication qui ralentit le développement.
 
-**Option 3 - Monorepo avec packages internes** : Cette approche que j'ai retenue mutualise la logique commune via des packages partagés sans les inconvénients du versioning externe. Les modifications se propagent instantanément à toutes les applications grâce aux liens symboliques, accélérant considérablement les cycles de développement.
-
-L'architecture monorepo résout ces problématiques en centralisant les préoccupations transversales tout en préservant l'indépendance des applications. Cette approche garantit la cohérence technique sans compromettre la vélocité de développement.
+**Monorepo avec packages internes** : Approche retenue - mutualisation sans versioning externe, propagation instantanée des modifications.
 
 ## @dropit/contract : Contrats API typés
 
 Ce package centralise la définition de toute l'API REST sous forme de contrats typés grâce à **ts-rest**, un outil **TypeScript** qui permet de définir des APIs type-safe.
 
-Sans cet outil, j'aurais dû maintenir manuellement la cohérence entre les endpoints NestJS côté serveur et les appels API côté clients. L'approche classique consiste à définir les types TypeScript des requêtes et réponses de chaque côté, ce qui fonctionne mais demande une synchronisation constante lors des évolutions.
-
-ts-rest résout cette problématique en adoptant une approche "contract-first". Je définis une seule fois chaque endpoint avec ses schémas de validation Zod, et ce contrat devient la source de vérité partagée entre le serveur et tous les clients. Cette centralisation apporte plusieurs bénéfices immédiats : les types TypeScript sont générés automatiquement pour les requêtes et réponses, la validation Zod s'exécute côté client avant l'appel réseau (évitant des requêtes inutiles), toute divergence entre contrat et implémentation provoque une erreur TypeScript à la compilation, et l'IDE propose automatiquement l'auto-complétion des paramètres disponibles.
+Cette approche définit une seule fois chaque endpoint avec ses schémas de validation Zod, et ce contrat devient la source de vérité partagée entre le serveur et tous les clients. Cette centralisation apporte plusieurs bénéfices comme les types TypeScript auto-générés, la validation en amont côté client avant l'appel réseau (évitant des requêtes inutiles), la détection des divergences à la compilation, ou encore l'auto-complétion IDE des paramètres disponibles.
 
 ```typescript
 // Exemple de contrat pour la gestion des athlètes
@@ -47,13 +43,11 @@ export const athleteContract = {
 }
 ```
 
-Cette approche élimine les divergences entre frontend et backend : toute modification du contrat se répercute automatiquement sur tous les clients, garantissant la cohérence des types et réduisant les erreurs d'intégration.
+Toute modification du contrat se répercute automatiquement sur tous les clients, garantissant la cohérence.
 
 ## @dropit/schemas : Validation centralisée avec Zod
 
-L'ensemble des schémas de validation sont centralisés dans ce package grâce à Zod, une solution TypeScript de validation de données à l'exécution.
-
-Traditionnellement, j'aurais dû définir des règles de validation séparées côté client (pour les formulaires React) et côté serveur (pour l'API NestJS), avec le risque d'incohérences entre ces validations. Zod me permet de définir une seule fois les règles de validation sous forme de schémas TypeScript, puis de les réutiliser partout où c'est nécessaire.
+Les schémas de validation sont centralisés avec Zod. Au lieu de définir des validations séparées côté client et serveur, Zod permet de définir une seule fois les règles et de les réutiliser partout.
 
 ```typescript
 export const createAthleteSchema = z.object({
@@ -77,15 +71,13 @@ export const athleteDetailsSchema = z.object({
 export type AthleteDetailsDto = z.infer<typeof athleteDetailsSchema>;
 ```
 
-Ces schémas sont utilisés à la fois pour la validation côté client (formulaires React), la validation côté serveur (NestJS), et la définition des contrats API. Cette triple utilisation garantit une cohérence parfaite des règles de validation.
+Ces schémas servent pour la validation client ( formulaires React), serveur (NestJS) et contrats API, garantissant une cohérence complète.
 
 ## @dropit/permissions : Contrôle d'accès granulaire
 
-Ce package implémente un système d'autorisation centralisé qui définit précisément les permissions selon les rôles utilisateurs.
+Ce package implémnte un système d'autorisation centralisé avec Better Auth définissant les permissions par rôle. Les mêmes règles s'appliquent côté client (UX) et serveur (sécurité).
 
-Sans centralisation, j'aurais dû gérer les autorisations séparément côté client et côté serveur, avec des enjeux différents selon le contexte. Côté React, les contrôles d'accès servent principalement à améliorer l'expérience utilisateur en masquant les boutons ou sections non autorisés. Côté API, les contrôles constituent une barrière de sécurité critique qui empêche l'accès non autorisé aux données, indépendamment de ce qui est affiché côté client.
-
-Le package utilise Better Auth pour définir un système de permissions où chaque rôle dispose d'actions spécifiques sur des ressources métier définies. Un membre peut gérer ses propres données d'athlète mais ne peut que consulter ses séances, tandis qu'un administrateur dispose d'un contrôle complet sur toutes les ressources. Cette approche garantit que les mêmes règles s'appliquent pour l'affichage côté client et la sécurisation côté serveur. La section [Sécurité et autorisation](/securite/autorisation) détaille en profondeur ce système.
+Côté React, les contrôles d'accès servent principalement à améliorer l'expérience utilisateur en masquant les boutons ou sections non autorisés. Côté API, les contrôles constituent une barrière de sécurité critique qui empêche l'accès non autorisé aux données, indépendamment de ce qui est affiché côté client.
 
 ```typescript
 // Exemple simplifié de définition des rôles
@@ -105,11 +97,7 @@ export const admin = ac.newRole({
 
 ## @dropit/i18n : Internationalisation partagée
 
-Ce package centralise tous les textes de l'application, répondant à un double objectif : permettre la traduction multilingue et externaliser les contenus textuels du code.
-
-Au-delà de la simple traduction français/anglais, cette approche évite la dispersion des textes directement dans les composants React. Sans centralisation, modifier un libellé comme "Créer un programme" nécessiterait de parcourir potentiellement plusieurs fichiers pour trouver toutes ses occurrences. Le système i18n devient une source de vérité unique pour tous les contenus textuels, facilitant leur maintenance et leur évolution.
-
-Le package structure les traductions par domaines métier :
+Ce package centralise tous les textes pour la traduction multilingue et l'externalisation du contenu. Cette source de vérité unique facilitant la maintenance. Elle est structurée par domaines métier :
 
 ```typescript
 // Configuration i18next partagée
@@ -129,7 +117,7 @@ export const resources = {
 };
 ```
 
-Les traductions couvrent tous les aspects de l'application : authentification, gestion des athlètes, planification des séances, processus d'accueil. Cette approche centralisée facilite la maintenance des traductions et garantit une expérience utilisateur cohérente sur toutes les plateformes.
+Couvre tous les aspects : authentification, gestion athlètes, planification, garantissant une expérience cohérente.
 
 ## Gestion des dépendances et sécurité
 
@@ -140,8 +128,6 @@ L'utilisation de bibliothèques externes à travers le monorepo (frontend, backe
 J'ai mis en place un système d'audit automatique via GitHub Actions qui exécute `pnpm audit` à chaque push et de manière hebdomadaire. Cette vérification détecte les vulnérabilités connues dans l'arbre de dépendances et génère des alertes par email en cas de faille critique. GitHub Security Advisories complète ce dispositif en surveillant automatiquement le repository et en proposant des pull requests de correction pour les vulnérabilités détectées.
 
 ### Surveillance des mises à jour
-
-Pour rester informé des évolutions importantes, j'ai configuré Dependabot sur le repository GitHub qui propose automatiquement des pull requests pour les mises à jour de dépendances. Cette approche me permet de tester et valider chaque mise à jour dans un environnement contrôlé avant déploiement.
 
 Pour les bibliothèques critiques (React, NestJS, MikroORM, PostgreSQL driver), je surveille également les annonces de sécurité via leurs canaux officiels (Twitter, newsletters, GitHub releases). Cette veille proactive me permet d'anticiper les migrations importantes et de planifier les mises à jour selon leur criticité.
 
