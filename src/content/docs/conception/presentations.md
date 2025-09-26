@@ -9,9 +9,9 @@ Après avoir détaillé l'[accès aux données](/conception/acces-donnees), cett
 
 ## Architecture Web App
 
-### Choix d'organisation modulaire
+### Organisation modulaire
 
-Ma stratégie d'architecture frontend s'appuie sur une organisation par features qui traduit directement les domaines métier identifiés lors de l'analyse des besoins. Cette approche, inspirée des principes du Domain-Driven Design, établit un langage commun entre l'équipe technique et les coachs utilisateurs. Plutôt que de structurer le code selon des préoccupations purement techniques (composants, services, utils), j'ai privilégié une architecture qui reflète le vocabulaire métier : "athletes", "exercises", "workout", "planning". Cette correspondance directe facilite considérablement les échanges avec les utilisateurs finaux et réduit les incompréhensions lors des phases de validation fonctionnelle.
+L'architecture frontend adopte une organisation par features inspirée du Domain-Driven Design, structurant le code selon le vocabulaire métier ("athletes", "exercises", "workout", "planning") plutôt que par préoccupations techniques. Cette approche établit un langage commun avec les utilisateurs et facilite le développement parallèle.
 
 ```markdown
 apps/web/src/
@@ -28,9 +28,7 @@ apps/web/src/
 └── routes/                # Structure de routage Tanstack Router
 ```
 
-Au-delà de cette cohérence sémantique, cette organisation présente des avantages techniques concrets que j'ai découverts au fil du développement. Elle facilite considérablement le développement parallèle : je peux travailler sur la gestion des exercices sans impacter les fonctionnalités de planification. Elle respecte également le principe de responsabilité unique au niveau des modules, chaque feature encapsulant sa logique métier spécifique et ses règles de validation propres.
-
-L'isolation des domaines métier s'avère bénéfique dans le contexte de DropIt où les règles business diffèrent significativement entre la gestion des athlètes et la création d'exercices. Par exemple, le module `athletes/` implémente des validations spécifiques aux données personnelles (format email, validation d'âge, contraintes de confidentialité), tandis que le module `exercises/` se concentre sur les règles biomécaniques (validation des groupes musculaires, cohérence des paramètres de charge). Cette séparation me permet d'appliquer ces règles métier spécialisées sans créer de couplage entre les modules, facilitant ainsi leur maintenance et leur évolution indépendante.
+Chaque feature encapsule sa logique métier spécifique et ses règles de validation propres, respectant le principe de responsabilité unique. Cette isolation permet d'appliquer des règles business différenciées (données personnelles pour `athletes/`, règles biomécaniques pour `exercises/`) sans créer de couplage entre modules.
 
 ### Gestion des formulaires avec React Hook Form
 
@@ -125,14 +123,6 @@ L'implémentation repose sur le hook `useSortable` qui me donne tous les éléme
 
 > **Exemples d'implémentation drag-and-drop** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/)
 
-### Gestion du planning avec FullCalendar
-
-Pour l'interface calendaire de planification des séances, j'ai intégré FullCalendar, une bibliothèque JavaScript mature spécialisée dans l'affichage de calendriers interactifs. Cette solution me évite de développer from scratch les fonctionnalités complexes de navigation temporelle, gestion des fuseaux horaires, et interactions utilisateur propres aux calendriers.
-
-Cette intégration me permet de proposer aux coachs une expérience familiar d'agenda, avec visualisations mensuelle, hebdomadaire et quotidienne selon leurs préférences d'organisation.
-
-> **Configuration FullCalendar** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/)
-
 ### Internationalisation côté client
 
 Au-delà de la perspective multilingue, l'implémentation d'un système d'internationalisation répond à deux besoins pratiques : externaliser tous les textes dans des fichiers dédiés plutôt que dispersés dans le code, et mutualiser certains messages (notamment les erreurs) entre l'application web et mobile.
@@ -145,67 +135,65 @@ Les fichiers de traduction sont organisés par domaines métier, permettant une 
 
 ### TailwindCSS
 
-Dans le contexte de DropIt, j'avais besoin d'une approche CSS permettant un développement rapide sans sacrifier la cohérence visuelle ni les performances finales. TailwindCSS répond précisément à cette problématique en inversant la logique traditionnelle du développement CSS.
+TailwindCSS adopte une approche CSS atomique avec des classes utilitaires correspondant directement aux propriétés CSS, permettant de composer les interfaces directement dans le JSX. Cette méthodologie élimine la navigation constante entre fichiers CSS et composants, optimisant le développement des formulaires et interfaces de planning.
 
-Contrairement à l'approche classique où j'aurais créé des classes CSS sémantiques comme `.workout-card` ou `.athlete-form`, Tailwind propose des classes utilitaires atomiques qui correspondent directement aux propriétés CSS. Cette méthodologie me permet de composer les interfaces directement dans le JSX sans naviguer constamment entre fichiers CSS et composants.
+L'intégration avec Vite utilise le compilateur JIT (Just-In-Time) qui génère uniquement les styles correspondant aux classes effectivement utilisées, optimisant drastiquement la taille du bundle final. Le système de purge automatique élimine les classes non utilisées, résultant en un fichier CSS de quelques kilooctets.
 
-Cette approche me fait gagner un temps considérable lors du développement des formulaires de création d'exercices et des interfaces de planning. Au lieu de définir des styles CSS personnalisés, puis de les maintenir et les faire évoluer, je compose directement les interfaces avec des classes atomiques qui correspondent à mes besoins visuels immédiats.
-
-L'intégration de Tailwind dans le projet Vite nécessite une configuration spécifique que j'ai adaptée aux besoins de DropIt. Le compilateur JIT (Just-In-Time) génère uniquement les styles CSS correspondant aux classes effectivement utilisées dans le code, optimisant drastiquement la taille du bundle final.
-
-Cette configuration me permet d'étendre la palette de base avec des couleurs métier spécifiques à l'application tout en bénéficiant des plugins officiels pour les formulaires et la typographie. Le système de purge automatique élimine toutes les classes non utilisées, résultant en un fichier CSS final de quelques kilooctets seulement.
-
-L'approche responsive de Tailwind facilite également le développement mobile-first que j'ai adopté. Les préfixes `sm:`, `md:`, `lg:` permettent d'adapter facilement les interfaces aux différentes tailles d'écran sans écrire de media queries CSS manuelles, aspect crucial pour une application utilisée à la fois sur desktop par les coachs et sur mobile par les athlètes.
+L'approche responsive mobile-first utilise les préfixes `sm:`, `md:`, `lg:` pour adapter les interfaces aux différentes tailles d'écran sans media queries manuelles.
 
 > **Configuration Tailwind et exemples** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/)
 
 ### Shadcn/ui
 
-Dans le développement de DropIt, j'ai privilégié Shadcn/ui non seulement pour sa productivité, mais surtout pour son approche fondamentale de l'accessibilité et de la durabilité numérique. Dans le contexte de ma formation, ces préoccupations d'accessibilité universelle et d'écoconception sont devenues centrales, particulièrement pour une application destinée à un public diversifié d'athlètes.
+Shadcn/ui s'appuie sur Radix UI pour implémenter nativement les recommandations WCAG 2.1 et respecter les critères RGAA (Référentiel Général d'Amélioration de l'Accessibilité). Cette conformité garantit l'utilisabilité par tous les athlètes, y compris ceux en situation de handicap.
 
-Shadcn/ui s'appuie sur Radix UI, une bibliothèque qui implémente nativement les recommandations WCAG 2.1 et respecte les critères du RGAA (Référentiel Général d'Amélioration de l'Accessibilité). Cette conformité garantit que DropIt reste utilisable par tous les athlètes, y compris ceux en situation de handicap.
+L'implémentation respecte les critères RGAA essentiels : structure sémantique avec rôles ARIA appropriés, gestion du focus pour la navigation clavier, contrastes conformes (ratio 4.5:1 minimum), et messages d'erreur associés via `aria-describedby`. L'attribut `role="alert"` assure l'annonce immédiate des erreurs par les lecteurs d'écran.
 
-Cette implémentation respecte les critères RGAA essentiels : structure sémantique avec des rôles ARIA appropriés, gestion du focus pour la navigation clavier, contrastes de couleurs conformes (ratio 4.5:1 minimum), et messages d'erreur associés via `aria-describedby`. L'attribut `role="alert"` assure que les lecteurs d'écran annoncent immédiatement les erreurs de validation, améliorant l'expérience des utilisateurs malvoyants.
-
-La stratégie de bundling que j'ai adoptée avec Shadcn permet un tree-shaking optimal : seuls les composants effectivement utilisés sont inclus dans le bundle final. Cette granularité d'import réduit significativement la taille du JavaScript téléchargé, diminuant la consommation énergétique côté client et améliorant les temps de chargement sur des connexions limitées.
-
-L'approche "copy-paste" de Shadcn/ui me donne un contrôle total sur l'adaptation des composants aux spécificités métier de l'haltérophilie. Cette flexibilité me permet d'intégrer des fonctionnalités métier comme les indicateurs de sécurité pour les exercices à risque, tout en conservant les garanties d'accessibilité de la base Radix UI.
+L'approche "copy-paste" offre un contrôle total sur l'adaptation aux spécificités métier tout en conservant les garanties d'accessibilité de Radix UI. Les composants étant conçus pour être tree-shakeable, Vite peut éliminer automatiquement les composants non utilisés du bundle final, réduisant la taille du JavaScript téléchargé et répondant aux enjeux de durabilité numérique.
 
 > **Exemples d'implémentation Shadcn/ui** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/)
 
 ### Système d'icônes avec Lucide React
 
-Dans le développement des interfaces de DropIt, j'avais besoin d'un système d'icônes cohérent qui s'intègre harmonieusement avec l'écosystème React et Tailwind tout en respectant les principes d'accessibilité. Lucide React s'est imposé comme une solution naturelle, étant un fork maintenu et amélioré de Feather Icons, avec des optimisations spécifiques pour React.
+Lucide React, fork amélioré de Feather Icons, propose un style unifié avec des traits fins et des proportions harmonieuses qui s'intègrent parfaitement avec l'esthétique moderne de Tailwind. Cette cohérence visuelle facilite la reconnaissance et l'apprentissage de l'interface dans le contexte métier de DropIt.
 
-Le choix de Lucide React répond d'abord à un besoin de cohérence visuelle dans l'interface utilisateur. Contrairement à l'approche que j'aurais pu adopter en mélangeant différentes sources d'icônes (Font Awesome, Material Icons, icônes personnalisées), Lucide propose un style unifié avec des traits fins et des proportions harmonieuses qui s'accordent parfaitement avec l'esthétique moderne de Tailwind.
+L'implémentation technique présente des avantages significatifs en termes de performance : contrairement aux font-icons qui imposent le téléchargement complet de la police, Lucide permet un tree-shaking granulaire où seules les icônes importées sont incluses dans le bundle final grâce à Vite. Cette approche réduit la taille du JavaScript téléchargé, aspect crucial pour l'écoconception. Les icônes étant des composants SVG React natifs, elles bénéficient du rendu optimisé de React et peuvent être stylées dynamiquement.
 
-Cette cohérence devient particulièrement importante dans le contexte métier de DropIt où chaque icône porte une signification fonctionnelle précise pour les utilisateurs. J'ai établi un vocabulaire iconographique cohérent qui facilite la reconnaissance et l'apprentissage de l'interface.
-
-L'implémentation technique de Lucide React présente des avantages significatifs en termes de performance et d'optimisation. Contrairement aux font-icons qui imposent le téléchargement complet de la police même pour quelques icônes utilisées, Lucide permet un tree-shaking granulaire où seules les icônes effectivement importées sont incluses dans le bundle final.
-
-Cette approche réduit significativement la taille du JavaScript téléchargé, aspect crucial dans ma démarche d'écoconception. Les icônes étant des composants SVG React natifs, elles bénéficient du rendu optimisé de React et peuvent être stylées dynamiquement sans impact performance notable.
-
-L'intégration de Lucide React dans DropIt respecte scrupuleusement les recommandations d'accessibilité, particulièrement importantes pour garantir l'utilisabilité par tous les athlètes. Chaque icône est implémentée avec les attributs ARIA appropriés selon son contexte d'usage.
+L'intégration respecte scrupuleusement les recommandations d'accessibilité, chaque icône étant implémentée avec les attributs ARIA appropriés selon son contexte d'usage.
 
 > **Exemples d'implémentation Lucide React** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/)
 
 ### Optimisations du build avec Vite
 
-Dans le contexte de DropIt, j'ai choisi Vite comme bundler pour bénéficier d'optimisations automatiques sans configuration complexe. Contrairement à Webpack que j'utilisais précédemment et qui nécessitait des ajustements manuels pour maintenir de bonnes performances, Vite automatise les optimisations essentielles.
-
-L'outil applique automatiquement trois optimisations cruciales que j'aurais dû configurer manuellement avec d'autres bundlers :
-
-**Code splitting** : Chaque route Tanstack Router génère automatiquement un chunk séparé, permettant aux utilisateurs de ne télécharger que le JavaScript nécessaire à la page consultée. Les modules `athletes`, `exercises`, `workout` et `planning` deviennent des chunks indépendants, optimisant les temps de chargement.
-
-**Tree shaking** : L'élimination automatique du code non utilisé s'applique à tous les niveaux. Dans DropIt, cela supprime les composants Shadcn/ui non utilisés et les fonctions d'internationalisation des langues non activées, réduisant significativement la taille du bundle final.
-
-**Compression des assets** : La minification du CSS et JavaScript, ainsi que l'optimisation des images s'effectuent transparemment, améliorant les performances particulièrement critiques pour l'usage mobile en salle de sport.
-
-Cette approche me permet de bénéficier d'optimisations modernes sans configuration complexe, aspect appréciable dans un contexte de formation où je préfère me concentrer sur les aspects métier plutôt que sur l'optimisation fine du bundling.
+Vite, bundler moderne remplaçant Webpack, automatise les optimisations essentielles sans configuration complexe. Il applique trois optimisations cruciales : le code splitting qui génère automatiquement des chunks séparés pour chaque route Tanstack Router, permettant aux utilisateurs de télécharger uniquement le JavaScript nécessaire à la page consultée ; le tree shaking qui élimine automatiquement le code non utilisé (composants Shadcn/ui non utilisés, fonctions d'internationalisation des langues non activées) ; et la compression des assets qui minifie le CSS et JavaScript tout en optimisant les images, améliorant les performances particulièrement critiques pour l'usage mobile en salle de sport.
 
 > **Configuration Vite et optimisations** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/)
 
 ## Architecture Mobile App
+
+### Structure du projet mobile
+
+```markdown
+apps/mobile/
+├── src/
+│   ├── components/          # Composants React Native
+│   │   ├── AuthProvider.tsx # Gestion authentification globale
+│   │   ├── LoginScreen.tsx  # Écran de connexion
+│   │   └── DashboardScreen.tsx # Interface principale athlète
+│   └── lib/                 # Configuration et clients
+│       ├── auth-client.ts   # Client Better Auth pour mobile
+│       └── api.ts          # Client HTTP configuré
+├── assets/                  # Images et ressources natives
+│   ├── icon.png            # Icône application
+│   ├── splash-icon.png     # Écran de démarrage
+│   └── adaptive-icon.png   # Icône adaptative Android
+├── app.json                 # Configuration Expo
+└── App.tsx                 # Point d'entrée de l'application
+```
+
+La structure mobile reste volontairement simple avec une séparation entre les composants d'interface et la configuration des services externes. Cette simplicité architecturale facilite la maintenance et réduit la complexité cognitive, aspect important dans un contexte d'apprentissage du développement mobile.
+
+Les assets sont organisés selon les conventions Expo pour permettre une génération automatique des icônes et écrans de démarrage adaptés à chaque plateforme. Cette approche me fait économiser un temps précieux en automatisant les tâches répétitives de création d'assets spécifiques à chaque plateforme.
 
 ### Partage de la logique métier
 
@@ -213,13 +201,9 @@ L'application mobile, développée avec React Native et Expo, bénéficie pleine
 
 Cette réutilisation garantit une cohérence parfaite des règles métier entre les plateformes web et mobile, éliminant les risques de divergence fonctionnelle.
 
-### Adaptations spécifiques au mobile
-
-L'application mobile nécessite des adaptations spécifiques pour l'environnement mobile, notamment pour le stockage local des données et la synchronisation différée. Ces adaptations s'intègrent harmonieusement avec l'architecture globale du monorepo.
-
 ### Async storage 
 
-Le stockage mobile utilise AsyncStorage pour conserver les données localement, contrairement au web qui utilise des cookies httpOnly. Cette approche permet une utilisation hors-ligne partielle, particulièrement utile en salle de sport où la connectivité peut être limitée.
+Le stockage mobile utilise AsyncStorage pour conserver le token d'authentification localement, contrairement au web qui utilise des cookies httpOnly. Cette approche permet une authentification persistante et pourrait être étendue pour une utilisation hors-ligne partielle, particulièrement utile en salle de sport où la connectivité peut être limitée.
 
 > **Implémentation React Native complète** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/)
 

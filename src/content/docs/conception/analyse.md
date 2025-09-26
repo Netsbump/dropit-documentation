@@ -111,6 +111,4 @@ Plusieurs fonctionnalités identifiées lors de l'analyse restent pertinentes ma
 
 **Analytics avancées** : Les analyses statistiques de progression et comparaisons entre athlètes apporteraient une valeur ajoutée significative mais peuvent être développées une fois l'usage établi.
 
-### Justification de cette priorisation
-
 Cette approche me permet de concentrer mes efforts sur un cœur fonctionnel robuste qui démontre la valeur métier de DropIt. L'architecture technique décrite dans la suite de projet reste conçue pour supporter des évolutions futures.

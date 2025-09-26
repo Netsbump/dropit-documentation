@@ -76,7 +76,7 @@ Les IdP externes offrent des solutions clés en main de niveau enterprise :
 - ❌ **Complexité d'intégration** : configuration OAuth, gestion des redirections
 
 
-### Décision retenue et justification
+### Décision retenue
 
 Au regard de l'analyse comparative, Better-Auth répond de manière optimale aux contraintes spécifiques de DropIt. La solution from scratch présenterait des risques sécuritaires importants et un coût de développement disproportionné pour un projet de cette envergure. Les Identity Providers externes, bien que techniquement excellents, introduisent des coûts récurrents incompatibles avec le budget d'un club de sport et des fonctionnalités surdimensionnées.
 

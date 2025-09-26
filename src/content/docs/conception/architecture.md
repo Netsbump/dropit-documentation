@@ -21,15 +21,11 @@ Cette architecture répond aux contraintes identifiées lors de l'analyse des be
 
 Pour structurer ce projet multi-plateformes, j'ai choisi une architecture monorepo utilisant pnpm workspaces.
 
-### Structure des workspaces
-
 Le monorepo est organisé en deux catégories principales :
 
 **Applications (`apps/`)** : Chaque application (web, mobile, api) dispose de son environnement de développement spécifique tout en partageant les packages communs.
 
 **Packages partagés (`packages/`)** : Ces modules centralisent la logique réutilisable entre toutes les applications, garantissant la cohérence et facilitant la maintenance.
-
-### Justification du choix monorepo
 
 L'organisation en monorepo assure une cohérence technique entre l'application web, mobile et l'API grâce au partage des packages communs entre les différentes applications.
 
@@ -57,43 +53,9 @@ L'ajout de **TypeScript** apporte une sécurité de typage dans un contexte où 
 
 ### Écosystème technique et bibliothèques
 
-Mon architecture frontend s'appuie sur un ensemble de bibliothèques sélectionnées pour leurs avantages spécifiques : **Tanstack Router** pour le routage typé, **Tanstack Query** pour la synchronisation des données, **React Hook Form** intégré aux schémas **Zod** partagés, **Shadcn/ui** avec **Tailwind CSS** pour l'interface, et des solutions spécialisées pour le planning (FullCalendar) et le drag-and-drop (dnd-kit).
+Mon architecture frontend s'appuie sur un ensemble de bibliothèques sélectionnées pour leurs avantages spécifiques : **Tanstack Router** pour le routage typé, **Tanstack Query** pour la synchronisation des données, **React Hook Form** intégré aux schémas **Zod** partagés, **Shadcn/ui** avec **Tailwind CSS** pour l'interface, et des solutions spécialisées pour le planning comme le drag-and-drop (dnd-kit).
 
 La justification de ces choix, l'implémentation détaillée et leur intégration concrète dans les composants React est présentée dans la section [couches de présentation](/conception/presentations).
-
-### Structure du projet frontend
-
-```markdown
-apps/web/src/
-├── features/              # Modules métier organisés par domaine
-│   ├── athletes/          # Gestion des athlètes
-│   ├── exercises/         # Catalogue d'exercices
-│   ├── workout/           # Création et gestion des programmes
-│   └── planning/          # Interface calendaire de planification
-├── shared/                # Composants et utilitaires partagés
-│   ├── components/
-│   │   ├── ui/            # Composants Radix UI personnalisés
-│   │   ├── layout/        # Layouts, navigation, headers
-│   │   └── auth/          # Composants d'authentification
-│   ├── hooks/             # Hooks React réutilisables
-│   └── utils.ts           # Fonctions utilitaires communes
-├── lib/                   # Configuration et clients externes
-│   ├── api.ts            # Client HTTP configuré
-│   ├── auth-client.ts    # Configuration Better Auth
-│   └── utils.ts          # Utilitaires de configuration
-└── routes/               # Structure de routage Tanstack Router
-    ├── __root.tsx        # Layout racine de l'application
-    ├── _authenticated/   # Routes protégées par authentification
-    └── index.tsx         # Page d'accueil publique
-```
-
-Le dossier `features/` regroupe les modules métier (athletes, exercises, workout, planning) avec leurs composants, hooks et logiques spécifiques.
-
-Le dossier `shared/` centralise les éléments réutilisables : composants UI Shadcn, layouts de l'application, hooks personnalisés, et utilitaires communs.
-
-Le dossier `lib/` contient les clients configurés (authentification, API) et les utilitaires de configuration.
-
-Cette architecture frontend me permet de développer efficacement une interface tout en maintenant une base de code maintenable et évolutive. L'utilisation d'outils que je maîtrise, combinée à l'exploration de nouvelles bibliothèques comme Tanstack Router, constitue un équilibre raisonable entre productivité, apprentissage et besoins métier dans le cadre de ma formation.
 
 ## Application Mobile (Front Office) : React Native
 
@@ -107,31 +69,7 @@ L'architecture monorepo permet le partage de logique métier entre les applicati
 
 L'architecture mobile s'appuie sur des bibliothèques adaptées aux contraintes du développement mobile notamment **Expo** qui facilite l'écosystème de développement mobile en automatisant la gestion des certificats, les builds natifs et le déploiement. Cette plateforme me permet de me concentrer sur l'implémentation des fonctionnalités métier plutôt que sur la configuration d'environnements de développement mobile.
 
-### Structure du projet mobile
-
-```markdown
-apps/mobile/
-├── src/
-│   ├── components/          # Composants React Native
-│   │   ├── AuthProvider.tsx # Gestion authentification globale
-│   │   ├── LoginScreen.tsx  # Écran de connexion
-│   │   └── DashboardScreen.tsx # Interface principale athlète
-│   └── lib/                 # Configuration et clients
-│       ├── auth-client.ts   # Client Better Auth pour mobile
-│       └── api.ts          # Client HTTP configuré
-├── assets/                  # Images et ressources natives
-│   ├── icon.png            # Icône application
-│   ├── splash-icon.png     # Écran de démarrage
-│   └── adaptive-icon.png   # Icône adaptative Android
-├── app.json                 # Configuration Expo
-└── App.tsx                 # Point d'entrée de l'application
-```
-
-La structure mobile reste volontairement simple avec une séparation entre les composants d'interface et la configuration des services externes. Cette simplicité architecturale facilite la maintenance et réduit la complexité cognitive, aspect important dans un contexte d'apprentissage du développement mobile.
-
-Les assets sont organisés selon les conventions Expo pour permettre une génération automatique des icônes et écrans de démarrage adaptés à chaque plateforme. Cette approche me fait économiser un temps précieux en automatisant les tâches répétitives de création d'assets spécifiques à chaque plateforme.
-
-Cette architecture répond aux contraintes spécifiques du mobile (interface tactile, optimisations de performance) tout en maintenant la cohérence avec l'écosystème monorepo.
+Pour en savoir plus sur l'implémentation spécifique à l'application mobile rendez vous dans la page [couches de présentation](/conception/presentations).
 
 ## API REST : NestJS
 
@@ -160,31 +98,6 @@ Les détails de chacune des couches sont décrits dans la section [Architecture 
 Dans le contexte de ma formation et face à un projet comportant des relations entre athlètes, programmes, exercices et séances, l'utilisation d'un ORM apporte une productivité significative en gérant automatiquement les jointures et relations. Le recours au SQL brut aurait nécessité un temps de développement considérable pour gérer manuellement les migrations, les relations et tout le mapping objet-relationnel.
 
 J'ai opté pour MikroORM après avoir identifié des différences techniques avec TypeORM, pourtant plus répandu avec NestJS. MikroORM force à être explicite sur la définition des relations bidirectionnelles, ce qui évite des erreurs potentielles détectées seulement au runtime avec d'autres ORMs. Cette rigueur dans la déclaration des relations s'avère utile dans mon contexte d'apprentissage et pour les relations entre athlètes, programmes et séances d'entraînement.
-
-### Structure du projet backend
-
-```markdown
-apps/api/src/
-├── modules/                   # Modules métier organisés par domaine
-│   ├── identity/              # Authentification, autorisation, organisations
-│   │   ├── domain/            # Entités métier et règles business
-│   │   ├── application/       # Use cases et services applicatifs
-│   │   ├── infrastructure/    # Implémentations (repositories, services)
-│   │   └── interface/         # Controllers, DTOs, guards
-│   ├── training/              # Gestion des entraînements et exercices
-│   │   ├── domain/            # Modèle métier de l'entraînement
-│   │   ├── application/
-│   │   │   ├── use-cases/     # Logique applicative
-│   │   │   └── ports/         # Interfaces des repositories
-│   │   ├── infrastructure/    # Implémentations MikroORM
-│   │   └── interface/         # API REST et validation
-│   └── athletes/              # Gestion des athlètes
-├── config/                    # Configuration centralisée
-├── seeders/                   # Données de test et d'initialisation
-└── main.ts                    # Point d'entrée de l'application
-```
-
-Cette architecture backend constitue un bon terrain pour les principes du Domain-Driven Design et de l'architecture hexagonale dans un contexte concret. L'approche par ports et adaptateurs que j'ai adoptée garantit une flexibilité future non négligeable : si demain je souhaite migrer vers un autre ORM ou une base de données différente, cette transition pourra s'effectuer sans remettre en cause la logique métier, aspect crucial pour la maintenabilité à long terme d'un projet qui évoluera au-delà de ma formation.
 
 ## Structure complète du projet monorepo
 

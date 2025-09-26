@@ -155,6 +155,31 @@ Le décorateur `@Check` traduit la contrainte logique en contrainte PostgreSQL, 
 
 ## Architecture en couches détaillée
 
+### Structure du projet backend
+
+```markdown
+apps/api/src/
+├── modules/                   # Modules métier organisés par domaine
+│   ├── identity/              # Authentification, autorisation, organisations
+│   │   ├── domain/            # Entités métier et règles business
+│   │   ├── application/       # Use cases et services applicatifs
+│   │   ├── infrastructure/    # Implémentations (repositories, services)
+│   │   └── interface/         # Controllers, DTOs, guards
+│   ├── training/              # Gestion des entraînements et exercices
+│   │   ├── domain/            # Modèle métier de l'entraînement
+│   │   ├── application/
+│   │   │   ├── use-cases/     # Logique applicative
+│   │   │   └── ports/         # Interfaces des repositories
+│   │   ├── infrastructure/    # Implémentations MikroORM
+│   │   └── interface/         # API REST et validation
+│   └── athletes/              # Gestion des athlètes
+├── config/                    # Configuration centralisée
+├── seeders/                   # Données de test et d'initialisation
+└── main.ts                    # Point d'entrée de l'application
+```
+
+Cette architecture backend constitue un bon terrain pour les principes du Domain-Driven Design et de l'architecture hexagonale dans un contexte concret. L'approche par ports et adaptateurs que j'ai adoptée garantit une flexibilité future non négligeable : si demain je souhaite migrer vers un autre ORM ou une base de données différente, cette transition pourra s'effectuer sans remettre en cause la logique métier, aspect crucial pour la maintenabilité à long terme d'un projet qui évoluera au-delà de ma formation.
+
 ### Diagramme de l'architecture
 
 ```markdown

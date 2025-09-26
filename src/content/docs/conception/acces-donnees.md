@@ -95,6 +95,8 @@ Pour certains cas spécifiques, j'étends ces repositories automatiques avec des
 
 Cette approche hybride conserve l'accès aux méthodes MikroORM optimisées tout en respectant les contrats métier définis dans l'Application Layer.
 
+> **Structure complète de l'API** : Voir l'[Annexe - Implémentation accès aux données](/annexes/implementation-acces-donnees/structure-du-projet-backend)
+
 ### Gestion du multi-tenancy
 
 DropIt présente une particularité importante : chaque coach possède son propre catalogue d'exercices personnalisés qu'il développe au fil du temps. Cette logique crée une double isolation : les données d'organisation (athlètes) et les données personnelles de coach (catalogue d'exercices, complexes, programmes).
