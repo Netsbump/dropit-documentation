@@ -51,8 +51,6 @@ Le VPS chez `Infomaniak` offre un excellent rapport qualité-prix avec une infra
 
 ### Bénéfices pédagogiques
 
-Cette approche me permet d'expérimenter l'ensemble de la chaîne de déploiement : configuration serveur, orchestration des services, monitoring, sauvegardes. Ces compétences constituent un atout précieux pour mon développement professionnel.
-
-L'expérience acquise me donne les bases pour évoluer vers des solutions plus complexes (Kubernetes, cloud providers) avec une compréhension solide des fondamentaux.
+Cette approche me permet d'expérimenter l'ensemble de la chaîne de déploiement : configuration serveur, orchestration des services, monitoring, sauvegardes.
 
 Cette stratégie de déploiement étant définie, l'étape suivante consiste à implémenter concrètement cette infrastructure et configurer les processus de mise en production.
