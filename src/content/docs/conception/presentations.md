@@ -32,7 +32,7 @@ Pour la gestion des formulaires dans DropIt, j'avais besoin d'implémenter effic
 
 Cette approche me permet de me concentrer sur la logique métier spécifique à l'haltérophilie plutôt que sur l'implémentation des mécanismes de base des formulaires.
 
-> **Exemples d'implémentation** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/) 
+> **Exemples d'implémentation** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/#formulaires-avec-react-hook-form-et-validation-zod) 
 
 ### Intégration de la validation Zod partagée
 
@@ -42,7 +42,7 @@ Cette définition commune me permet d'exploiter les mêmes schémas pour deux us
 
 L'avantage le plus significatif réside dans l'élimination des divergences de validation. Avec cette approche centralisée, je garantis qu'un exercice respectant les contraintes côté client sera nécessairement accepté par l'API, réduisant drastiquement les erreurs d'intégration.
 
-> **Exemples d'intégration Zod** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/)
+> **Exemples d'intégration Zod** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/#gestion-des-erreurs-de-validation)
 
 ### Stratégie de synchronisation des données avec Tanstack Query
 
@@ -54,7 +54,7 @@ L'invalidation automatique du cache constitue un mécanisme particulièrement é
 
 Tanstack Query encapsule toute la logique complexe de gestion d'état dans ses hooks `useQuery` et `useMutation`, me permettant de me concentrer sur la logique métier plutôt que sur la plomberie de la synchronisation des données.
 
-> **Exemples d'implémentation Tanstack Query** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/)
+> **Exemples d'implémentation Tanstack Query** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/#synchronisation-des-données-avec-tanstack-query)
 
 ### Routage typé avec Tanstack Router
 
@@ -64,7 +64,7 @@ J'ai choisi d'explorer Tanstack Router plutôt que React Router principalement d
 
 Cette structure hiérarchique reflète l'organisation logique de l'application et facilite la gestion des layouts imbriqués. Le préfixe `__home` indique les routes protégées par authentification, simplifiant la logique de protection des pages.
 
-> **Configuration et exemples de routage** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/)
+L'approche file-based routing de Tanstack Router facilite l'organisation du code et la maintenance des routes protégées.
 
 ### Flux de données
 
@@ -109,25 +109,21 @@ J'ai choisi date-fns pour son approche fonctionnelle avec des fonctions pures qu
 
 Cette approche garantit une gestion cohérente des dates à travers l'application, évitant les incohérences de formatage qui pourraient nuire à l'expérience utilisateur.
 
-> **Exemples d'utilisation date-fns** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/)
-
 ### Drag-and-drop pour la composition
 
 Pour la réorganisation des exercices dans un programme, j'avais besoin d'une interface permettant de modifier facilement l'ordre des éléments. L'approche par champs numériques aurait fonctionné, mais j'ai préféré une interaction plus directe. J'ai donc choisi d'utiliser la bibliothèque dnd-kit qui me fournit tous les hooks et utilitaires nécessaires pour implémenter le drag-and-drop : gestion des événements, animations fluides, et support de l'accessibilité. Cette solution m'évite de réinventer la logique complexe de détection des zones de drop.
 
 L'implémentation repose sur le hook `useSortable` qui me donne tous les éléments nécessaires : les `attributes` et `listeners` pour capturer les interactions, la référence `setNodeRef` pour attacher le comportement au DOM, et les propriétés `transform` et `transition` pour gérer les animations. Le composant affiche l'exercice avec ses paramètres (séries, répétitions, poids) tout en restant complètement déplaçable grâce à la logique encapsulée par dnd-kit.
 
-> **Exemples d'implémentation drag-and-drop** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/)
-
 ### Internationalisation côté client
 
 Au-delà de la perspective multilingue, l'implémentation d'un système d'internationalisation répond à deux besoins pratiques : externaliser tous les textes dans des fichiers dédiés plutôt que dispersés dans le code, et mutualiser certains messages (notamment les erreurs) entre l'application web et mobile.
 
-J'ai donc intégré react-i18next côté client en réutilisant le package [`@dropit/i18n`](/conception/architecture#dropit-i18n--internationalisation-partagée) décrit dans l'architecture globale. Cette approche centralisée facilite la maintenance des textes et évite la duplication de messages entre les plateformes.
+J'ai donc intégré `react-i18next` côté client en réutilisant le package `@dropit/i18n` décrit dans l'architecture globale. Cette approche centralisée facilite la maintenance des textes et évite la duplication de messages entre les plateformes.
 
 Les fichiers de traduction sont organisés par domaines métier, permettant une maintenance ciblée et une évolution future facilitée.
 
-> **Configuration i18next et exemples** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/)
+> **Un exemple d'implémentation** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/#implémentation-i18n)
 
 ### TailwindCSS
 
@@ -137,7 +133,7 @@ L'intégration avec Vite utilise le compilateur JIT (Just-In-Time) qui génère 
 
 L'approche responsive mobile-first utilise les préfixes `sm:`, `md:`, `lg:` pour adapter les interfaces aux différentes tailles d'écran sans media queries manuelles.
 
-> **Configuration Tailwind et exemples** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/)
+> **Exemple implémentation Tailwind** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/#exemple-implémtation-tailwind)
 
 ### Shadcn/ui
 
@@ -147,7 +143,7 @@ L'implémentation respecte les critères RGAA essentiels : structure sémantique
 
 L'approche "copy-paste" offre un contrôle total sur l'adaptation aux spécificités métier tout en conservant les garanties d'accessibilité de Radix UI. Les composants étant conçus pour être tree-shakeable, Vite peut éliminer automatiquement les composants non utilisés du bundle final, réduisant la taille du JavaScript téléchargé et répondant aux enjeux de durabilité numérique.
 
-> **Exemples d'implémentation Shadcn/ui** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/)
+> **Exemple d'implémentation Shadcn/ui** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/#exemple-dimplémentation-shadcnui)
 
 ### Système d'icônes avec Lucide React
 
@@ -157,13 +153,11 @@ L'implémentation technique présente des avantages significatifs en termes de p
 
 L'intégration respecte scrupuleusement les recommandations d'accessibilité, chaque icône étant implémentée avec les attributs ARIA appropriés selon son contexte d'usage.
 
-> **Exemples d'implémentation Lucide React** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/)
+> **Exemple d'implémentation Lucide React** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/#exemple-dimplémentation-lucide-react)
 
 ### Optimisations du build avec Vite
 
 Vite, bundler moderne remplaçant Webpack, automatise les optimisations essentielles sans configuration complexe. Il applique trois optimisations cruciales : le code splitting qui génère automatiquement des chunks séparés pour chaque route Tanstack Router, permettant aux utilisateurs de télécharger uniquement le JavaScript nécessaire à la page consultée ; le tree shaking qui élimine automatiquement le code non utilisé (composants Shadcn/ui non utilisés, fonctions d'internationalisation des langues non activées) ; et la compression des assets qui minifie le CSS et JavaScript tout en optimisant les images, améliorant les performances particulièrement critiques pour l'usage mobile en salle de sport.
-
-> **Configuration Vite et optimisations** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/)
 
 ## Architecture Mobile App
 
@@ -197,11 +191,13 @@ L'application mobile, développée avec React Native et Expo, bénéficie pleine
 
 Cette réutilisation garantit une cohérence parfaite des règles métier entre les plateformes web et mobile, éliminant les risques de divergence fonctionnelle.
 
+> **Flux d'intéraction mobile** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/#architecture-mobile-flux-de-données)
+
 ### Async storage 
 
 Le stockage mobile utilise AsyncStorage pour conserver le token d'authentification localement, contrairement au web qui utilise des cookies httpOnly. Cette approche permet une authentification persistante et pourrait être étendue pour une utilisation hors-ligne partielle, particulièrement utile en salle de sport où la connectivité peut être limitée.
 
-> **Implémentation React Native complète** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/)
+> **Exemple implémentation React Native** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/#exemple-implémentation-react-native)
 
 ## Considérations de performance
 
@@ -213,7 +209,7 @@ J'ai appliqué plusieurs optimisations classiques du développement React modern
 
 Ces optimisations ciblent les problématiques courantes : chargement différé des composants lourds, évitement des calculs redondants, et limitation des appels réseau excessifs. Dans le contexte d'usage de DropIt (quelques dizaines d'utilisateurs par club), ces optimisations suffisent largement.
 
-> **Exemples d'optimisations React** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/)
+> **Exemples d'optimisations React** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/#exemples-doptimisations-react)
 
 
 ## Conclusion
