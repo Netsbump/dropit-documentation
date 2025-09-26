@@ -181,9 +181,7 @@ export class WorkoutController {
   ) {}
 
   getWorkouts(@CurrentUser() user: AuthenticatedUser) {
-    return tsRestHandler(c.getWorkouts, async () => {
-      return await this.workoutUseCases.getWorkouts(organizationId, user.id);
-    });
+    return this.workoutUseCases.getWorkouts(organizationId, user.id);
   }
 }
 ```
@@ -191,8 +189,6 @@ export class WorkoutController {
 Cet exemple montre l'`AuthGuard` global vérifiant l'authentification, le décorateur `@CurrentUser()` injectant l'utilisateur connecté, et l'absence de `@Public()` rendant l'authentification obligatoire.
 
 ## Gestion des sessions et sécurité
-
-### Architecture hybride JWT/Sessions
 
 Better-Auth implémente une approche hybride combinant JWT et sessions persistantes, répondant au besoin de révocation immédiate identifié dans mes contraintes.
 

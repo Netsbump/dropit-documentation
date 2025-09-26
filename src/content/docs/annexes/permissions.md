@@ -46,27 +46,10 @@ Les composants principaux incluent :
 - **Maintenance réduite** : modification des permissions au niveau du rôle
 - **Support natif** : intégration directe avec Better-Auth Organizations
 
-**Exemple de structure DropIt :**
-```typescript
-// Définition des rôles organisationnels
-const roles = {
-  member: {
-    workout: ['read'],
-    exercise: ['read'],
-    personalRecord: ['read', 'create']
-  },
-  admin: {
-    workout: ['read', 'create', 'update', 'delete'],
-    exercise: ['read', 'create', 'update', 'delete'],
-    athlete: ['read']
-  },
-  owner: {
-    // Hérite des permissions admin
-    athlete: ['read', 'create', 'update', 'delete'],
-    organization: ['read', 'update']
-  }
-};
-```
+**Structure des rôles :**
+- **Member** : Lecture des programmes et création de ses performances personnelles
+- **Admin** : Gestion complète des ressources d'entraînement et lecture des athlètes  
+- **Owner** : Hérite des permissions admin plus gestion organisationnelle
 
 **Évaluation pour DropIt :**
 - ✅ **Correspondance métier** : les rôles athlète/coach/propriétaire existent naturellement

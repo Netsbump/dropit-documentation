@@ -31,27 +31,15 @@ Cette analyse m'a orienté vers l'utilisation d'une librairie externe, et plus s
 
 ## Solution retenue : Better-Auth
 
-J'ai choisi Better-Auth comme solution d'authentification après analyse comparative des alternatives disponibles. Cette décision s'appuie sur plusieurs critères qui correspondent directement aux besoins de DropIt.
+Better-Auth propose une implémentation hybride combinant JWT et sessions persistantes, répondant à la contrainte de révocation immédiate des droits. Les JWT assurent les performances nécessaires pour l'API REST, tandis que les sessions en base permettent d'invalider instantanément l'accès d'un utilisateur sans attendre l'expiration du token.
 
-Better-Auth propose une implémentation hybride combinant JWT et sessions persistantes, ce qui répond à ma contrainte de révocation immédiate des droits. Les JWT me donnent les performances nécessaires pour l'API REST, tandis que les sessions en base permettent d'invalider instantanément l'accès d'un utilisateur sans attendre l'expiration du token.
+Le système de plugins permet d'ajouter progressivement des fonctionnalités selon l'évolution du projet. Le plugin d'autorisation génère automatiquement les tables nécessaires avec une structure optimisée, garantissant la cohérence entre le système d'auth et la gestion des droits.
 
-Le système de plugins de Better-Auth me permet d'ajouter progressivement des fonctionnalités selon l'évolution du projet. Le plugin d'autorisation génère automatiquement les tables nécessaires avec une structure optimisée pour l'authentification, garantissant la cohérence entre le système d'auth et la gestion des droits.
+Better-Auth implémente nativement plusieurs mécanismes de sécurité essentiels : le rate-limiting configure automatiquement des limites par IP (5 tentatives de connexion par minute) protégeant contre les attaques par force brute ; la protection CSRF utilise des tokens double-submit pour sécuriser les requêtes d'écriture ; les cookies de session sont automatiquement configurés avec les flags sécurisés appropriés (`SameSite=Lax`, `HttpOnly`, `Secure` en production).
 
-Cette librairie s'intègre naturellement dans la stack TypeScript/NestJS que j'ai choisie pour l'API. Cette cohérence technologique me permet de me concentrer sur l'implémentation de la logique métier plutôt que sur la configuration d'un système d'authentification externe.
+La librairie intègre des fonctionnalités de conformité RGPD essentielles : l'endpoint `/api/auth/user/export` génère automatiquement une archive contenant toutes les données utilisateur au format JSON, répondant aux obligations de portabilité (Article 20 RGPD) ; le système d'audit trace chaque action dans une table dédiée, servant trois objectifs RGPD cruciaux : preuve d'accès, détection d'anomalies, et preuve de suppression, particulièrement important pour les données de santé stockées dans DropIt.
 
-Better-Auth implémente nativement plusieurs mécanismes de sécurité essentiels pour DropIt. Le système de rate-limiting configure automatiquement des limites par IP (5 tentatives de connexion par minute) qui protègent l'API contre les attaques par force brute sans nécessiter de configuration manuelle.
-
-La protection CSRF utilise des tokens double-submit pour sécuriser les requêtes d'écriture. Chaque requête POST/PUT/DELETE inclut un token généré côté serveur et vérifié à la réception, empêchant l'exécution de requêtes non autorisées depuis des sites tiers.
-
-Les cookies de session sont automatiquement configurés avec les flags sécurisés appropriés : `SameSite=Lax` pour limiter l'envoi aux requêtes same-origin, `HttpOnly` pour prévenir l'accès via JavaScript, et `Secure` en production pour forcer HTTPS.
-
-Ces configurations par défaut peuvent être ajustées selon l'évolution des besoins sécuritaires du projet.
-
-Better-Auth intègre des fonctionnalités de conformité RGPD essentielles pour DropIt. L'endpoint `/api/auth/user/export` génère automatiquement une archive contenant toutes les données utilisateur au format JSON, répondant aux **obligations de portabilité** (Article 20 RGPD) : performances d'entraînement, historiques de blessures, données de profil.
-
-Le système d'audit trace chaque action dans une table dédiée, servant trois objectifs RGPD cruciaux : **preuve d'accès** (qui a consulté quelles données et quand), **détection d'anomalies** (accès non autorisés), et **preuve de suppression** (enregistrement de l'effacement des données utilisateur lors du départ d'un athlète). Cette traçabilité est particulièrement importante pour les données de santé stockées dans DropIt (blessures, limitations physiques).
-
-La librairie expose également les standards d'authentification modernes : l'endpoint JWKS (`/.well-known/jwks.json`) publie les clés publiques permettant la vérification des JWT par des services externes, tandis qu'OIDC Discovery (`/.well-known/openid-configuration`) standardise la découverte des endpoints d'authentification.
+Better-Auth expose également les standards d'authentification modernes : l'endpoint JWKS (`/.well-known/jwks.json`) publie les clés publiques permettant la vérification des JWT par des services externes, tandis qu'OIDC Discovery (`/.well-known/openid-configuration`) standardise la découverte des endpoints d'authentification.
 
 ### Évolutions envisagées
 

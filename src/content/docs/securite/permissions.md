@@ -18,11 +18,9 @@ modules/identity/
 ├── domain/
 │   ├── auth/                    # Entités d'authentification
 │   │   ├── user.entity.ts
-│   │   ├── session.entity.ts
 │   │   └── verification.entity.ts
 │   └── organization/            # Entités d'organisation
 │       ├── organization.entity.ts
-│       ├── member.entity.ts
 │       └── invitation.entity.ts
 ├── infrastructure/
 │   ├── guards/                  # Guards de sécurité
@@ -30,8 +28,7 @@ modules/identity/
 │   │   └── permissions.guard.ts
 │   └── decorators/              # Décorateurs
 │       ├── auth.decorator.ts
-│       ├── permissions.decorator.ts
-│       └── organization.decorator.ts
+│       └── permissions.decorator.ts
 ├── application/
 │   └── auth.service.ts          # Service Better-Auth
 └── identity.module.ts           # Configuration du module
@@ -116,38 +113,19 @@ Cette déclaration limite les actions possibles à celles définies, évitant le
 
 ### Rôles et permissions
 
-Better-Auth propose trois rôles par défaut que j'ai réutilisés car ils correspondent aux besoins des clubs d'haltérophilie :
+Better-Auth propose trois rôles par défaut correspondant aux besoins des clubs d'haltérophilie. Le rôle **Admin (Coach)** illustre la gestion complète des ressources d'entraînement et des athlètes :
 
-**Member (Athlète)** : Consultation des programmes et saisie des performances personnelles
-```typescript
-export const member = ac.newRole({
-  workout: ["read"],
-  exercise: ["read"],
-  athlete: ["read", "create", "update", "delete"], // Gestion de son profil
-  personalRecord: ["read", "create"], // Saisie de ses performances
-});
-```
-
-**Admin (Coach)** : Gestion complète des ressources d'entraînement et des athlètes
 ```typescript
 export const admin = ac.newRole({
   workout: ["read", "create", "update", "delete"],
   exercise: ["read", "create", "update", "delete"],
   athlete: ["read"],
+  personalRecord: ["read", "create", "update", "delete"],
   // ... toutes permissions métier
 });
 ```
 
-**Owner (Administrateur)** : Accès total incluant la gestion administrative pour les interventions techniques
-```typescript
-export const owner = ac.newRole({
-  // Hérite de toutes les permissions admin
-  athlete: ["read", "create", "update", "delete"],
-  // Plus gestion organisation, paramètres avancés
-});
-```
-
-Ce modèle RBAC (Role-Based Access Control) assure la cohérence des permissions entre toutes les parties de l'application. Les détails sur les autres modèles évalués sont disponibles dans les [Annexes permissions](/annexes/permissions/).
+Ce modèle RBAC (Role-Based Access Control) assure la cohérence des permissions entre toutes les parties de l'application. Les détails complets sur les trois rôles (Member, Admin, Owner) sont disponibles dans les [Annexes permissions](/annexes/permissions/).
 
 ## Décorateurs de permissions
 
@@ -171,49 +149,7 @@ Ces décorateurs permettent de définir explicitement les permissions requises a
 
 ## Guard de permission
 
-Le `PermissionsGuard` s'exécute après l'`AuthGuard` pour valider les droits d'accès selon le rôle organisationnel de l'utilisateur.
-
-```typescript
-@Injectable()
-export class PermissionsGuard implements CanActivate {
-  constructor(
-    private readonly reflector: Reflector,
-    private readonly em: EntityManager
-  ) {}
-
-  async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
-    const session = request.session;
-    const user = session?.user;
-
-    // 1. Récupération des permissions requises
-    const requiredPermissions = this.reflector.get<string[]>(
-      'REQUIRED_PERMISSIONS',
-      context.getHandler()
-    );
-
-    // 2. Détermination de la ressource depuis le controller
-    const controllerName = context.getClass().name;
-    const resource = this.extractResourceFromController(controllerName);
-
-    // 3. Vérification du rôle d'organisation
-    const organizationId = session?.session?.activeOrganizationId;
-    const memberRecord = await this.em.findOne(Member, {
-      user: { id: user.id },
-      organization: { id: organizationId },
-    });
-
-    // 4. Validation des permissions
-    return this.checkUserRolePermissions(
-      memberRecord.role,
-      resource,
-      requiredPermissions
-    );
-  }
-}
-```
-
-Le Guard lit les métadonnées définies par les décorateurs, identifie la ressource concernée à partir du nom du contrôleur (`WorkoutController` → `workout`), puis compare les permissions requises avec celles accordées au rôle de l'utilisateur dans l'organisation active.
+Le `PermissionsGuard` s'exécute après l'`AuthGuard` pour valider les droits d'accès selon le rôle organisationnel de l'utilisateur. Le processus de vérification suit quatre étapes : récupération des permissions requises via les métadonnées des décorateurs, détermination de la ressource depuis le nom du contrôleur (`WorkoutController` → `workout`), vérification du rôle d'organisation de l'utilisateur via la table `Member`, et validation finale des permissions en comparant les droits requis avec ceux accordés au rôle dans l'organisation active.
 
 ## Exemple d'utilisation
 
@@ -228,9 +164,7 @@ export class WorkoutController {
     @CurrentOrganization() organizationId: string,
     @CurrentUser() user: AuthenticatedUser
   ) {
-    return tsRestHandler(c.getWorkouts, async () => {
-      return await this.workoutUseCase.getAll(organizationId, user.id);
-    });
+    return this.workoutUseCase.getAll(organizationId, user.id);
   }
 
   @RequirePermissions('create')
@@ -238,9 +172,7 @@ export class WorkoutController {
     @CurrentOrganization() organizationId: string,
     @CurrentUser() user: AuthenticatedUser
   ) {
-    return tsRestHandler(c.createWorkout, async ({ body }) => {
-      return await this.workoutUseCase.create(body, organizationId, user.id);
-    });
+    return this.workoutUseCase.create(body, organizationId, user.id);
   }
 }
 ```
