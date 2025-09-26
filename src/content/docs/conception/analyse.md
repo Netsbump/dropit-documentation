@@ -25,9 +25,9 @@ graph TD
     E --> H[Analyse complémentaire]
     F --> I[Backlog d'évolution]
     
-    style D fill:#1b5e20
+    style D fill:#4caf50
     style E fill:#e65100
-    style F fill:#0d47a1
+    style F fill:#42a5f5
 ```
 
 ## Diagramme des cas d'usage
