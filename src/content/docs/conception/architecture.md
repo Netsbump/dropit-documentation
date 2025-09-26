@@ -202,9 +202,7 @@ Les détails d'implémentation sont documentés dans la section annexe [Architec
 
 ## Conclusion
 
-Cette architecture répond aux exigences spécifiques d'une application de gestion de club sportif : elle garantit la cohérence des données d'entraînement entre les différents utilisateurs, offre une expérience adaptée à chaque contexte d'usage (mobile pour les athlètes, web pour les coachs), et assure la maintenabilité nécessaire pour un usage associatif sur plusieurs années.
+Cette architecture répond aux exigences spécifiques d'une application de gestion de club sportif : cohérence des données d'entraînement, expérience adaptée à chaque contexte d'usage, et maintenabilité pour un usage associatif. L'approche monorepo et l'architecture hexagonale apportent des bénéfices concrets : synchronisation automatique des types, réduction des erreurs d'intégration, et évolutivité technique.
 
-L'approche monorepo et l'architecture hexagonale apportent des bénéfices concrets : synchronisation automatique des types entre clients et serveur, réduction des erreurs d'intégration, facilité de déploiement et évolutivité technique. Ces choix facilitent la maintenance pour les développeurs futurs qui pourraient reprendre le projet, aspect crucial dans un contexte associatif où les ressources techniques peuvent évoluer.
-
-La séparation claire des responsabilités entre les différentes couches permet d'adapter l'application aux retours d'usage du club sans remettre en cause l'architecture globale. Cette flexibilité constitue un atout pour répondre aux évolutions des besoins métier et accompagner le développement du club sur le long terme.
+La section suivante détaille l'implémentation concrète de la couche d'accès aux données avec Nest.js et MikroORM, transformant cette architecture en code fonctionnel.
 

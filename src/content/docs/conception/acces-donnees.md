@@ -186,11 +186,7 @@ L'aspect particulièrement intéressant est le rôle des seeders dans la créati
 
 ## Conclusion
 
-Cette implémentation de la couche d'accès aux données avec Nest.js et MikroORM m'a permis de résoudre les défis spécifiques de DropIt tout en posant les bases d'une architecture évolutive. 
+Cette implémentation de la couche d'accès aux données avec Nest.js et MikroORM résout les défis spécifiques de DropIt tout en posant les bases d'une architecture évolutive.
 
-Le choix de l'approche Code First s'est avéré particulièrement adapté au contexte du monorepo, permettant une cohérence complète avec les packages partagés et une productivité optimale en développement.
-
-Cette architecture en couches, inspirée des principes hexagonaux, me donne aujourd'hui la flexibilité nécessaire pour faire évoluer DropIt selon les besoins futurs des clubs d'haltérophilie. Que ce soit pour intégrer de nouveaux types de données sportives, étendre les fonctionnalités de planification d'entraînement, ou migrer vers d'autres technologies, les fondations posées résisteront aux évolutions à venir.
-
-La section suivante sur les [couches de présentation](/conception/presentations) explore maintenant comment ces données sont consommées et présentées aux utilisateurs via les clients web et mobile, complétant ainsi l'architecture distribuée de l'application.
+La section suivante sur les [couches de présentation](/conception/presentations) présente comment ces données sont consommées et présentées aux utilisateurs via les clients web et mobile.
 

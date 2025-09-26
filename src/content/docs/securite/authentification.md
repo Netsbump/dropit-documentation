@@ -239,6 +239,6 @@ Cette approche unifie l'expérience de sécurité entre web et mobile tout en re
 
 L'implémentation de Better-Auth répond aux contraintes identifiées : révocation immédiate, architecture multi-plateforme, et conformité RGPD. Cette base d'authentification me permet de me concentrer sur la couche d'autorisation.
 
-La section suivante présente l'implémentation du système RBAC via le plugin Organization de Better-Auth, gérant les permissions granulaires entre administrateurs, coachs et athlètes selon leur périmètre d'action.
+La section suivante présente l'implémentation via le plugin Organization de Better-Auth des permissions granulaires entre administrateurs, coachs et athlètes selon leur périmètre d'action.
 
 

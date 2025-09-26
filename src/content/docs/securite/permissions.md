@@ -178,7 +178,7 @@ Cette extension permettrait de masquer automatiquement les actions non autorisé
 
 ## Conclusion
 
-L'implémentation du système de permissions complète la couche d'authentification avec un contrôle d'accès granulaire basé sur les rôles d'organisation. Cette architecture maintient la simplicité d'utilisation tout en assurant la sécurité des ressources selon le contexte organisationnel.
+L'implémentation du système de permissions complète la couche d'authentification avec un contrôle d'accès basé sur les rôles d'organisation. Cette architecture maintient la simplicité d'utilisation tout en assurant la sécurité des ressources selon le contexte organisationnel.
 
 La section suivante présente les stratégies de tests mises en place pour garantir la fiabilité de cette infrastructure de sécurité.
 

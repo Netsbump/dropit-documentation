@@ -216,10 +216,8 @@ Ces optimisations ciblent les problématiques courantes : chargement différé d
 > **Exemples d'optimisations React** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/)
 
 
-## Bilan des choix architecturaux frontend
+## Conclusion
 
-L'architecture des couches de présentation que j'ai mise en place illustre concrètement l'application des patterns architecturaux : organisation par features, validation Zod partagée, gestion d'état avec Tanstack Query, et composants Shadcn/ui avec TailwindCSS.
+L'architecture des couches de présentation illustre l'application des patterns architecturaux modernes, créant un écosystème cohérent où la logique métier reste centralisée tout en permettant des adaptations spécifiques à chaque plateforme.
 
-Ces choix techniques - React/TypeScript pour le web, React Native pour le mobile, packages partagés du monorepo - créent un écosystème cohérent où la logique métier reste centralisée tout en permettant des adaptations spécifiques à chaque plateforme.
-
-Maintenant que cette fondation architecturale est établie, la section suivante détaille la conception des interfaces utilisateur et les wireframes qui matérialisent ces choix techniques en expérience utilisateur concrète.  
+La section suivante détaille la conception des wireframes qui matérialisent ces choix techniques en expérience utilisateur concrète.

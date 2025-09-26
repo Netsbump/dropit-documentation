@@ -45,6 +45,6 @@ L'ajout de providers OAuth (Google, Apple) pourrait faciliter l'onboarding des u
 
 ## Conclusion
 
-Le choix de Better-Auth comme solution d'authentification répond aux exigences techniques et réglementaires de DropIt : gestion granulaire des permissions, révocation immédiate des droits, conformité RGPD, et extensibilité via le système de plugins.
+Le choix de Better-Auth comme solution d'authentification répond aux exigences techniques et réglementaires de mon application : gestion granulaire des permissions, révocation immédiate des droits, conformité RGPD, et extensibilité via le système de plugins.
 
-La section suivante présente l'implémentation concrète de cette librairie dans le projet, détaillant l'architecture hybride JWT/sessions, les entités générées, et les mécanismes de protection des routes API.
+La section suivante présente l'implémentation concrète de cette librairie dans le projet Dropit.

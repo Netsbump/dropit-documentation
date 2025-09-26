@@ -119,4 +119,6 @@ Les fonctions de recherche font l'objet de tests particuliers car elles constitu
 
 ## Conclusion
 
-Cette couverture de tests constitue un prérequis essentiel avant le déploiement en production. L'étape suivante consiste à préparer l'infrastructure de déploiement pour mettre l'application à disposition des utilisateurs dans un environnement sécurisé.
+Cette couverture de tests constitue un prérequis essentiel avant le déploiement en production.
+
+L'étape suivante consiste à préparer l'infrastructure de déploiement pour mettre l'application à disposition des utilisateurs dans un environnement sécurisé.

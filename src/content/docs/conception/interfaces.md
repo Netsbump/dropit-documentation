@@ -71,4 +71,4 @@ Pour le design system, j'ai choisi Shadcn/ui (pour l'interface web) après avoir
 
 Ces wireframes achèvent la conception technique de DropIt. L'ensemble de cette démarche établit les fondations nécessaires à l'implémentation de l'application.
 
-La suite de ce dossier aborde les aspects sécuritaires, dimension critique pour une application gérant des données personnelles d'athlètes. 
+La section suivante aborde les aspects sécuritaires, avec un zoom sur l'accès aux données (authentification et autorisation).
