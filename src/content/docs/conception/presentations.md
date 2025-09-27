@@ -28,9 +28,7 @@ Chaque feature encapsule sa logique métier spécifique et ses règles de valida
 
 ### Gestion des formulaires avec React Hook Form
 
-Pour la gestion des formulaires dans DropIt, j'avais besoin d'implémenter efficacement des fonctionnalités comme la validation en temps réel, la gestion des erreurs, et la soumission asynchrone sans réinventer ces mécanismes from scratch. React Hook Form me fournit ces fonctionnalités clés en main : gestion automatique des états de formulaire, validation intégrée, et optimisation des performances via des champs non contrôlés.
-
-Cette approche me permet de me concentrer sur la logique métier spécifique à l'haltérophilie plutôt que sur l'implémentation des mécanismes de base des formulaires.
+React Hook Form fournit la validation en temps réel, la gestion des erreurs et l'optimisation des performances via des champs non contrôlés, me permettant de me concentrer sur la logique métier spécifique à l'haltérophilie.
 
 > **Exemples d'implémentation** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/#formulaires-avec-react-hook-form-et-validation-zod) 
 
@@ -38,9 +36,7 @@ Cette approche me permet de me concentrer sur la logique métier spécifique à 
 
 L'un des aspects les plus enrichissants de cette implémentation a été l'intégration des schémas Zod définis dans le package partagé [`@dropit/schemas`](/conception/architecture#dropit-schemas--validation-centralisée-avec-zod), également utilisés côté API dans la [couche d'accès aux données](/conception/acces-donnees). Cette approche résout une problématique récurrente : maintenir la cohérence des règles de validation entre le frontend et le backend.
 
-Cette définition commune me permet d'exploiter les mêmes schémas pour deux usages complémentaires : validation des données reçues par l'API côté serveur, et validation des formulaires côté client avant envoi. Cette réutilisation garantit une parfaite synchronisation des règles de validation sur l'ensemble de l'application.
-
-L'avantage le plus significatif réside dans l'élimination des divergences de validation. Avec cette approche centralisée, je garantis qu'un exercice respectant les contraintes côté client sera nécessairement accepté par l'API, réduisant drastiquement les erreurs d'intégration.
+Cette définition commune permet d'exploiter les mêmes schémas côté serveur et client, garantissant une synchronisation parfaite des règles de validation. Avec cette approche centralisée, je garantis qu'un exercice respectant les contraintes côté client sera nécessairement accepté par l'API, réduisant drastiquement les erreurs d'intégration.
 
 > **Exemples d'intégration Zod** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/#gestion-des-erreurs-de-validation)
 
@@ -62,9 +58,7 @@ Dans le contexte d'une Single Page Application (SPA) comme DropIt, la gestion du
 
 J'ai choisi d'explorer Tanstack Router plutôt que React Router principalement dans une démarche d'apprentissage d'une alternative moderne au routage classique. L'approche file-based routing où chaque route correspond à un fichier m'a semblé plus intuitive que la configuration centralisée de React Router, facilitant l'organisation et la maintenance du code.
 
-Cette structure hiérarchique reflète l'organisation logique de l'application et facilite la gestion des layouts imbriqués. Le préfixe `__home` indique les routes protégées par authentification, simplifiant la logique de protection des pages.
-
-L'approche file-based routing de Tanstack Router facilite l'organisation du code et la maintenance des routes protégées.
+Cette structure hiérarchique reflète l'organisation logique de l'application et facilite la gestion des layouts imbriqués. Le préfixe `__home` indique les routes protégées par authentification.
 
 ### Flux de données
 
@@ -103,17 +97,13 @@ La structure respecte une séparation entre les différentes couches : présenta
 
 ### Gestion des dates avec date-fns
 
-Dans DropIt, la manipulation des dates intervient fréquemment : planification des séances, formatage des dates d'entraînement, calculs de périodes. J'avais besoin d'une solution fiable pour éviter les pièges classiques de manipulation des objets Date JavaScript natifs.
-
-J'ai choisi date-fns pour son approche fonctionnelle avec des fonctions pures qui ne mutent pas les dates originales. Cette immutabilité évite les modifications involontaires que j'avais déjà rencontrées dans des projets précédents. Sa modularité me permet également d'importer uniquement les fonctions nécessaires, optimisant la taille du bundle final.
-
-Cette approche garantit une gestion cohérente des dates à travers l'application, évitant les incohérences de formatage qui pourraient nuire à l'expérience utilisateur.
+Dans DropIt, la manipulation des dates intervient fréquemment : planification des séances, formatage des dates d'entraînement, calculs de périodes. J'ai choisi date-fns pour son approche fonctionnelle avec des fonctions pures qui ne mutent pas les dates originales, évitant les modifications involontaires. Sa modularité permet d'importer uniquement les fonctions nécessaires, optimisant la taille du bundle.
 
 ### Drag-and-drop pour la composition
 
 Pour la réorganisation des exercices dans un programme, j'avais besoin d'une interface permettant de modifier facilement l'ordre des éléments. L'approche par champs numériques aurait fonctionné, mais j'ai préféré une interaction plus directe. J'ai donc choisi d'utiliser la bibliothèque dnd-kit qui me fournit tous les hooks et utilitaires nécessaires pour implémenter le drag-and-drop : gestion des événements, animations fluides, et support de l'accessibilité. Cette solution m'évite de réinventer la logique complexe de détection des zones de drop.
 
-L'implémentation repose sur le hook `useSortable` qui me donne tous les éléments nécessaires : les `attributes` et `listeners` pour capturer les interactions, la référence `setNodeRef` pour attacher le comportement au DOM, et les propriétés `transform` et `transition` pour gérer les animations. Le composant affiche l'exercice avec ses paramètres (séries, répétitions, poids) tout en restant complètement déplaçable grâce à la logique encapsulée par dnd-kit.
+L'implémentation utilise le hook `useSortable` qui fournit les événements, références DOM et animations nécessaires pour rendre les exercices déplaçables avec leurs paramètres.
 
 ### Internationalisation côté client
 
@@ -149,7 +139,7 @@ L'approche "copy-paste" offre un contrôle total sur l'adaptation aux spécifici
 
 Lucide React, fork amélioré de Feather Icons, propose un style unifié avec des traits fins et des proportions harmonieuses qui s'intègrent parfaitement avec l'esthétique moderne de Tailwind. Cette cohérence visuelle facilite la reconnaissance et l'apprentissage de l'interface dans le contexte métier de DropIt.
 
-L'implémentation technique présente des avantages significatifs en termes de performance : contrairement aux font-icons qui imposent le téléchargement complet de la police, Lucide permet un tree-shaking granulaire où seules les icônes importées sont incluses dans le bundle final grâce à Vite. Cette approche réduit la taille du JavaScript téléchargé, aspect crucial pour l'écoconception. Les icônes étant des composants SVG React natifs, elles bénéficient du rendu optimisé de React et peuvent être stylées dynamiquement.
+Contrairement aux font-icons, Lucide permet un tree-shaking granulaire et des composants SVG natifs. Cette approche réduit la taille du JavaScript téléchargé, aspect crucial pour l'écoconception. Les icônes étant des composants SVG React natifs, elles bénéficient du rendu optimisé de React et peuvent être stylées dynamiquement.
 
 L'intégration respecte scrupuleusement les recommandations d'accessibilité, chaque icône étant implémentée avec les attributs ARIA appropriés selon son contexte d'usage.
 
@@ -181,9 +171,7 @@ apps/mobile/
 └── App.tsx                 # Point d'entrée de l'application
 ```
 
-La structure mobile reste volontairement simple avec une séparation entre les composants d'interface et la configuration des services externes. Cette simplicité architecturale facilite la maintenance et réduit la complexité cognitive, aspect important dans un contexte d'apprentissage du développement mobile.
-
-Les assets sont organisés selon les conventions Expo pour permettre une génération automatique des icônes et écrans de démarrage adaptés à chaque plateforme. Cette approche me fait économiser un temps précieux en automatisant les tâches répétitives de création d'assets spécifiques à chaque plateforme.
+La structure mobile reste volontairement simple avec une séparation entre les composants d'interface et la configuration des services externes, facilitant la maintenance et réduisant la complexité cognitive. Les assets sont organisés selon les conventions Expo pour une génération automatique des icônes et écrans de démarrage adaptés à chaque plateforme.
 
 ### Partage de la logique métier
 

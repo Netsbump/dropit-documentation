@@ -21,7 +21,7 @@ Ces contraintes m'orientent vers une solution d'authentification qui offre à la
 
 Pour l'implémentation de l'authentification et de l'autorisation dans DropIt, trois approches principales s'offraient à moi : développer un système from scratch, utiliser une librairie externe, ou déléguer ce système à un identity provider externe.
 
-Chaque solution présente des avantages et inconvénients spécifiques dans le contexte de mon application. J'ai mené une analyse comparative détaillée de ces trois approches en évaluant leurs forces et faiblesses par rapport aux besoins de DropIt. Cette étude complète est disponible en annexe dans la section [Choix authentification](/annexes/authentifications/).
+Chaque solution présente des avantages et inconvénients spécifiques dans le contexte de mon application. J'ai mené une analyse comparative de ces trois approches en évaluant leurs forces et faiblesses par rapport aux besoins de DropIt. Cette étude est disponible en annexe dans la section [Analyse comparative des solutions](/annexes/authentifications/#analyse-comparative-des-solutions).
 
 Cette analyse m'a orienté vers l'utilisation d'une librairie externe, et plus spécifiquement vers Better-Auth.
 

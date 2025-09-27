@@ -23,7 +23,7 @@ Better-Auth impose un schéma de base de données spécifique avec quatre entit�
 
 L'intégration dans mon architecture existante s'est concentrée sur la table `User` qui devait s'harmoniser avec mon modèle utilisateur, les autres tables (`Session`, `Account`, `Verification`) étant autonomes.
 
-Les schémas détaillés de ces entités (MCD, MLD, MPD) sont disponibles dans la section [Annexes authentification](/annexes/authentifications/) pour une vision complète de l'architecture de données.
+Le schéma détaillé de ces entités est disponible dans la section [Modèle Logique de Données Better-Auth](/annexes/authentifications/#modèle-logique-de-données-better-auth) pour une vision complète de l'architecture de données.
 
 ### Entités clés : Session et Verification
 
@@ -190,7 +190,7 @@ Better-Auth implémente une approche hybride combinant JWT et sessions persistan
 
 Lors de la connexion, Better-Auth génère un JWT pour la validation rapide côté serveur et enregistre une session en base de données pour permettre la révocation instantanée (départ d'un utilisateur, changement de rôle).
 
-Cette architecture combine la performance des tokens stateless avec la flexibilité des sessions traditionnelles. Les détails techniques et la comparaison JWT vs Sessions sont disponibles dans les [Annexes authentification](/annexes/authentifications/).
+Cette architecture combine la performance des tokens stateless avec la flexibilité des sessions traditionnelles. Les détails techniques et la comparaison JWT vs Sessions sont disponibles dans la section [Étude comparative des solutions d'authentification](/annexes/authentifications/#étude-comparative-des-solutions-dauthentification).
 
 ## Stratégie de sécurisation côté client
 
@@ -204,7 +204,7 @@ Pour l'application mobile, Better-Auth utilise automatiquement le stockage sécu
 
 J'ai adapté la durée des sessions selon les habitudes d'usage : 7 jours pour le web avec renouvellement automatique, et 30 jours pour le mobile pour éviter les reconnexions fréquentes. Cette configuration équilibre sécurité et expérience utilisateur.
 
-Les détails d'implémentation, la configuration complète des tokens et les spécificités techniques sont disponibles dans les [Annexes authentification](/annexes/authentifications/).
+Les détails d'implémentation et les spécificités techniques sont disponibles dans les sections [Configuration côté clients](/annexes/authentifications/#configuration-côté-clients-de-better-auth) et [Mécanismes de sécurité avancés](/annexes/authentifications/#mécanismes-de-sécurité-avancés).
 
 ## Implémentation côté clients
 
@@ -233,7 +233,7 @@ function WorkoutForm() {
 
 Better-Auth s'adapte automatiquement aux spécificités de chaque plateforme. Pour l'application mobile Expo, j'utilise le plugin dédié qui gère le stockage sécurisé et les redirections. Pour le backoffice web, la configuration standard avec cookies HttpOnly suffit.
 
-Cette approche unifie l'expérience de sécurité entre web et mobile tout en respectant les bonnes pratiques spécifiques à chaque plateforme. Les détails de configuration sont disponibles dans les [Annexes authentification](/annexes/authentifications/).
+Cette approche unifie l'expérience de sécurité entre web et mobile tout en respectant les bonnes pratiques spécifiques à chaque plateforme. Les détails de configuration sont disponibles dans la section [Configuration côté clients de Better-Auth](/annexes/authentifications/#configuration-côté-clients-de-better-auth).
 
 ## Conclusion
 

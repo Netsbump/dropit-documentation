@@ -52,11 +52,15 @@ Les composants principaux incluent :
 - **Owner** : Hérite des permissions admin plus gestion organisationnelle
 
 **Évaluation pour DropIt :**
-- ✅ **Correspondance métier** : les rôles athlète/coach/propriétaire existent naturellement
-- ✅ **Simplicité administrative** : gestion par rôles plutôt que permissions individuelles
-- ✅ **Évolutivité** : nouveaux membres par assignation de rôle
-- ✅ **Support technique** : Better-Auth Organizations implémente nativement ce modèle
-- ⚠️ **Granularité limitée** : moins flexible que ACL pour des cas spécifiques
+
+**Avantages :**
+- **Correspondance métier** : les rôles athlète/coach/propriétaire existent naturellement
+- **Simplicité administrative** : gestion par rôles plutôt que permissions individuelles
+- **Évolutivité** : nouveaux membres par assignation de rôle
+- **Support technique** : Better-Auth Organizations implémente nativement ce modèle
+
+**Point d'attention :**
+- **Granularité limitée** : moins flexible que ACL pour des cas spécifiques
 
 ### ABAC (Attribute-Based Access Control)
 
@@ -118,34 +122,17 @@ Cette approche combine la simplicité administrative du RBAC avec les fonctionna
 
 ---
 
-## Schémas de base de données détaillés
+## Modèle Logique de Données RBAC
 
-Cette section présente les schémas détaillés des entités d'autorisation du plugin Organization mentionnés dans la page d'implémentation. Bien que Better-Auth génère automatiquement ces structures RBAC, cette modélisation selon la méthode Merise démontre ma compréhension des patterns d'autorisation complexes et ma capacité à concevoir des systèmes de permissions cohérents.
-
-#### Modèle Conceptuel de Données (MCD)
-
-Modélisation Merise du système RBAC si j'avais dû le concevoir manuellement :
-
-![Modèle Conceptuel de Données](../../../assets/mcd-autorization.png)
-
-**Analyse des relations RBAC :**
-- **User** appartient à une **Organization** (1,n)
-- **User** peut avoir plusieurs **Roles** via l'association **Member** (n,n)
-- **Role** dispose de plusieurs **Permissions** (n,n)
-- Relations many-to-many nécessitant des tables d'association pour la normalisation
-
-#### Modèle Logique de Données (MLD)
+Bien que Better-Auth génère automatiquement les structures du plugin Organization, cette modélisation MLD démontre ma compréhension des patterns RBAC et ma capacité à analyser un système de permissions complexe.
 
 Résolution des associations many-to-many par des tables intermédiaires :
 
 ![Modèle Logique de Données](../../../assets/mld-autorization.png)
 
-Les tables `Member` et `RolePermission` matérialisent les associations many-to-many, respectant les règles de normalisation pour éviter les redondances.
+**Analyse des relations RBAC :**
+- **User** appartient à une **Organization** (1,n)
+- **User** peut avoir plusieurs **Roles** via la table **Member** (n,n)
+- **Role** dispose de plusieurs **Permissions** (n,n)
 
-#### Modèle Physique de Données (MPD)
-
-Implémentation optimisée avec contraintes et index pour les performances des requêtes d'autorisation :
-
-![Modèle Physique de Données](../../../assets/mpd-autorization.png)
-
-Index composites sur (`userId`, `organizationId`) et (`roleId`, `permissionId`) pour optimiser les vérifications de permissions fréquentes dans l'application.
+Les tables `Member` et `RolePermission` matérialisent les associations many-to-many avec index composites sur (`userId`, `organizationId`) et (`roleId`, `permissionId`) pour optimiser les vérifications de permissions.

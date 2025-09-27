@@ -48,45 +48,23 @@ Cette approche donne la flexibilité de changer d'ORM, de base de données ou de
 
 ### Interface Layer : exposition HTTP
 
-**Controllers** gèrent le protocole HTTP et orchestrent les vérifications de sécurité avant de déléguer la logique métier. Ils appliquent plusieurs mécanismes de sécurité en cascade :
-
-- **Authentification** : Vérification du token valide et extraction des informations utilisateur
-- **Isolation organisationnelle** : Garantie d'accès uniquement aux ressources de l'organisation  
-- **Permissions granulaires** : Vérification des droits spécifiques requis pour chaque action
-- **Contrat d'API** : Respect du contrat ts-rest défini dans `@dropit/contract`
-
-**Mappers** transforment les entités de base de données en objets de transfert (DTO) pour l'API, respectant le contrat ts-rest et protégeant le schéma de base de données.
-
-**Presenters** standardisent le formatage des réponses et gèrent la logique de présentation des données, normalisant les codes de statut et sécurisant les messages d'erreur.
+Les **Controllers** gèrent le protocole HTTP et orchestrent les vérifications de sécurité : authentification, isolation organisationnelle, permissions granulaires et respect du contrat ts-rest. 
+Les **Mappers** transforment les entités en DTO pour l'API. 
+Enfin les **Presenters** standardisent le formatage des réponses et sécurisent les messages d'erreur.
 
 > **Exemples détaillés d'implémentation** : Voir l'[Annexe - Implémentation accès aux données](/annexes/implementation-acces-donnees/)
 
 
 ### Application Layer : orchestration métier
 
-**Use Cases** concentrent la logique applicative et les règles métier spécifiques au domaine de l'haltérophilie. Ils orchestrent les différents repositories tout en appliquant des vérifications métier critiques :
-
-- Vérifications d'autorisation métier (coach de l'organisation)
-- Validation de l'existence et de l'accès aux ressources avec filtres organisationnels
-- Vérification d'intégrité référentielle (athlètes, exercices, complexes)
-- Orchestration de plusieurs règles d'autorisation combinées
-
-Cette approche centralise la logique métier critique tout en la gardant indépendante de l'infrastructure technique.
+**Use Cases** concentrent la logique applicative et les règles métier spécifiques à l'haltérophilie. Ils orchestrent les repositories en appliquant des vérifications métier critiques : autorisations organisationnelles, validation de l'existence des ressources, intégrité référentielle et combinaison de règles d'autorisation.
 
 > **Exemple complet de Use Case** : Voir l'[Annexe - Implémentation accès aux données](/annexes/implementation-acces-donnees/)
 
 ### Domain Layer : modèle métier
 
-Les entités représentent les concepts métier du domaine de l'haltérophilie avec leurs règles et contraintes. Elles utilisent des décorateurs MikroORM pour définir leur mapping vers la base de données :
-
-- `@Entity()` : Marque la classe comme entité de base de données
-- `@Property()` : Mappe les propriétés simples vers des colonnes
-- `@ManyToOne()` / `@OneToMany()` : Établit les associations et génère les clés étrangères
-- `@Check()` : Traduit les règles métier en contraintes PostgreSQL
-- `@Property({ onCreate: () => new Date() })` : Configure les comportements de lifecycle
-
+Les entités représentent les concepts métier avec leurs règles et contraintes, utilisant les décorateurs MikroORM (`@Entity()`, `@Property()`, `@ManyToOne()`, `@Check()`) pour le mapping vers PostgreSQL. Cette approche offre un bon compromis entre simplicité et maintenabilité.
 Cette approche présente une limitation par rapport à l'architecture hexagonale pure, mais offre un bon compromis entre simplicité et maintenabilité.
-
 ### Infrastructure Layer : accès aux données
 
 L'Infrastructure Layer contient les **Repositories** qui assurent la persistance des données. MikroORM propose nativement des repositories automatiques pour chaque entité, accessibles via l'injection de dépendance.
@@ -178,11 +156,7 @@ En développement, j'ai privilégié une approche de reconstruction complète vi
 
 ## Seeders et données de test
 
-J'ai implémenté un système de seeders qui peuple la base avec des données cohérentes, servant un double objectif : fournir un environnement de développement reproductible et créer un catalogue commun d'exercices et de techniques d'haltérophilie accessible à tous les clubs.
-
-Ce système respecte les contraintes d'intégrité référentielle et garantit un environnement de développement reproductible. La structure modulaire permet de réutiliser les données entre différents seeders tout en maintenant la cohérence des relations.
-
-L'aspect particulièrement intéressant est le rôle des seeders dans la création de ressources partagées via `createdBy = null`. Ces entités publiques constituent un socle commun d'exercices officiels d'haltérophilie que tous les clubs peuvent utiliser, évitant la duplication des données de base.
+J'ai implémenté un système de seeders servant un double objectif : environnement de développement reproductible et catalogue commun d'exercices d'haltérophilie. Les ressources partagées (`createdBy = null`) constituent un socle d'exercices officiels accessible à tous les clubs, évitant la duplication des données de base.
 
 ## Conclusion
 

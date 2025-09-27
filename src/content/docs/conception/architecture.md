@@ -25,9 +25,7 @@ Le monorepo est organisé en deux catégories principales :
 
 L'organisation en monorepo assure une cohérence technique entre l'application web, mobile et l'API grâce au partage des packages communs entre les différentes applications.
 
-Cette approche élimine les divergences potentielles entre les différents clients et garantit une homogénéité architecturale sur l'ensemble du projet. Par exemple, toute modification d'API impacte immédiatement tous les clients grâce aux types partagés. Cette synchronisation automatique réduit significativement les erreurs d'intégration et accélère les cycles de développement.
-
-La gestion des dépendances s'avère également optimisée grâce à pnpm workspaces qui permet une installation unique des dépendances communes, réduisant l'espace disque et accélérant les installations. Les packages internes sont liés symboliquement, facilitant le développement en temps réel et permettant de voir immédiatement l'impact des modifications sur l'ensemble des applications.
+Cette approche élimine les divergences entre clients et garantit une homogénéité architecturale. Les modifications d'API impactent immédiatement tous les clients grâce aux types partagés, réduisant les erreurs d'intégration. Pnpm workspaces optimise la gestion des dépendances avec une installation unique des dépendances communes et des packages internes liés symboliquement.
 
 ## Packages partagés
 
@@ -42,9 +40,7 @@ Les détails techniques d'implémentation et des explications plus détaillées 
 
 ## Client Web (Back Office) : React et TypeScript
 
-Pour le back office destiné aux coachs, j'ai choisi **React** associé à **TypeScript**. Cette technologie offre une architecture basée sur des composants réutilisables particulièrement adaptée aux interfaces de gestion nécessaires pour organiser les entraînements, suivre les performances et gérer les athlètes.
-
-L'ajout de **TypeScript** apporte une sécurité de typage dans un contexte où la manipulation des données d'entraînement doit être fiable. Les **types stricts** permettent de **détecter les erreurs potentielles dès la phase de compilation**, réduisant significativement les risques de bugs en production. Cette approche se révèle particulièrement critique pour les calculs de charges et la gestion des progressions d'athlètes, domaines où la précision des données conditionne la sécurité des utilisateurs.
+Pour le back office destiné aux coachs, j'ai choisi **React** associé à **TypeScript**. Cette technologie offre une architecture basée sur des composants réutilisables adaptée aux interfaces de gestion. **TypeScript** apporte une sécurité de typage critique pour la manipulation des données d'entraînement, détectant les erreurs dès la compilation et garantissant la précision nécessaire aux calculs de charges et progressions d'athlètes.
 
 ### Écosystème technique et bibliothèques
 
@@ -68,13 +64,7 @@ Pour en savoir plus sur l'implémentation spécifique à l'application mobile re
 
 ## API REST : NestJS
 
-Le backend repose sur NestJS, un framework Node.js que j'ai déjà eu l'occasion d'utiliser dans des projets précédents ainsi qu'en entreprise.
-
-NestJS me fournit des patterns d'architecture éprouvés tels que les modules, services, guards et interceptors, évitant ainsi de réinventer la roue architecturale. Cette approche me permet de me concentrer directement sur la logique métier et d'utiliser leur architecture de base solide et éprouvée.
-
-Le framework bénéficie d'une maintenance active avec des mises à jour régulières et dispose d'une forte communauté. Cette stabilité s'avère essentielle pour un projet qui doit rester fonctionnel sur la durée. L'écosystème mature de NestJS propose des modules officiels pour la plupart des besoins courants, qu'il s'agisse d'authentification, de validation ou d'intégration ORM.
-
-Le système d'injection de dépendances natif facilite considérablement les tests unitaires en favorisant le principe d'inversion de contrôle me permettant d'isoler facilement la logique métier des préoccupations techniques.
+Le backend repose sur NestJS, un framework Node.js que j'ai déjà utilisé en projets et en entreprise. NestJS fournit des patterns d'architecture éprouvés (modules, services, guards, interceptors) avec un écosystème mature et une maintenance active. Son système d'injection de dépendances facilite les tests unitaires en favorisant l'inversion de contrôle, permettant d'isoler la logique métier des préoccupations techniques.
 
 ### Architecture hexagonale et Domain-Driven Design
 

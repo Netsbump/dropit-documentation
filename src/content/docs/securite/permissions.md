@@ -40,7 +40,7 @@ Le plugin génère automatiquement trois nouvelles entités qui s'intègrent ave
 - **Member** : Lie un utilisateur à une organisation avec un rôle spécifique
 - **Invitation** : Gère le processus d'ajout de nouveaux membres
 
-Les schémas détaillés de ces entités (MCD, MLD, MPD) et leurs relations sont disponibles dans la section [Annexes permissions](/annexes/permissions/) pour une vision complète de l'architecture de données.
+Le schéma détaillé de ces entités est disponible dans la section [Modèle Logique de Données RBAC](/annexes/permissions/#modèle-logique-de-données-rbac) pour une vision complète de l'architecture de données.
 
 ### Adaptation du modèle métier
 
@@ -108,7 +108,7 @@ export const admin = ac.newRole({
 });
 ```
 
-Ce modèle RBAC (Role-Based Access Control) assure la cohérence des permissions entre toutes les parties de l'application. Les détails complets sur les trois rôles (Member, Admin, Owner) sont disponibles dans les [Annexes permissions](/annexes/permissions/).
+Ce modèle RBAC (Role-Based Access Control) assure la cohérence des permissions entre toutes les parties de l'application. Les détails complets sur les trois rôles (Member, Admin, Owner) sont disponibles ([Annexes permissions](/annexes/permissions/#étude-comparative-des-modèles-de-permissions)).
 
 ## Décorateurs de permissions
 
