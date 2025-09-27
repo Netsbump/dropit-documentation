@@ -51,7 +51,7 @@ Dans le MVP, j'ai fait le choix de ne pas optimiser l'interface web pour les mob
 
 L'interface mobile privilégie la simplicité avec trois écrans principaux optimisés pour l'usage en salle de sport :
 
-<img src="/src/assets/wireframe-mobile-dashboard.png" alt="Wireframe page accueil mobile" width="300" />
+<img src="/src/assets/wireframe-dashboard-mobile.png" alt="Wireframe page accueil mobile" width="300" />
 <img src="/src/assets/wireframe-mobile-training.png" alt="Wireframe visualisation programme mobile" width="300" />
 <img src="/src/assets/wireframe-mobile-training-detail.png" alt="Wireframe visualisation détail exercice mobile" width="300" />
 
