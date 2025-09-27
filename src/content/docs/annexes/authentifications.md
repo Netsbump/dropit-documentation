@@ -70,6 +70,109 @@ Cette décision s'appuie sur une évaluation pragmatique du rapport bénéfice/c
 
 ---
 
+## Implémentation des décorateurs
+
+```typescript
+/**
+ * Décorateur pour marquer une route comme publique (accessible sans authentification)
+ */
+export const Public = () => SetMetadata('PUBLIC', true);
+
+/**
+ * Décorateur pour marquer une route comme optionnelle (accessible avec ou sans authentification)
+ */
+export const Optional = () => SetMetadata('OPTIONAL', true);
+
+/**
+ * Décorateur pour injecter la session dans un contrôleur
+ */
+export const Session = createParamDecorator(
+  (_data: unknown, context: ExecutionContext) => {
+    const request = context.switchToHttp().getRequest();
+    return request.session;
+  }
+);
+
+/**
+ * Décorateur pour injecter l'utilisateur connecté dans un contrôleur
+ */
+export const CurrentUser = createParamDecorator(
+  (_data: unknown, context: ExecutionContext) => {
+    const request = context.switchToHttp().getRequest();
+    return request.user;
+  }
+);
+```
+
+Ces décorateurs permettent d'annoter les routes avec des métadonnées de sécurité (`@Public()`, `@Optional()`) et d'injecter directement les données d'authentification dans les paramètres de méthode (`@CurrentUser()`, `@Session()`).
+
+## Implémentation du Guard
+
+Le Guard AuthGuard implémente la logique de sécurité qui s'exécute avant chaque route pour valider l'authentification selon les métadonnées définies par les décorateurs.
+
+```typescript
+@Injectable()
+export class AuthGuard implements CanActivate {
+  constructor(
+    private readonly reflector: Reflector,
+    private readonly authService: AuthService
+  ) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+
+    try {
+      // Récupération de la session via Better-Auth
+      const session = await this.authService.api.getSession({
+        headers: fromNodeHeaders(request.headers),
+      });
+
+      // Injection session et utilisateur dans la requête
+      request.session = session;
+      request.user = session?.user ?? null;
+
+      // Vérification des métadonnées de route
+      const isPublic = this.reflector.get('PUBLIC', context.getHandler());
+      const isOptional = this.reflector.get('OPTIONAL', context.getHandler());
+
+      if (isPublic) return true;
+      if (isOptional && !session) return true;
+
+      if (!session) {
+        throw new UnauthorizedException('You must be logged in to access this resource');
+      }
+
+      return true;
+    } catch (error) {
+      throw new UnauthorizedException('Authentication failed');
+    }
+  }
+}
+```
+
+Le Guard utilise le service `Reflector` de NestJS pour lire les métadonnées ajoutées par les décorateurs et adapter son comportement selon le niveau de sécurité requis pour chaque route.
+
+## Exemple d'usage concret
+
+Cet exemple illustre l'utilisation concrète des décorateurs et Guards dans un contrôleur de l'API DropIt.
+
+```typescript
+@Controller()
+export class WorkoutController {
+  constructor(
+    private readonly workoutUseCases: WorkoutUseCases
+  ) {}
+
+  getWorkouts(@CurrentUser() user: AuthenticatedUser) {
+    return this.workoutUseCases.getWorkouts(organizationId, user.id);
+  }
+}
+```
+
+Cet exemple montre l'`AuthGuard` global vérifiant l'authentification, le décorateur `@CurrentUser()` injectant l'utilisateur connecté, et l'absence de `@Public()` rendant l'authentification obligatoire pour cette route.
+
+---
+
 ## Étude comparative des solutions d'authentification
 
 Cette section détaille la comparaison technique JWT vs Sessions mentionnée dans la page d'implémentation. Bien que Better-Auth impose une architecture hybride, cette analyse démontre ma compréhension des différentes approches d'authentification moderne et justifie pourquoi l'hybride constitue la meilleure solution.

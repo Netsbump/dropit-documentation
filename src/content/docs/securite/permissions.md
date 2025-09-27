@@ -162,12 +162,6 @@ export class WorkoutController {
 
 Le `PermissionsGuard` appliqué au contrôleur vérifie automatiquement que l'utilisateur possède les droits requis (`read`, `create`) sur la ressource `workout` selon son rôle dans l'organisation active.
 
-## Pipeline d'accès aux ressources
-
-Le pipeline complet de middlewares illustre la défense en profondeur : l'AuthGuard valide d'abord l'identité de l'utilisateur, puis le PermissionGuard contrôle ses droits d'accès à la ressource demandée.
-
-![Pipeline d'accès aux ressources protégées](../../../assets/pipeline-auth.png)
-
 ## Perspectives d'évolution côté client
 
 L'architecture centralisée du package `@dropit/permissions` permet d'étendre la gestion des permissions aux interfaces utilisateur.

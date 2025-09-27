@@ -47,21 +47,15 @@ Dans le MVP, j'ai fait le choix de ne pas optimiser l'interface web pour les mob
 
 ### Wireframe mobile athlète (Front office)
 
-#### Page d'accueil
+#### Wireframes application mobile
+
+L'interface mobile privilégie la simplicité avec trois écrans principaux optimisés pour l'usage en salle de sport :
 
 <img src="/src/assets/wireframe-mobile-dashboard.png" alt="Wireframe page accueil mobile" width="300" />
-
-Carousel pour visualiser l'entrainement, l'actualité du club et l'hitorique d'entrainement + menubottom avec acceuil au milieu (le caroussel), a droite navigation vers account, a gauche le bouton de navigation vers l'enristrement des record de l'athlète.
-
-#### Page de visualisation d'entraînement
-
 <img src="/src/assets/wireframe-mobile-training.png" alt="Wireframe visualisation programme mobile" width="300" />
-
-L'interface mobile présente les exercices de manière séquentielle, avec les infos les importantes, au click sur un des éléments on aura une navigation vers le détails de l'exercice/complex
-
-#### Page de visualisation détaillée d'un exercice
-
 <img src="/src/assets/wireframe-mobile-training-detail.png" alt="Wireframe visualisation détail exercice mobile" width="300" />
+
+La page d'accueil présente un carousel central pour l'entraînement du jour, l'actualité du club et l'historique, avec un menu bottom pour la navigation (compte, accueil, records). La visualisation d'entraînement affiche les exercices de manière séquentielle avec accès aux détails par clic. L'interface détaillée permet de visualiser les paramètres spécifiques et d'enregistrer les performances réalisées.
 
 ## Design system
 

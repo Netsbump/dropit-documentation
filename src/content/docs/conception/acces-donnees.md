@@ -65,6 +65,7 @@ Enfin les **Presenters** standardisent le formatage des réponses et sécurisent
 
 Les entités représentent les concepts métier avec leurs règles et contraintes, utilisant les décorateurs MikroORM (`@Entity()`, `@Property()`, `@ManyToOne()`, `@Check()`) pour le mapping vers PostgreSQL. Cette approche offre un bon compromis entre simplicité et maintenabilité.
 Cette approche présente une limitation par rapport à l'architecture hexagonale pure, mais offre un bon compromis entre simplicité et maintenabilité.
+
 ### Infrastructure Layer : accès aux données
 
 L'Infrastructure Layer contient les **Repositories** qui assurent la persistance des données. MikroORM propose nativement des repositories automatiques pour chaque entité, accessibles via l'injection de dépendance.

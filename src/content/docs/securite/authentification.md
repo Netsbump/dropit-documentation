@@ -81,39 +81,7 @@ Concrètement, au lieu d'écrire de la logique conditionnelle dans chaque contr�
 
 Dans mon projet, j'ai configuré l'authentification comme étant globale : par défaut, toutes les routes nécessitent une authentification, sauf si je les marque explicitement avec `@Public()`. Cette configuration se fait via un système de Guards que je vais présenter juste après.
 
-Voici une version simplifiée de mes décorateurs principaux :
-
-```typescript
-  /**
-   * Décorateur pour marquer une route comme publique (accessible sans authentification)
-   */
-  export const Public = () => SetMetadata('PUBLIC', true);
-
-  /**
-   * Décorateur pour marquer une route comme optionnelle (accessible avec ou sans authentification)
-   */
-  export const Optional = () => SetMetadata('OPTIONAL', true);
-
-  /**
-   * Décorateur pour injecter la session dans un contrôleur
-   */
-  export const Session = createParamDecorator(
-    (_data: unknown, context: ExecutionContext) => {
-      const request = context.switchToHttp().getRequest();
-      return request.session;
-    }
-  );
-
-  /**
-   * Décorateur pour injecter l'utilisateur connecté dans un contrôleur
-   */
-  export const CurrentUser = createParamDecorator(
-    (_data: unknown, context: ExecutionContext) => {
-      const request = context.switchToHttp().getRequest();
-      return request.user;
-    }
-  );
-```
+> **Exemple d'implémentation des décorateurs** : Voir l'[Annexe - Authentifications](/annexes/authentifications/#implémentation-des-décorateurs)
 
 Ces décorateurs me permettent d'annoter mes routes avec des métadonnées de sécurité (`@Public()`, `@Optional()`) et d'injecter directement les données d'authentification dans les paramètres de méthode (`@CurrentUser()`, `@Session()`).
 
@@ -123,66 +91,13 @@ Les Guards sont des classes qui implémentent une logique de sécurité dans Nes
 
 Le Guard utilise le service `Reflector` de NestJS pour lire les métadonnées ajoutées par les décorateurs et adapter son comportement. Par exemple, si une route est marquée `@Public()`, le Guard autorisera l'accès même sans authentification. 
 
-Voici une version allégée de mon AuthGuard qui montre la logique principale :
-
-```typescript
-@Injectable()
-export class AuthGuard implements CanActivate {
-  constructor(
-    private readonly reflector: Reflector,
-    private readonly authService: AuthService
-  ) {}
-
-  async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
-    
-    try {
-      // Récupération de la session via Better-Auth
-      const session = await this.authService.api.getSession({
-        headers: fromNodeHeaders(request.headers),
-      });
-
-      // Injection session et utilisateur dans la requête
-      request.session = session;
-      request.user = session?.user ?? null;
-
-      // Vérification des métadonnées de route
-      const isPublic = this.reflector.get('PUBLIC', context.getHandler());
-      const isOptional = this.reflector.get('OPTIONAL', context.getHandler());
-
-      if (isPublic) return true;
-      if (isOptional && !session) return true;
-      
-      if (!session) {
-        throw new UnauthorizedException('You must be logged in to access this resource');
-      }
-
-      return true;
-    } catch (error) {
-      throw new UnauthorizedException('Authentication failed');
-    }
-  }
-}
-```
+> **Exemple d'implémentation du Guard** : Voir l'[Annexe - Authentifications](/annexes/authentifications/#implémentation-du-guard)
 
 ### Exemple d'utilisation concrète
 
-Extrait du `WorkoutController` illustrant l'usage des décorateurs et Guards :
+L'utilisation concrète de ces décorateurs et Guards dans un contrôleur illustre comment l'`AuthGuard` global vérifie l'authentification, comment le décorateur `@CurrentUser()` injecte l'utilisateur connecté, et comment l'absence de `@Public()` rend l'authentification obligatoire.
 
-```typescript
-@Controller()
-export class WorkoutController {
-  constructor(
-    private readonly workoutUseCases: WorkoutUseCases
-  ) {}
-
-  getWorkouts(@CurrentUser() user: AuthenticatedUser) {
-    return this.workoutUseCases.getWorkouts(organizationId, user.id);
-  }
-}
-```
-
-Cet exemple montre l'`AuthGuard` global vérifiant l'authentification, le décorateur `@CurrentUser()` injectant l'utilisateur connecté, et l'absence de `@Public()` rendant l'authentification obligatoire.
+> **Exemple d'implémentation** : Voir l'[Annexe - Authentifications](/annexes/authentifications/#exemple-dusage-concret)
 
 ## Gestion des sessions et sécurité
 
