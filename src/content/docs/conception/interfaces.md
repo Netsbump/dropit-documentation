@@ -28,13 +28,13 @@ L'architecture de DropIt se décline en deux interfaces distinctes : une applica
 
 #### Page de bibliothèque d'entrainement
 
-<img src="/src/assets/wireframe-web-prog.png" alt="Wireframe vue générale bibliothèque" width="800" />
+<img src="/assets/wireframe-web-prog.png" alt="Wireframe vue générale bibliothèque" width="800" />
 
 La vue générale présente l'interface globale avec une navigation latérale permanente donnant accès aux trois catalogues : exercices, complexes et programmes d'entraînement. Cette organisation facilite la navigation entre les différents types de contenus que le coach manipule quotidiennement.
 
 #### Page de formulaire de création d'un entrainement
 
-<img src="/src/assets/wireframe-web-form-training.png" alt="Wireframe page création exercice" width="800" />
+<img src="/assets/wireframe-web-form-training.png" alt="Wireframe page création exercice" width="800" />
 
 Le wireframe révèle les éléments structurants :
 - Etape du formulaire dans lequel on peut composer l'entrainement avec un des exercices et/ou des complexS
@@ -51,9 +51,9 @@ Dans le MVP, j'ai fait le choix de ne pas optimiser l'interface web pour les mob
 
 L'interface mobile privilégie la simplicité avec trois écrans principaux optimisés pour l'usage en salle de sport :
 
-<img src="/src/assets/wireframe-dashboard-mobile.png" alt="Wireframe page accueil mobile" width="300" />
-<img src="/src/assets/wireframe-mobile-training.png" alt="Wireframe visualisation programme mobile" width="300" />
-<img src="/src/assets/wireframe-mobile-training-detail.png" alt="Wireframe visualisation détail exercice mobile" width="300" />
+<img src="/assets/wireframe-dashboard-mobile.png" alt="Wireframe page accueil mobile" width="300" />
+<img src="/assets/wireframe-mobile-training.png" alt="Wireframe visualisation programme mobile" width="300" />
+<img src="/assets/wireframe-mobile-training-detail.png" alt="Wireframe visualisation détail exercice mobile" width="300" />
 
 La page d'accueil présente un carousel central pour l'entraînement du jour, l'actualité du club et l'historique, avec un menu bottom pour la navigation (compte, accueil, records). La visualisation d'entraînement affiche les exercices de manière séquentielle avec accès aux détails par clic. L'interface détaillée permet de visualiser les paramètres spécifiques et d'enregistrer les performances réalisées.
 
