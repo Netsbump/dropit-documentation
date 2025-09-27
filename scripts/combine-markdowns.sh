@@ -6,10 +6,11 @@
 DOCS_DIR="../src/content/docs"
 OUTPUT_FILE="../DropIt-Documentation-Complete.md"
 
-# Fonction pour convertir les balises <img> en Markdown
+# Fonction pour convertir les balises <img> en Markdown et supprimer les alt des références existantes
 convert_img_to_markdown() {
-    # Convertir <img src="..." alt="..." width="..." /> en ![alt](src)
-    sed -E 's|<img[^>]*src="([^"]*)"[^>]*alt="([^"]*)"[^>]*/?>|![\2](\1)|g'
+    # Convertir <img src="..." alt="..." width="..." /> en ![](src) (sans alt text)
+    # ET supprimer les alt text des références Markdown existantes ![...](src) -> ![](src)
+    sed -E 's|<img[^>]*src="([^"]*)"[^>]*/?>|![](\1)|g' | sed -E 's|!\[[^\]]*\]\(([^)]+)\)|![](\1)|g'
 }
 
 echo "🚀 Création du document combiné DropIt Documentation..."
@@ -17,13 +18,7 @@ echo "🚀 Création du document combiné DropIt Documentation..."
 # Supprimer le fichier existant s'il existe
 rm -f "$OUTPUT_FILE"
 
-# Page d'accueil
-echo "# DropIt Documentation Complète" >> "$OUTPUT_FILE"
-echo "" >> "$OUTPUT_FILE"
-echo "---" >> "$OUTPUT_FILE"
-echo "" >> "$OUTPUT_FILE"
-
-# Introduction
+# Introduction (pas de titre principal, on commence directement)
 echo "# Introduction" >> "$OUTPUT_FILE"
 echo "" >> "$OUTPUT_FILE"
 
@@ -31,7 +26,7 @@ if [ -f "$DOCS_DIR/introduction/presentation.md" ]; then
     echo "## Présentation du projet" >> "$OUTPUT_FILE"
     echo "" >> "$OUTPUT_FILE"
     # Supprimer le titre frontmatter et le premier titre
-    tail -n +4 "$DOCS_DIR/introduction/presentation.md" | sed '/^# /d' | sed 's|../../../assets/|src/assets/|g' | sed 's|src="/src/assets/|src="src/assets/|g' | convert_img_to_markdown >> "$OUTPUT_FILE"
+    tail -n +4 "$DOCS_DIR/introduction/presentation.md" | sed '/^# /d' | sed 's|../../../assets/|src/assets/|g' | sed 's|src="/src/assets/|src="src/assets/|g' | sed 's|src="/assets/|src="src/assets/|g' | sed 's|src="/src/assets/|src="src/assets/|g' | sed 's|src="/assets/|src="src/assets/|g' | convert_img_to_markdown >> "$OUTPUT_FILE"
     echo "" >> "$OUTPUT_FILE"
     echo "\\newpage" >> "$OUTPUT_FILE"
     echo "" >> "$OUTPUT_FILE"
@@ -40,7 +35,7 @@ fi
 if [ -f "$DOCS_DIR/introduction/contexte.md" ]; then
     echo "## Contexte et enjeux" >> "$OUTPUT_FILE"
     echo "" >> "$OUTPUT_FILE"
-    tail -n +4 "$DOCS_DIR/introduction/contexte.md" | sed '/^# /d' | sed 's|../../../assets/|src/assets/|g' | sed 's|src="/src/assets/|src="src/assets/|g' | convert_img_to_markdown >> "$OUTPUT_FILE"
+    tail -n +4 "$DOCS_DIR/introduction/contexte.md" | sed '/^# /d' | sed 's|../../../assets/|src/assets/|g' | sed 's|src="/src/assets/|src="src/assets/|g' | sed 's|src="/assets/|src="src/assets/|g' | convert_img_to_markdown >> "$OUTPUT_FILE"
     echo "" >> "$OUTPUT_FILE"
     echo "\\newpage" >> "$OUTPUT_FILE"
     echo "" >> "$OUTPUT_FILE"
@@ -64,7 +59,7 @@ for item in "${conception_files[@]}"; do
     if [ -f "$DOCS_DIR/conception/$filename.md" ]; then
         echo "## $title" >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
-        tail -n +4 "$DOCS_DIR/conception/$filename.md" | sed '/^# /d' | sed 's|../../../assets/|src/assets/|g' | sed 's|src="/src/assets/|src="src/assets/|g' | convert_img_to_markdown >> "$OUTPUT_FILE"
+        tail -n +4 "$DOCS_DIR/conception/$filename.md" | sed '/^# /d' | sed 's|../../../assets/|src/assets/|g' | sed 's|src="/src/assets/|src="src/assets/|g' | sed 's|src="/assets/|src="src/assets/|g' | convert_img_to_markdown >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
         echo "\\newpage" >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
@@ -86,7 +81,7 @@ for item in "${securite_files[@]}"; do
     if [ -f "$DOCS_DIR/securite/$filename.md" ]; then
         echo "## $title" >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
-        tail -n +4 "$DOCS_DIR/securite/$filename.md" | sed '/^# /d' | sed 's|../../../assets/|src/assets/|g' | sed 's|src="/src/assets/|src="src/assets/|g' | convert_img_to_markdown >> "$OUTPUT_FILE"
+        tail -n +4 "$DOCS_DIR/securite/$filename.md" | sed '/^# /d' | sed 's|../../../assets/|src/assets/|g' | sed 's|src="/src/assets/|src="src/assets/|g' | sed 's|src="/assets/|src="src/assets/|g' | convert_img_to_markdown >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
         echo "\\newpage" >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
@@ -107,7 +102,7 @@ for item in "${tests_files[@]}"; do
     if [ -f "$DOCS_DIR/tests/$filename.md" ]; then
         echo "## $title" >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
-        tail -n +4 "$DOCS_DIR/tests/$filename.md" | sed '/^# /d' | sed 's|../../../assets/|src/assets/|g' | sed 's|src="/src/assets/|src="src/assets/|g' | convert_img_to_markdown >> "$OUTPUT_FILE"
+        tail -n +4 "$DOCS_DIR/tests/$filename.md" | sed '/^# /d' | sed 's|../../../assets/|src/assets/|g' | sed 's|src="/src/assets/|src="src/assets/|g' | sed 's|src="/assets/|src="src/assets/|g' | convert_img_to_markdown >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
         echo "\\newpage" >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
@@ -128,7 +123,7 @@ for item in "${deploiement_files[@]}"; do
     if [ -f "$DOCS_DIR/deploiement/$filename.md" ]; then
         echo "## $title" >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
-        tail -n +4 "$DOCS_DIR/deploiement/$filename.md" | sed '/^# /d' | sed 's|../../../assets/|src/assets/|g' | sed 's|src="/src/assets/|src="src/assets/|g' | convert_img_to_markdown >> "$OUTPUT_FILE"
+        tail -n +4 "$DOCS_DIR/deploiement/$filename.md" | sed '/^# /d' | sed 's|../../../assets/|src/assets/|g' | sed 's|src="/src/assets/|src="src/assets/|g' | sed 's|src="/assets/|src="src/assets/|g' | convert_img_to_markdown >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
         echo "\\newpage" >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
@@ -149,7 +144,7 @@ for item in "${gestion_files[@]}"; do
     if [ -f "$DOCS_DIR/gestion/$filename.md" ]; then
         echo "## $title" >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
-        tail -n +4 "$DOCS_DIR/gestion/$filename.md" | sed '/^# /d' | sed 's|../../../assets/|src/assets/|g' | sed 's|src="/src/assets/|src="src/assets/|g' | convert_img_to_markdown >> "$OUTPUT_FILE"
+        tail -n +4 "$DOCS_DIR/gestion/$filename.md" | sed '/^# /d' | sed 's|../../../assets/|src/assets/|g' | sed 's|src="/src/assets/|src="src/assets/|g' | sed 's|src="/assets/|src="src/assets/|g' | convert_img_to_markdown >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
         echo "\\newpage" >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
@@ -177,7 +172,7 @@ for item in "${annexes_files[@]}"; do
     if [ -f "$DOCS_DIR/annexes/$filename.md" ]; then
         echo "## $title" >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
-        tail -n +4 "$DOCS_DIR/annexes/$filename.md" | sed '/^# /d' | sed 's|../../../assets/|src/assets/|g' | sed 's|src="/src/assets/|src="src/assets/|g' | convert_img_to_markdown >> "$OUTPUT_FILE"
+        tail -n +4 "$DOCS_DIR/annexes/$filename.md" | sed '/^# /d' | sed 's|../../../assets/|src/assets/|g' | sed 's|src="/src/assets/|src="src/assets/|g' | sed 's|src="/assets/|src="src/assets/|g' | convert_img_to_markdown >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"
         echo "\\newpage" >> "$OUTPUT_FILE"
         echo "" >> "$OUTPUT_FILE"

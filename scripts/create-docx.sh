@@ -62,7 +62,7 @@ for i, mermaid_content in enumerate(mermaid_blocks, 1):
         
         # Remplacer le bloc Mermaid par une référence d'image
         old_block = f'```mermaid\n{mermaid_content}\n```'
-        new_reference = f'![Diagramme Mermaid {i}](mermaid-images/{image_name}.png)'
+        new_reference = f'![](mermaid-images/{image_name}.png)'
         content = content.replace(old_block, new_reference)
         
     except subprocess.CalledProcessError as e:
@@ -149,7 +149,7 @@ for i, (language, code_content) in enumerate(code_blocks, 1):
         
         # Remplacer le bloc de code par une référence d'image
         old_block = f'```{language}\n{code_content}\n```'
-        new_reference = f'![Code {language} - Bloc {i}](code-images/{image_name}.png)'
+        new_reference = f'![](code-images/{image_name}.png)'
         content = content.replace(old_block, new_reference)
         
     except subprocess.CalledProcessError as e:
@@ -237,11 +237,31 @@ else
     echo "   Les images garderont leur taille originale."
 fi
 
-# Étape 5: Conversion en DOCX
-echo "📄 Étape 5: Conversion en DOCX..."
+# Étape 5: Conversion en DOCX avec page de garde et sommaire
+echo "📄 Étape 5: Conversion en DOCX avec page de garde et sommaire..."
 
-cd .. && pandoc 'DropIt-Documentation-Complete.md' \
-  --toc \
+# Créer un fichier temporaire avec page de garde
+CURRENT_DATE=$(date +'%B %Y')
+cat > '../temp-doc-with-cover.md' << EOF
+---
+title: "DropIt"
+subtitle: "Titre Professionnel Concepteur Développeur d'Applications"
+author: "Dossier Projet - Sten Levasseur"
+date: "$CURRENT_DATE"
+geometry: "margin=2cm"
+fontsize: 11pt
+linestretch: 1.2
+number-sections: true
+---
+
+EOF
+
+# Ajouter le contenu principal
+cat '../DropIt-Documentation-Complete.md' >> '../temp-doc-with-cover.md'
+
+cd .. && pandoc 'temp-doc-with-cover.md' \
+  --from markdown+smart \
+  --to docx \
   --number-sections \
   --variable fontsize=11pt \
   --variable linestretch=1.2 \
@@ -249,7 +269,14 @@ cd .. && pandoc 'DropIt-Documentation-Complete.md' \
   --variable margin-right=2cm \
   --variable margin-top=2cm \
   --variable margin-bottom=2cm \
+  --metadata title="DropIt" \
+  --metadata subtitle="Titre Professionnel Concepteur Développeur d'Applications" \
+  --metadata author="Dossier Projet - Sten Levasseur" \
+  --metadata date="$CURRENT_DATE" \
   -o 'DropIt-Documentation.docx'
+
+# Nettoyer le fichier temporaire
+rm -f '../temp-doc-with-cover.md'
 
 if [ $? -eq 0 ]; then
     echo "✅ DOCX créé avec succès: DropIt-Documentation.docx"
