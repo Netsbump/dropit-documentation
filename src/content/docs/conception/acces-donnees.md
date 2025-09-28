@@ -9,7 +9,7 @@ Après avoir établi le modèle conceptuel avec la méthode Merise, plusieurs ap
 
 J'ai retenu l'approche **Code First** qui définit les entités directement en TypeScript avec les décorateurs MikroORM. Cette méthode s'intègre nativement dans l'écosystème du monorepo, permet la génération automatique des migrations et tire parti de l'auto-complétion TypeScript.
 
-> **Analyse détaillée des approches** : Voir l'[Annexe - Implémentation accès aux données](/annexes/implementation-acces-donnees/)
+> **Analyse détaillée des approches** : Voir l'annexe [Comparaison des approches d'implémentation](/annexes/implementation-acces-donnees/#comparaison-des-approches-dimplémentation)
 
 ## Définition des entités MikroORM
 
@@ -27,7 +27,7 @@ J'ai adopté plusieurs patterns systématiquement :
 
 L'entité `WorkoutElement` illustre la résolution du pattern polymorphe avec un discriminant `element_type` et deux clés étrangères optionnelles. Le décorateur `@Check` garantit l'intégrité référentielle au niveau PostgreSQL.
 
-> **Exemples complets d'entités** : Voir l'[Annexe - Implémentation accès aux données](/annexes/implementation-acces-donnees/)
+> **Exemple d'entité** : Voir l'annexe [Exemple d'entité MikroORM](/annexes/implementation-acces-donnees/#exemple-dentité-mikroorm)
 
 ## Architecture en couches et pattern Repository
 
@@ -44,7 +44,7 @@ L'architecture respecte une séparation stricte en quatre couches distinctes :
 
 Cette approche donne la flexibilité de changer d'ORM, de base de données ou de services externes sans impacter la logique métier centrale.
 
-> **Architecture détaillée avec exemples** : Voir l'[Annexe - Implémentation accès aux données](/annexes/implementation-acces-donnees/)
+> **Architecture détaillée** : Voir l'annexe [Architecture en couches détaillée](/annexes/implementation-acces-donnees/#architecture-en-couches-détaillée)
 
 ### Interface Layer : exposition HTTP
 
@@ -52,14 +52,14 @@ Les **Controllers** gèrent le protocole HTTP et orchestrent les vérifications 
 Les **Mappers** transforment les entités en DTO pour l'API. 
 Enfin les **Presenters** standardisent le formatage des réponses et sécurisent les messages d'erreur.
 
-> **Exemples détaillés d'implémentation** : Voir l'[Annexe - Implémentation accès aux données](/annexes/implementation-acces-donnees/)
+> **Exemple détaillé d'implémentation** : Voir l'annexe [Interface Layer : exposition HTTP](/annexes/implementation-acces-donnees/#interface-layer--exposition-http)
 
 
 ### Application Layer : orchestration métier
 
 **Use Cases** concentrent la logique applicative et les règles métier spécifiques à l'haltérophilie. Ils orchestrent les repositories en appliquant des vérifications métier critiques : autorisations organisationnelles, validation de l'existence des ressources, intégrité référentielle et combinaison de règles d'autorisation.
 
-> **Exemple complet de Use Case** : Voir l'[Annexe - Implémentation accès aux données](/annexes/implementation-acces-donnees/)
+> **Exemple de Use Case** : Voir l'annexe [Exemple de Use Cases](/annexes/implementation-acces-donnees/#application-layer--orchestration-métier)
 
 ### Domain Layer : modèle métier
 
@@ -74,9 +74,7 @@ Pour certains cas spécifiques, j'étends ces repositories automatiques avec des
 
 Cette approche hybride conserve l'accès aux méthodes MikroORM optimisées tout en respectant les contrats métier définis dans l'Application Layer.
 
-> **Exemples de Repositories personnalisés** : Voir l'[Annexe - Implémentation accès aux données](/annexes/implementation-acces-donnees/)
-
-> **Structure complète de l'API** : Voir l'[Annexe - Implémentation accès aux données](/annexes/implementation-acces-donnees/)
+> **Exemple de Repository personnalisé** : Voir l'annexe [Repository personnalisé](/annexes/implementation-acces-donnees/#repository-personnalisé)
 
 ### Gestion du multi-tenancy
 
@@ -149,7 +147,7 @@ La stratégie de migration privilégie la sécurité et la traçabilité :
 - **Préservation des contraintes** : `disableForeignKeys: false` maintient l'intégrité référentielle
 - **Traçabilité complète** : Chaque migration appliquée est enregistrée dans une table système
 
-> **Exemple de migration** : Voir l'[Annexe - Implémentation accès aux données](/annexes/implementation-acces-donnees/Exemple-de-migration-générée)
+> **Exemple de migration** : Voir l'annexe [Exemple de migration générée](/annexes/implementation-acces-donnees/#exemple-de-migration-générée)
 
 ### Stratégie différenciée selon l'environnement
 
@@ -163,5 +161,5 @@ J'ai implémenté un système de seeders servant un double objectif : environnem
 
 Cette implémentation de la couche d'accès aux données avec Nest.js et MikroORM résout les défis spécifiques de DropIt tout en posant les bases d'une architecture évolutive.
 
-La section suivante sur les [couches de présentation](/conception/presentations) présente comment ces données sont consommées et présentées aux utilisateurs via les clients web et mobile.
+La section suivante sur les couches de présentation présente comment ces données sont consommées et présentées aux utilisateurs via les clients web et mobile.
 

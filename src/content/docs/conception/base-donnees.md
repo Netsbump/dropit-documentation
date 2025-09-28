@@ -43,7 +43,7 @@ La spécificité de mon application réside dans ses relations many-to-many qui 
 
 ### Simplification volontaire du périmètre
 
-Dans ce MCD, j'ai volontairement omis les entités liées à l'authentification et aux autorisations (User, Organization, Role, Permission) qui seront détaillées dans la section [sécurité](/securite/conception). Cette approche me permet de me concentrer sur le cœur métier de l'application tout en maintenant la lisibilité du schéma conceptuel.
+Dans ce MCD, j'ai volontairement omis les entités liées à l'authentification et aux autorisations (User, Organization, Role, Permission) qui seront détaillées dans la section [Sécurité](/securite/conception). Cette approche me permet de me concentrer sur le cœur métier de l'application tout en maintenant la lisibilité du schéma conceptuel.
 
 ## Modèle Logique de Données (MLD)
 
@@ -77,7 +77,7 @@ Le passage au MLD m'a demandé de résoudre plusieurs types de relations selon l
 
 Les entités de catégorisation (ExerciseCategory, WorkoutCategory, ComplexCategory) utilisent des relations one-to-many classiques pour organiser les données sans attributs supplémentaires.
 
-> **Détails techniques** : Voir l'[Annexe - Conception technique de la base de données](/annexes/conception-bdd-technique/)
+> **Détails techniques** : Voir l'annexe [Conception technique de la base de données](/annexes/conception-bdd-technique/)
 
 ## Modèle Physique de Données (MPD)
 
@@ -109,7 +109,5 @@ L'architecture actuelle facilite l'ajout de nouvelles fonctionnalités selon les
 
 Ces extensions s'intègrent naturellement dans l'architecture existante sans remettre en cause les relations fondamentales. L'évolution du modèle utilisera le système de migrations de MikroORM pour préserver l'intégrité des données existantes.
 
-> **Extensions détaillées** : Voir l'[Annexe - Conception technique de la base de données](/annexes/conception-bdd-technique/)
-
-La section suivante sur l'[accès aux données](/conception/acces-donnees) détaille l'implémentation de ces modèles avec MikroORM et les patterns de développement adoptés.
+La section suivante sur l'accès aux données détaille l'implémentation de ces modèles avec MikroORM et les patterns de développement adoptés.
 

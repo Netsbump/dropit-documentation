@@ -59,7 +59,7 @@ it('should allow access when user has required permissions', async () => {
 });
 ```
 
-Cette approche couvre plus de 40 tests unitaires validant tous les cas d'usage du système de permissions. Les détails sont disponibles dans [Validation des composants](/tests/validation/).
+Cette approche couvre environ 40 tests unitaires validant les cas d'usage du système de permissions. Des exemples sont disponibles dans [Validation des composants](/tests/validation/).
 
 ## Tests d'intégration
 
@@ -77,7 +77,7 @@ La validation porte sur la création d'enchaînements d'exercices ordonnés, le 
 
 L'orchestration des workouts représente le défi le plus complexe car elle combine exercices simples et complexes dans une structure cohérente. Chaque test suit un pattern de vérifications en cascade : création, validation des propriétés de base, puis vérification de chaque élément selon son type avec ses métadonnées spécifiques.
 
-Tous les tests suivent un pattern uniforme : nettoyage de base, création du contexte organisationnel via les seeders, puis exécution isolée. Les exemples détaillés sont dans [Validation des composants](/tests/validation/).
+Tous les tests suivent un pattern uniforme : nettoyage de base, création du contexte organisationnel via les seeders, puis exécution isolée.
 
 ## Perspective E2E
 

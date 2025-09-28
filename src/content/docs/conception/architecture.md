@@ -60,7 +60,7 @@ L'architecture monorepo permet le partage de logique métier entre les applicati
 
 L'architecture mobile s'appuie sur des bibliothèques adaptées aux contraintes du développement mobile notamment **Expo** qui facilite l'écosystème de développement mobile en automatisant la gestion des certificats, les builds natifs et le déploiement. Cette plateforme me permet de me concentrer sur l'implémentation des fonctionnalités métier plutôt que sur la configuration d'environnements de développement mobile.
 
-Pour en savoir plus sur l'implémentation spécifique à l'application mobile rendez vous dans la page [couches de présentation](/conception/presentations).
+Pour en savoir plus sur l'implémentation spécifique à l'application mobile rendez vous dans la page [couches de présentation](/conception/presentations#architecture-mobile-app).
 
 ## API REST : NestJS
 
@@ -83,10 +83,6 @@ Les détails de chacune des couches sont décrits dans la section [Architecture 
 Dans le contexte de ma formation et face à un projet comportant des relations entre athlètes, programmes, exercices et séances, l'utilisation d'un ORM apporte une productivité significative en gérant automatiquement les jointures et relations. Le recours au SQL brut aurait nécessité un temps de développement considérable pour gérer manuellement les migrations, les relations et tout le mapping objet-relationnel.
 
 J'ai opté pour MikroORM après avoir identifié des différences techniques avec TypeORM, pourtant plus répandu avec NestJS. MikroORM force à être explicite sur la définition des relations bidirectionnelles, ce qui évite des erreurs potentielles détectées seulement au runtime avec d'autres ORMs. Cette rigueur dans la déclaration des relations s'avère utile dans mon contexte d'apprentissage et pour les relations entre athlètes, programmes et séances d'entraînement.
-
-## Structure complète du projet monorepo
-
-La structure détaillée du monorepo (applications, packages, configuration) est documentée dans la section [Architecture technique](/annexes/architecture-technique/#structure-complète-du-monorepo).
 
 ## Base de données : PostgreSQL
 
@@ -173,7 +169,7 @@ Les détails d'implémentation sont présentés dans la section [Conception séc
 
 L'architecture distribuée adopte une approche défensive multi-niveaux : Error Boundaries React pour isoler les pannes d'interface, exception filters NestJS pour standardiser les erreurs API, et patterns de résilience pour les services externes.
 
-Les détails d'implémentation sont présentés dans les sections [Couches de présentation](/conception/presentations) et [Architecture en couches](/conception/acces-donnees).
+Les détails d'implémentation sont présentés dans les sections [Gestion des erreurs React](/conception/presentations#gestion-des-formulaires-avec-react-hook-form) et [Architecture en couches](/conception/acces-donnees#architecture-en-couches-et-pattern-repository).
 
 ## Perspectives d'évolution et scalabilité
 

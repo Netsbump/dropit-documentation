@@ -30,15 +30,13 @@ Chaque feature encapsule sa logique métier spécifique et ses règles de valida
 
 React Hook Form fournit la validation en temps réel, la gestion des erreurs et l'optimisation des performances via des champs non contrôlés, me permettant de me concentrer sur la logique métier spécifique à l'haltérophilie.
 
-> **Exemples d'implémentation** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/#formulaires-avec-react-hook-form-et-validation-zod) 
+> **Exemple d'implémentation** : Voir l'annexe [Formulaires avec React Hook Form et validation Zod](/annexes/implementation-presentations/#formulaires-avec-react-hook-form-et-validation-zod) 
 
 ### Intégration de la validation Zod partagée
 
-L'un des aspects les plus enrichissants de cette implémentation a été l'intégration des schémas Zod définis dans le package partagé [`@dropit/schemas`](/conception/architecture#dropit-schemas--validation-centralisée-avec-zod), également utilisés côté API dans la [couche d'accès aux données](/conception/acces-donnees). Cette approche résout une problématique récurrente : maintenir la cohérence des règles de validation entre le frontend et le backend.
+L'un des aspects les plus enrichissants de cette implémentation a été l'intégration des schémas Zod définis dans le package partagé `@dropit/schemas`, également utilisés côté API dans la [couche d'accès aux données](/conception/acces-donnees#s%C3%A9curit%C3%A9-applicative-et-protection-owasp). Cette approche résout une problématique récurrente : maintenir la cohérence des règles de validation entre le frontend et le backend.
 
 Cette définition commune permet d'exploiter les mêmes schémas côté serveur et client, garantissant une synchronisation parfaite des règles de validation. Avec cette approche centralisée, je garantis qu'un exercice respectant les contraintes côté client sera nécessairement accepté par l'API, réduisant drastiquement les erreurs d'intégration.
-
-> **Exemples d'intégration Zod** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/#gestion-des-erreurs-de-validation)
 
 ### Stratégie de synchronisation des données avec Tanstack Query
 
@@ -50,7 +48,7 @@ L'invalidation automatique du cache constitue un mécanisme particulièrement é
 
 Tanstack Query encapsule toute la logique complexe de gestion d'état dans ses hooks `useQuery` et `useMutation`, me permettant de me concentrer sur la logique métier plutôt que sur la plomberie de la synchronisation des données.
 
-> **Exemples d'implémentation Tanstack Query** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/#synchronisation-des-données-avec-tanstack-query)
+> **Exemple d'implémentation Tanstack Query** : Voir l'annexe [Synchronisation des données avec Tanstack Query](/annexes/implementation-presentations/#synchronisation-des-données-avec-tanstack-query)
 
 ### Routage typé avec Tanstack Router
 
@@ -113,7 +111,7 @@ J'ai donc intégré `react-i18next` côté client en réutilisant le package `@d
 
 Les fichiers de traduction sont organisés par domaines métier, permettant une maintenance ciblée et une évolution future facilitée.
 
-> **Un exemple d'implémentation** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/#implémentation-i18n)
+> **Exemple d'implémentation** : Voir l'annexe [Implémentation i18n](/annexes/implementation-presentations/#implémentation-i18n)
 
 ### TailwindCSS
 
@@ -123,7 +121,7 @@ L'intégration avec Vite utilise le compilateur JIT (Just-In-Time) qui génère 
 
 L'approche responsive mobile-first utilise les préfixes `sm:`, `md:`, `lg:` pour adapter les interfaces aux différentes tailles d'écran sans media queries manuelles.
 
-> **Exemple implémentation Tailwind** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/#exemple-implémtation-tailwind)
+> **Exemple d'implémentation Tailwind** : Voir l'annexe [Exemple d'implémentation Tailwind](/annexes/implementation-presentations/#exemple-dimplémentation-tailwind)
 
 ### Shadcn/ui
 
@@ -133,7 +131,7 @@ L'implémentation respecte les critères RGAA essentiels : structure sémantique
 
 L'approche "copy-paste" offre un contrôle total sur l'adaptation aux spécificités métier tout en conservant les garanties d'accessibilité de Radix UI. Les composants étant conçus pour être tree-shakeable, Vite peut éliminer automatiquement les composants non utilisés du bundle final, réduisant la taille du JavaScript téléchargé et répondant aux enjeux de durabilité numérique.
 
-> **Exemple d'implémentation Shadcn/ui** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/#exemple-dimplémentation-shadcnui)
+> **Exemple d'implémentation Shadcn/ui** : Voir l'annexe [Exemple d'implémentation Shadcn/ui](/annexes/implementation-presentations/#exemple-dimplémentation-shadcnui)
 
 ### Système d'icônes avec Lucide React
 
@@ -143,7 +141,7 @@ Contrairement aux font-icons, Lucide permet un tree-shaking granulaire et des co
 
 L'intégration respecte scrupuleusement les recommandations d'accessibilité, chaque icône étant implémentée avec les attributs ARIA appropriés selon son contexte d'usage.
 
-> **Exemple d'implémentation Lucide React** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/#exemple-dimplémentation-lucide-react)
+> **Exemple d'implémentation Lucide React** : Voir l'annexe [Exemple d'implémentation Lucide React](/annexes/implementation-presentations/#exemple-dimplémentation-lucide-react)
 
 ### Optimisations du build avec Vite
 
@@ -179,13 +177,11 @@ L'application mobile, développée avec React Native et Expo, bénéficie pleine
 
 Cette réutilisation garantit une cohérence parfaite des règles métier entre les plateformes web et mobile, éliminant les risques de divergence fonctionnelle.
 
-> **Flux d'intéraction mobile** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/#architecture-mobile-flux-de-données)
+> **Flux d'interaction mobile** : Voir l'annexe [Architecture mobile flux de données](/annexes/implementation-presentations/#architecture-mobile-flux-de-données)
 
 ### Async storage 
 
 Le stockage mobile utilise AsyncStorage pour conserver le token d'authentification localement, contrairement au web qui utilise des cookies httpOnly. Cette approche permet une authentification persistante et pourrait être étendue pour une utilisation hors-ligne partielle, particulièrement utile en salle de sport où la connectivité peut être limitée.
-
-> **Exemple implémentation React Native** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/#exemple-implémentation-react-native)
 
 ## Considérations de performance
 
@@ -197,7 +193,7 @@ J'ai appliqué plusieurs optimisations classiques du développement React modern
 
 Ces optimisations ciblent les problématiques courantes : chargement différé des composants lourds, évitement des calculs redondants, et limitation des appels réseau excessifs. Dans le contexte d'usage de DropIt (quelques dizaines d'utilisateurs par club), ces optimisations suffisent largement.
 
-> **Exemples d'optimisations React** : Voir l'[Annexe - Implémentation des présentations](/annexes/implementation-presentations/#exemples-doptimisations-react)
+> **Exemple d'optimisations React** : Voir l'annexe [Exemples d'optimisations React](/annexes/implementation-presentations/#exemple-doptimisations-react)
 
 
 ## Conclusion

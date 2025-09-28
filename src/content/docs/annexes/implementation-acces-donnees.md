@@ -17,7 +17,7 @@ Approche intermédiaire utilisant un fichier de définition central (ex: Prisma 
 
 J'ai retenu l'approche Code First qui définit les entités directement en TypeScript avec les décorateurs MikroORM. Cette approche offre une intégration native dans l'écosystème du monorepo, génère automatiquement les migrations, fournit l'auto-complétion et la vérification de types TypeScript, et assure une cohérence technique complète avec les packages partagés.
 
-## Exemples complets d'entités MikroORM
+## Exemple d'entité MikroORM
 
 ### Structure type d'une entité
 
@@ -117,36 +117,6 @@ apps/api/src/
 
 Cette architecture backend constitue un bon terrain pour les principes du Domain-Driven Design et de l'architecture hexagonale dans un contexte concret. L'approche par ports et adaptateurs que j'ai adoptée garantit une flexibilité future non négligeable : si demain je souhaite migrer vers un autre ORM ou une base de données différente, cette transition pourra s'effectuer sans remettre en cause la logique métier, aspect crucial pour la maintenabilité à long terme d'un projet qui évoluera au-delà de ma formation.
 
-### Diagramme de l'architecture
-
-```mermaid
-graph LR
-    Client[🌐 Client] --> Controller[🎛️ Controller]
-
-    subgraph API["🏗️ API Backend"]
-        Controller --> UseCase[📋 Use Case]
-        UseCase --> Repo[📦 Repository]
-        Repo --> ORM[🔄 MikroORM]
-
-        Repo --> UseCase
-        UseCase --> Mapper[🔄 Mapper]
-        Mapper --> Presenter[📤 Presenter]
-        Presenter --> Controller
-    end
-
-    ORM --> DB[(💾 PostgreSQL)]
-    DB --> ORM
-
-    Controller --> Client
-
-    style Client fill:#e1f5fe
-    style Controller fill:#fff3e0
-    style UseCase fill:#f3e5f5
-    style Repo fill:#e8f5e8
-    style ORM fill:#fff8e1
-    style DB fill:#fce4ec
-``` 
-
 ### Interface Layer : exposition HTTP
 
 #### Controllers
@@ -196,7 +166,7 @@ Les mappers remplissent deux rôles essentiels :
 - **Respect du contrat d'API ts-rest** défini dans `@dropit/contract`
 - **Protection du schéma de base de données** en ne exposant pas directement les structures internes
 
-#### Presenters avec exemples
+#### Presenter avec exemple
 
 ```typescript
 export const WorkoutPresenter = {
@@ -227,7 +197,7 @@ Le Presenter joue les rôles de :
 
 ### Application Layer : orchestration métier
 
-#### Use Cases avec exemples complets
+#### Exemple de Use Cases
 
 ```typescript
 async createWorkout(workout: CreateWorkout, organizationId: string, userId: string) {
@@ -307,7 +277,7 @@ Chaque décorateur MikroORM a un rôle spécifique :
 
 ### Infrastructure Layer : accès aux données
 
-#### Repositories personnalisés
+#### Repository personnalisé
 
 ```typescript
 @Injectable()

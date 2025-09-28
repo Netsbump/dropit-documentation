@@ -81,7 +81,7 @@ Concrètement, au lieu d'écrire de la logique conditionnelle dans chaque contr�
 
 Dans mon projet, j'ai configuré l'authentification comme étant globale : par défaut, toutes les routes nécessitent une authentification, sauf si je les marque explicitement avec `@Public()`. Cette configuration se fait via un système de Guards que je vais présenter juste après.
 
-> **Exemple d'implémentation des décorateurs** : Voir l'[Annexe - Authentifications](/annexes/authentifications/#implémentation-des-décorateurs)
+> **Exemple d'implémentation des décorateurs** : Voir l'annexe [Implémentation des décorateurs](/annexes/authentifications/#implémentation-des-décorateurs)
 
 Ces décorateurs me permettent d'annoter mes routes avec des métadonnées de sécurité (`@Public()`, `@Optional()`) et d'injecter directement les données d'authentification dans les paramètres de méthode (`@CurrentUser()`, `@Session()`).
 
@@ -91,13 +91,13 @@ Les Guards sont des classes qui implémentent une logique de sécurité dans Nes
 
 Le Guard utilise le service `Reflector` de NestJS pour lire les métadonnées ajoutées par les décorateurs et adapter son comportement. Par exemple, si une route est marquée `@Public()`, le Guard autorisera l'accès même sans authentification. 
 
-> **Exemple d'implémentation du Guard** : Voir l'[Annexe - Authentifications](/annexes/authentifications/#implémentation-du-guard)
+> **Exemple d'implémentation du Guard** : Voir l'annexe [Implémentation du Guard](/annexes/authentifications/#implémentation-du-guard)
 
 ### Exemple d'utilisation concrète
 
 L'utilisation concrète de ces décorateurs et Guards dans un contrôleur illustre comment l'`AuthGuard` global vérifie l'authentification, comment le décorateur `@CurrentUser()` injecte l'utilisateur connecté, et comment l'absence de `@Public()` rend l'authentification obligatoire.
 
-> **Exemple d'implémentation** : Voir l'[Annexe - Authentifications](/annexes/authentifications/#exemple-dusage-concret)
+> **Exemple d'implémentation** : Voir l'annexe [Exemple d'usage concret](/annexes/authentifications/#exemple-dusage-concret)
 
 ## Gestion des sessions et sécurité
 

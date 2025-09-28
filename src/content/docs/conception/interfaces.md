@@ -59,7 +59,7 @@ La page d'accueil présente un carousel central pour l'entraînement du jour, l'
 
 ## Design system
 
-Pour le design system, j'ai choisi Shadcn/ui (pour l'interface web) après avoir analysé les enjeux d'accessibilité et de maintenabilité que présentait DropIt. Cette décision s'appuie sur plusieurs arguments techniques décisifs pour un projet professionnel détaillés dans la partie [présentations](/conception/presentations).
+Pour le design system, j'ai choisi Shadcn/ui (pour l'interface web) après avoir analysé les enjeux d'accessibilité et de maintenabilité que présentait DropIt. Cette décision s'appuie sur plusieurs arguments techniques détaillés dans la partie [présentations](/conception/presentations#shadcnui).
 
 ## Conclusion
 

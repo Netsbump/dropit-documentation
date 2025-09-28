@@ -96,7 +96,7 @@ const CreateWorkoutButton = () => {
 };
 ```
 
-## Exemple implémtation Tailwind
+## Exemple d'implémentation Tailwind
 
 ```tsx
 // Composants réutilisables avec Tailwind
@@ -214,7 +214,7 @@ sequenceDiagram
     Server-->>API: Confirmation serveur
 ```
 
-## Exemple implémentation React Native
+## Exemple d'implémentation React Native
 
 ```tsx
 // Même logique de validation côté mobile
@@ -257,7 +257,7 @@ export function PerformanceForm() {
 }
 ```
 
-## Exemples d'optimisations React
+## Exemple d'optimisations React
 
 ### Lazy loading et memoization
 

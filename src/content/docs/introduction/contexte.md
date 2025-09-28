@@ -27,9 +27,9 @@ Le projet couvre l'ensemble des aspects techniques suivants :
 
 - **Création et gestion d'une base de données** : Cette compétence est abordée par le biais de la méthode Merise pour la partie conception, et mise en place au sein de l'application via une approche Code First avec un ORM et une base de données relationnelle. Le détail sera défini dans la partie [Base de données](/conception/base-donnees)
 
-- **Développement de fonctionnalités back-end sécurisées** : Cette dimension couvre l'authentification, la gestion des autorisations, la protection des données personnelles et la prévention des attaques OWASP (injections SQL, XSS, CSRF). L'implémentation sera détaillée dans les sections [Sécurité](/securite/) et [Accès aux données](/conception/acces-donnees)
+- **Développement de fonctionnalités back-end sécurisées** : Cette dimension couvre l'authentification, la gestion des autorisations, la protection des données personnelles et la prévention des attaques OWASP (injections SQL, XSS, CSRF). L'implémentation sera détaillée dans les sections [Sécurité](/securite/conception/) et [Accès aux données](/conception/acces-donnees)
 
-- **Déploiement et maintenance d'une application en production** : Cette compétence sera illustrée par la mise en place de CI/CD, l'utilisation d'un VPS avec Dokploy, et l'application des bonnes pratiques de maintenance. Les détails seront présentés dans la partie [Déploiement](/deploiement/)
+- **Déploiement et maintenance d'une application en production** : Cette compétence sera illustrée par la mise en place de CI/CD, l'utilisation d'un VPS avec Dokploy, et l'application des bonnes pratiques de maintenance. Les détails seront présentés dans la partie [Déploiement](/deploiement/preparation/)
 
 ## Public cible et de ses besoins
 

@@ -117,63 +117,9 @@ Cette segmentation facilite la gestion des certificats SSL automatiques et prép
 
 ## Architecture de production déployée
 
-```mermaid
-flowchart TB
- subgraph Utilisateurs["Utilisateurs"]
-        Users["Utilisateurs Web"]
-        Mobile["App Mobile"]
-  end
- subgraph subGraph1["DNS Infomaniak"]
-        DNS["Enregistrements A"]
-  end
- subgraph subGraph2["Dokploy UI"]
-        DokployUI["Dokploy Dashboard<br>Port 3000"]
-  end
- subgraph subGraph3["Traefik"]
-        Traefik["Port 80/443<br>SSL automatique"]
-  end
- subgraph subGraph4["Docker Network - Dropit"]
-        Frontend["Frontend Statique<br>Nginx auto"]
-        API["API NestJS<br>Container Docker"]
-        DB[("PostgreSQL 16<br>Service natif")]
-  end
-  subgraph subGraph7["Docker Swarm"]
-        DockerSwarm["DockerSwarm"]
-  end
- subgraph subGraph5["VPS Infomaniak - OS Debian Bookworm"]
-        subGraph2
-        subGraph3
-        subGraph4
-        subGraph7
-  end
- subgraph subGraph6["Services Externes"]
-        Email["Brevo Email"]
-        Backup["Backups S3 futurs"]
-  end
-    Users -- "dropit-app.fr" --> DNS
-    Mobile -- "api.dropit-app.fr" --> DNS
-    DNS --> Traefik
-    API --> DB & Email
-    DB --> Backup
-    DokployUI -. Gestion des services<br>Déploiements, logs .-> DockerSwarm
-    subGraph3 -- "dropit-app.fr" --> Frontend
-    subGraph3 -- "api.dropit-app.fr" --> API
-    subGraph3 -- "dokploy.dropit-app.fr" --> DokployUI
-    subGraph7 -- Configuration dynamique des routes --> subGraph3
-    subGraph7 -- Déploiement, reload --> subGraph4
-    n1[" "] --> n2[" "]
+![Schema déploiement Dropit](../../../assets/schema-architecture-vps.png)
 
-
-    n1@{ shape: anchor}
-    n2@{ shape: anchor}
-    style DokployUI fill:#fff3e0
-    style Traefik fill:#f0f8ff
-    style Frontend fill:#e8f5e8
-    style API fill:#e1f5fe
-    style DB fill:#f3e5f5
-```
-
-Cette architecture services séparés garantit la maintenabilité et la simplicité de gestion tout en conservant les performances et la sécurité nécessaires pour l'application DropIt.
+Cette architecture VPS avec services containerisés (API NestJS, Frontend Nginx, PostgreSQL, Dokploy) garantit la maintenabilité et la simplicité de gestion tout en conservant les performances et la sécurité nécessaires pour l'application DropIt.
 
 ## Perspectives d'évolution
 

@@ -77,7 +77,7 @@ Les fonctionnalités de l'application sont adaptées aux méthodes d'entraîneme
 - **Gestion du profil** : Informations personnelles et paramètres de compte
 - **Communication vie du club** : Actualités et informations importantes
 
-> **Détail complet des flux d'interactions** : Voir l'[Annexe - Analyses des besoins](/annexes/analyses-besoins/)
+> **Détail complet des flux d'interactions** : Voir l'annexe [Analyses des besoins](/annexes/analyses-besoins/)
 
 ## MVP
 

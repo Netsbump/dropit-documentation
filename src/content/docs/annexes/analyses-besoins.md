@@ -3,7 +3,7 @@ title: Analyses des besoins - Flux d'interactions détaillés
 description: Spécifications fonctionnelles détaillées des parcours utilisateurs pour DropIt
 ---
 
-## Exemples de flux d'interactions
+## Exemple de flux d'interaction
 
 ### Accéder à son entraînement personnalisé (Athlète)
 
