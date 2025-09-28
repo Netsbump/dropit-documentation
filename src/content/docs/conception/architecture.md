@@ -40,7 +40,7 @@ Les détails techniques d'implémentation et des explications plus détaillées 
 
 ## Client Web (Back Office) : React et TypeScript
 
-Pour le back office destiné aux coachs, j'ai choisi **React** associé à **TypeScript**. Cette technologie offre une architecture basée sur des composants réutilisables adaptée aux interfaces de gestion. **TypeScript** apporte une sécurité de typage critique pour la manipulation des données d'entraînement, détectant les erreurs dès la compilation et garantissant la précision nécessaire aux calculs de charges et progressions d'athlètes.
+Pour le back office destiné aux coachs, j'ai choisi **React** associé à **TypeScript**. Cette technologie offre une architecture basée sur des composants réutilisables adaptée aux interfaces de gestion. TypeScript apporte une sécurité de typage critique pour la manipulation des données d'entraînement, détectant les erreurs dès la compilation et garantissant la précision nécessaire aux calculs de charges et progressions d'athlètes.
 
 ### Écosystème technique et bibliothèques
 
@@ -64,7 +64,7 @@ Pour en savoir plus sur l'implémentation spécifique à l'application mobile re
 
 ## API REST : NestJS
 
-Le backend repose sur NestJS, un framework Node.js que j'ai déjà utilisé en projets et en entreprise. NestJS fournit des patterns d'architecture éprouvés (modules, services, guards, interceptors) avec un écosystème mature et une maintenance active. Son système d'injection de dépendances facilite les tests unitaires en favorisant l'inversion de contrôle, permettant d'isoler la logique métier des préoccupations techniques.
+Le backend repose sur **NestJS**, un framework **Node.js** que j'ai déjà utilisé en projets et en entreprise. NestJS fournit des patterns d'architecture éprouvés (modules, services, guards, interceptors) avec un écosystème mature et une maintenance active. Son système d'injection de dépendances facilite les tests unitaires en favorisant l'inversion de contrôle, permettant d'isoler la logique métier des préoccupations techniques.
 
 ### Architecture hexagonale et Domain-Driven Design
 
@@ -173,15 +173,15 @@ Les détails d'implémentation sont présentés dans les sections [Gestion des e
 
 ## Perspectives d'évolution et scalabilité
 
-L'une des préoccupations constantes lors de la conception de cette architecture a été d'anticiper les **évolutions futures** sans pour autant tomber dans la sur-ingénierie. La **séparation entre les clients applicatifs** constitue un atout majeur pour l'évolution fonctionnelle. Cette approche me permet d'enrichir l'application mobile avec de nouvelles fonctionnalités spécifiques aux athlètes sans impacter le back office des coachs, et inversement.
+L'une des préoccupations constantes lors de la conception de cette architecture a été d'anticiper les évolutions futures sans pour autant tomber dans la sur-ingénierie. La séparation entre les clients applicatifs constitue un atout majeur pour l'évolution fonctionnelle. Cette approche me permet d'enrichir l'application mobile avec de nouvelles fonctionnalités spécifiques aux athlètes sans impacter le back office des coachs, et inversement.
 
-Du point de vue de la **scalabilité horizontale**, l'**architecture stateless** de l'API facilite grandement la réplication et le déploiement de nouvelles instances selon l'évolution des besoins de charge. Les choix technologiques (**protocoles standardisés**, **API S3-compatible**, **containerisation**) anticipent une migration progressive vers des **solutions cloud managées**.
+Du point de vue de la scalabilité horizontale, l'architecture stateless de l'API facilite grandement la réplication et le déploiement de nouvelles instances selon l'évolution des besoins de charge. Les choix technologiques (protocoles standardisés, API S3-compatible, containerisation) anticipent une migration progressive vers des solutions cloud managées.
 
-Cette flexibilité architecturale ouvre la voie à plusieurs enrichissements fonctionnels envisagés comme l'**import automatique** de programmes `PDF/Excel`, un **module chronomètre intégré** pour les athlètes, et des **dashboards d'analyse des performances** pour les coachs.
+Cette flexibilité architecturale ouvre la voie à plusieurs enrichissements fonctionnels envisagés comme l'import automatique de programmes `PDF/Excel`, un module chronomètre intégré** pour les athlètes, et des dashboards d'analyse des performances** pour les coachs.
 
 ## Gestion des dépendances et sécurité
 
-L'utilisation de bibliothèques externes à travers le monorepo (frontend, backend, packages partagés) nécessite une surveillance des mises à jour et vulnérabilités de sécurité. Cette maintenance s'appuie sur trois piliers : **surveillance des mises à jour** via Dependabot, **audit automatisé des vulnérabilités** avec GitHub Actions, et **stratégie de mise à jour** coordonnée entre toutes les applications. Cette approche préventive garantit la sécurité des données personnelles d'athlètes.
+L'utilisation de bibliothèques externes à travers le monorepo (frontend, backend, packages partagés) nécessite une surveillance des mises à jour et vulnérabilités de sécurité. Cette maintenance s'appuie sur trois piliers : surveillance des mises à jour via Dependabot, audit automatisé des vulnérabilités avec GitHub Actions, et stratégie de mise à jour coordonnée entre toutes les applications. Cette approche préventive garantit la sécurité des données personnelles d'athlètes.
 
 Les détails d'implémentation sont documentés dans la section annexe [Architecture technique](/annexes/architecture-technique/#gestion-des-dépendances-et-sécurité).
 
