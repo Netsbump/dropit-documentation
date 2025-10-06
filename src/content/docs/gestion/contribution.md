@@ -3,11 +3,11 @@ title: Contribution au projet
 description: Organisation du projet et méthodes de développement collaboratif
 ---
 
-## Philosophie Open Source
+## Philosophie Free Software
 
-Le projet DropIt est hébergé sur GitHub sous licence MIT, favorisant la transparence et l'apprentissage communautaire. Cette approche open source me permet de démontrer mes compétences techniques tout en contribuant à l'écosystème des outils d'haltérophilie.
+Le projet DropIt est hébergé sur GitHub sous licence AGPL-3.0, favorisant la transparence et l'apprentissage communautaire tout en protégeant contre l'appropriation commerciale.
 
-J'envisage d'évoluer vers une licence plus restrictive pour préserver l'usage non-commercial du projet.
+Cette licence copyleft garantit que toute modification reste open source, même pour les déploiements sur serveur web.
 
 ## Infrastructure de développement
 
