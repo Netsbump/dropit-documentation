@@ -91,9 +91,11 @@ L'implémentation d'alertes email est prévue pour les événements critiques, g
 
 ### Stratégie backup
 
-Les sauvegardes PostgreSQL s'exécutent quotidiennement via un container dédié exportant vers un bucket S3 chiffré. Cette stratégie 3-2-1 (3 copies, 2 supports différents, 1 site distant) assure la résilience des données critiques.
+En phase de prototypage, l'application utilise des données de démonstration qui ne requièrent pas de système de sauvegarde critique. La mise en place d'une architecture de backup robuste est planifiée pour le passage en production avec de vraies données utilisateur.
+ 
+La stratégie de sauvegarde suivra la règle 3-2-1, standard de l'industrie pour assurer la résilience des données : trois copies des données (originale et deux backups), stockées sur deux types de supports différents, avec une copie conservée hors-site pour se prémunir d'une défaillance du datacenter principal.
 
-Les backups incluent configurations Dokploy et images Docker, permettant une restauration complète. Les procédures sont documentées et testées régulièrement.
+L'implémentation reposera sur les fonctionnalités natives de Dokploy pour générer des dumps SQL quotidiens de PostgreSQL, stockés initialement sur le VPS avec une rétention de 7 jours. Ces sauvegardes locales seront ensuite automatiquement exportées vers un stockage distant compatible S3, tel qu'Infomaniak Swiss Backup, avec une rétention longue durée d'au moins 30 jours.
 
 ### Plan de continuité
 
@@ -130,12 +132,8 @@ Cette architecture VPS avec services containerisés (API NestJS, Frontend Nginx,
 
 L'architecture Docker Swarm facilite l'évolution vers un clustering multi-nodes si la charge augmente. Cette transition s'effectuerait en ajoutant des workers au swarm existant, permettant la répartition automatique des services.
 
-Pour une croissance significative, la migration vers Kubernetes offrirait des capacités d'orchestration avancées, tout en conservant la compatibilité avec les containers existants.
-
 ### Optimisations futures
 
 L'implémentation de CDN pour les assets statiques, Redis Cluster pour la haute disponibilité, et un environnement de staging complet constituent les prochaines étapes d'amélioration.
-
-Ces évolutions s'appuieraient sur l'expérience acquise, garantissant une progression maîtrisée vers une infrastructure de niveau entreprise.
 
 Cette infrastructure de production opérationnelle me permet maintenant de me concentrer sur les aspects organisationnels et collaboratifs du projet. La section suivante détaille comment j'ai structuré le développement pour faciliter la contribution et la maintenance à long terme. 
