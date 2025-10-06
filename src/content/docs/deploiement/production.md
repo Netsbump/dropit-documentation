@@ -42,7 +42,7 @@ Cette architecture permet de gérer chaque composant indépendamment, facilitant
 
 ### Optimisations Dockerfile
 
-Le Dockerfile multi-stage intègre plusieurs optimisations critiques pour la production :
+Le Dockerfile multi-stage intègre plusieurs optimisations pour la production :
 
 **Build multi-stage** : Le premier stage contient tous les outils de compilation TypeScript et devDependencies (~800MB), le stage final ne conserve que le runtime et dépendances de production (~200MB). Cette séparation réduit drastiquement la taille de l'image finale, améliorant les performances de déploiement.
 
@@ -58,15 +58,18 @@ Le Dockerfile multi-stage intègre plusieurs optimisations critiques pour la pro
 
 ### Stratégie de branches
 
-Ma stratégie Git s'articule autour de deux branches : `develop` pour l'intégration des fonctionnalités, `main` pour les releases production. Cette approche GitFlow simplifiée garantit que seul du code validé atteint l'environnement de production.
+Ma stratégie Git repose sur un workflow GitFlow à deux branches : `develop` pour l'intégration continue des fonctionnalités et `main` pour la production.
 
-Le workflow CI/CD s'active automatiquement sur les push vers `main` : tests complets, build de l'image Docker, déploiement sur Dokploy via webhook sécurisé. Cette automatisation élimine les erreurs humaines et assure la reproductibilité.
+Branche `develop` - Intégration continue :
+Chaque pull request déclenche automatiquement un workflow CI complet : linting avec Biome, build du monorepo, vérification et application des migrations MikroORM sur une base PostgreSQL de
+test, puis exécution des tests unitaires et d'intégration. Cette validation systématique garantit que `develop` reste toujours stable et déployable.
 
-### Intégration Dokploy
+Branche `main` - Livraison continue :
+Le merge manuel de `develop` vers `main` active un webhook GitHub qui notifie Dokploy. La plateforme orchestre alors le déploiement complet : build des images Docker, déploiement avec rolling
+updates Docker Swarm pour un zero-downtime, et conservation automatique des versions précédentes permettant un rollback manuel via l'interface si nécessaire. Les health checks HTTP
+post-déploiement garantissent le bon fonctionnement avant de router le trafic utilisateur.
 
-Le pipeline utilise les webhooks Dokploy pour déclencher automatiquement les déploiements. Cette intégration permet un déploiement zero-downtime grâce aux rolling updates de Docker Swarm, maintenant la disponibilité pendant les mises à jour.
-
-La configuration inclut des vérifications post-déploiement via health checks HTTP, garantissant le fonctionnement correct avant de router le trafic utilisateur.
+Cette approche automatise les vérifications et le déploiement tout en maintenant un contrôle explicite sur le passage en production.
 
 ## Monitoring et observabilité
 
