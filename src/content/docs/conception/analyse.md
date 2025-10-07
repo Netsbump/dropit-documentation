@@ -38,25 +38,7 @@ Le diagramme ci-dessous présente une vue synthétique des principales interacti
 
 Ce diagramme illustre la séparation claire entre les fonctionnalités destinées aux athlètes (consultation des entraînements, gestion des maxima) et celles réservées aux coachs (gestion des entraînements, gestion des athlètes). Certaines fonctionnalités, comme la gestion du profil et la communication, sont communes aux deux types d'utilisateurs.
 
-## Système de calcul automatique des charges
-
-Le système de calcul automatique des charges basé sur les pourcentages des maximums illustre l'intégration des spécificités techniques de l'haltérophilie. Plutôt que de laisser les athlètes calculer manuellement leurs charges d'entraînement, l'application automatise cette tâche en s'appuyant sur les données de leurs maximums et les pourcentages définis par le coach.
-
-```mermaid
-sequenceDiagram
-    participant A as Athlète
-    participant S as Système DropIt
-    participant C as Coach
-    
-    C->>S: Définit programme (exercice + % du max)
-    S->>S: Enregistre programmation
-    A->>S: Consulte entraînement du jour
-    S->>S: Récupère max de l'athlète pour l'exercice
-    S->>S: Calcule charge = max × pourcentage
-    S->>A: Affiche charge en kilos à utiliser
-    
-    Note over A,S: Automatisation du calcul<br/>évitant les erreurs manuelles
-```
+> Voir le détail du [système de calcul automatique des charges](/annexes/analyses-besoins/#système-de-calcul-automatique-des-charges) en annexe.
 
 ## Résumé des parcours utilisateur
 

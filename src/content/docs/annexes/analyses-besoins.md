@@ -56,3 +56,23 @@ L'analyse de ces flux a permis d'identifier les entités principales du système
 ### Permissions et accès
 - **Coachs** : Accès complet à la gestion des entraînements et athlètes
 - **Athlètes** : Accès limité à leurs propres données et programmes assignés
+
+## Système de calcul automatique des charges
+
+Le système de calcul automatique des charges basé sur les pourcentages des maximums illustre l'intégration des spécificités techniques de l'haltérophilie. Plutôt que de laisser les athlètes calculer manuellement leurs charges d'entraînement, l'application automatise cette tâche en s'appuyant sur les données de leurs maximums et les pourcentages définis par le coach.
+
+```mermaid
+sequenceDiagram
+    participant A as Athlète
+    participant S as Système DropIt
+    participant C as Coach
+    
+    C->>S: Définit programme (exercice + % du max)
+    S->>S: Enregistre programmation
+    A->>S: Consulte entraînement du jour
+    S->>S: Récupère max de l'athlète pour l'exercice
+    S->>S: Calcule charge = max × pourcentage
+    S->>A: Affiche charge en kilos à utiliser
+    
+    Note over A,S: Automatisation du calcul<br/>évitant les erreurs manuelles
+```
