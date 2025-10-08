@@ -31,37 +31,15 @@ Le projet couvre l'ensemble des aspects techniques suivants :
 
 - **Déploiement et maintenance d'une application en production** : Cette compétence sera illustrée par la mise en place de CI/CD, l'utilisation d'un VPS avec Dokploy, et l'application des bonnes pratiques de maintenance. Les détails seront présentés dans la partie [Déploiement](/deploiement/preparation/)
 
-## Public cible et de ses besoins
+## Public cible
 
-### Les pratiquants
+L'application s'adresse à deux profils d'utilisateurs distincts au sein du club d'haltérophilie : les athlètes, qui ont besoin d'accéder à leurs programmes d'entraînement, et les coachs, qui doivent créer et gérer ces programmes de manière efficace.
 
-L'application s'adresse principalement aux membres du club qui ont besoin d'accéder facilement à leurs programmes d'entraînement personnalisés, de suivre leurs progressions et de rester informés des actualités importantes du club.
-
-L'accès au programme du jour constitue leur besoin prioritaire. Entre chaque série, l'athlète doit pouvoir visualiser immédiatement l'exercice suivant et la charge à utiliser sur sa barre. Le support mobile s'impose naturellement par sa praticité dans l'environnement de la salle de sport.
-
-Le suivi de progression représente un aspect motivationnel crucial pour maintenir l'engagement des pratiquants. Cette fonctionnalité doit permettre une visualisation claire des améliorations sans complexité excessive d'usage.
-
-### Les coachs
-
-Les entraîneurs expriment des besoins différents, centrés sur l'efficacité de leur travail de programmation et de suivi.
-
-La création et la gestion efficaces des programmes d'entraînement constituent leur besoin principal. L'outil doit leur faire gagner du temps dans ces tâches administratives pour qu'ils puissent se concentrer sur l'accompagnement technique des athlètes.
-
-Le suivi des performances de leurs athlètes nécessite des outils de visualisation et d'analyse adaptés à la planification des cycles d'entraînement.
-
-La communication avec l'ensemble du groupe doit être simplifiée et ciblée, évitant la dispersion actuelle de l'information.
+L'analyse détaillée de leurs besoins respectifs et des parcours utilisateur est présentée dans la section [Analyse des besoins fonctionnels](/conception/analyse/).
 
 ## Stratégie de développement
 
-La première version se concentrera sur les fonctionnalités essentielles : la gestion des programmes d'entraînement pour les coachs et leur consultation par les athlètes via l'application mobile. Cette approche MVP (Minimum Viable Product) me permet de créer rapidement une alternative fonctionnelle à la messagerie instantanée actuelle.
-
-Dans un second temps, l'application évoluera en fonction des retours d'usage réels des membres de mon club. Cette phase d'enrichissement intégrera le suivi des progressions, un mode hors ligne pour l'application mobile, et diverses améliorations de l'expérience utilisateur basées sur l'observation des comportements d'utilisation.
-
-## Défis techniques
-
-L'interface doit être accessible sur différents supports, avec une version mobile pour les athlètes et une interface web pour les coachs.
-
-La protection des données personnelles constitue un enjeu majeur. L'application devra respecter les normes RGPD et intégrer des mesures de sécurité robustes, particulièrement importantes dans le contexte de données de performance sportive qui peuvent révéler des informations sensibles sur les données de santé des utilisateurs.
+Le développement suivra une approche itérative, en commençant par un MVP (Minimum Viable Product) centré sur les fonctionnalités essentielles, puis en enrichissant l'application selon les retours d'usage des membres du club. Les choix de priorisation sont détaillés dans la partie [MVP](/conception/analyse/#mvp).
 
 ## Perspectives d'évolution
 
