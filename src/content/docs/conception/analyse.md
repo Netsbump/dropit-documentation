@@ -89,51 +89,8 @@ Cette approche me permet de concentrer mes efforts sur un cœur fonctionnel robu
 
 Le diagramme ci-dessous présente une vue synthétique des interactions retenues pour le MVP entre les utilisateurs et le système.
 
-```mermaid
-graph TB
-    subgraph Système
-        UC1[Accéder à son<br/>entraînement<br/>personnalisé]
-        UC2[Calcul automatique<br/>des charges]
-        UC3[Gestion des<br/>maxima]
-        UC4[Saisie des<br/>maxima]
-        UC5[Visualisation<br/>des maxima]
-        UC6[Créer une<br/>bibliothèque<br/>d'exercices]
-        UC7[Gestion des<br/>entraînements]
-        UC8[Planifier les<br/>entraînements]
-        UC9[Gestion des<br/>athlètes]
-        UC10[Consultation des<br/>profils des athlètes]
-        UC11[Gestion du<br/>profil]
-    end
-
-    ATHLETE((ATHLÈTE))
-    COACH((COACH))
-
-    ATHLETE --> UC1
-    ATHLETE --> UC3
-    ATHLETE --> UC11
-
-    COACH --> UC6
-    COACH --> UC7
-    COACH --> UC8
-    COACH --> UC9
-    COACH --> UC11
-
-    UC1 -.->|include| UC2
-    UC3 --> UC4
-    UC3 --> UC5
-    UC7 -.->|include| UC6
-    UC8 -.->|include| UC7
-    UC9 -.->|include| UC10
-
-    classDef actor fill:#fff,stroke:#333,stroke-width:2px
-    classDef usecase fill:#4A90E2,stroke:#2E5C8A,stroke-width:2px,color:#fff
-
-    class ATHLETE,COACH actor
-    class UC1,UC2,UC3,UC4,UC5,UC6,UC7,UC8,UC9,UC10,UC11 usecase
-```
-
 Ce diagramme illustre la séparation claire entre les fonctionnalités destinées aux athlètes et celles réservées aux coachs. La gestion du profil est commune aux deux types d'utilisateurs.
 
-![Diagramme des cas d'usage](../../../assets/diagram-use-cases.png)
+![Diagramme des cas d'usage](../../../assets/use-case-diagram-mvp.png)
 
 > Voir le détail du [système de calcul automatique des charges](/annexes/analyses-besoins/#système-de-calcul-automatique-des-charges) en annexe.
