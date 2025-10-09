@@ -15,6 +15,6 @@ L'entreprise qui a accepté ma candidature, Lonestone, est une agence web spéci
 
 ## Genèse du projet Dropit
 
-Sur mon temps libre, je fais partie d'un club d'haltérophilie. Ma pratique de ce sport m'a placé dans une position privilégiée pour observer les défis organisationnels de ce type de structure. Cette immersion quotidienne dans cet environnement a fait naître l'idée d'aider les pratiquants et le coach en informatisant le suivi des entraînements.
+Sur mon temps libre, je fais partie d'un club d'haltérophilie. Ma pratique de ce sport m'a placé dans une position privilégiée pour observer les défis organisationnels de ce type de structure et m'a donné l'idée de proposer mes compétences techniques au service du club pour moderniser ses processus de gestion.
 
-Le projet que j'ai décidé de nommer DropIt me permet de développer une approche complète de la conception d'applications, depuis l'analyse des besoins jusqu'au déploiement en production.
+Le projet que j'ai décidé de nommer **DropIt** me permet de développer une approche complète de la conception d'applications, depuis l'analyse des besoins jusqu'au déploiement en production.

@@ -5,13 +5,9 @@ description: Diagnostic technique, stratégie de développement et défis du pro
 
 ## Diagnostic de l'existant
 
-Au sein de mon club d'haltérophilie, la gestion des entraînements repose actuellement sur l'utilisation d'une application de messagerie instantanée. Cette solution simple, bien que pratique à première vue, révèle des dysfonctionnements significatifs dans la pratique quotidienne que j'ai pu observer et analyser pendant mes années de pratique.
+Au sein de mon club, l'ensemble de la vie associative et sportive transite par une application de messagerie instantanée : actualités, programmation et visualisation des entraînements, échanges entre adhérents, partage de médias... Cette centralisation, bien que pratique à première vue, génère une confusion dans l'accès à l'information que j'ai pu observer pendant mes années de pratique. Rechercher un programme d'entraînement spécifique ou retrouver une annonce importante devient rapidement frustrant, chaque type de contenu se retrouvant noyé dans un flux continu de messages.
 
-Les programmes d'entraînement se retrouvent rapidement noyés dans le flux des conversations, rendant leur consultation difficile pour les athlètes. Cette dispersion de l'information génère régulièrement des incompréhensions sur les séances à réaliser, obligeant les coachs à répéter les mêmes informations à plusieurs reprises.
-
-Cette situation impacte le travail des coachs, qui doivent consacrer un temps considérable à la gestion et à la communication des programmes d'entraînement. L'absence d'un outil dédié complique le suivi personnalisé des athlètes et la planification des cycles d'entraînement.
-
-Cette observation du terrain m'a amené à m'interroger sur la possibilité de développer une solution plus adaptée aux besoins spécifiques de la gestion d'un club d'haltérophilie, en tirant parti de ma position de pratiquant pour mieux comprendre les enjeux utilisateur.
+C'est à partir de ce constat que j'ai cherché dans quelle direction je pouvais proposer une solution pour fluidifier l'accès à l'information et mieux structurer la gestion quotidienne du club.
 
 ## Compétences du titre professionnel
 
@@ -33,14 +29,4 @@ Le projet couvre l'ensemble des aspects techniques suivants :
 
 ## Public cible
 
-L'application s'adresse à deux profils d'utilisateurs distincts au sein du club d'haltérophilie : les athlètes, qui ont besoin d'accéder à leurs programmes d'entraînement, et les coachs, qui doivent créer et gérer ces programmes de manière efficace.
-
-L'analyse détaillée de leurs besoins respectifs et des parcours utilisateur est présentée dans la section [Analyse des besoins fonctionnels](/conception/analyse/).
-
-## Stratégie de développement
-
-Le développement suivra une approche itérative, en commençant par un MVP (Minimum Viable Product) centré sur les fonctionnalités essentielles, puis en enrichissant l'application selon les retours d'usage des membres du club. Les choix de priorisation sont détaillés dans la partie [MVP](/conception/analyse/#mvp).
-
-## Perspectives d'évolution
-
-La conception de l'application devra permettre son évolution future selon les besoins exprimés par les utilisateurs.
+L'application s'adresse aux adhérents du club d'haltérophilie. L'identification des différents profils utilisateurs et l'analyse détaillée de leurs besoins respectifs sont présentées dans la section [Analyse des besoins fonctionnels](/conception/analyse/).
