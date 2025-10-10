@@ -68,15 +68,13 @@ Le backend repose sur **NestJS**, un framework **Node.js** que j'ai déjà utili
 
 ### Architecture hexagonale et Domain-Driven Design
 
-J'ai structuré l'application backend selon deux principes complémentaires : l'**architecture hexagonale** pour l'organisation technique en couches, et les principes **Domain-Driven Design** pour l'organisation en modules métier.
+**Organisation technique (Hexagonale)** : Initialement, j'avais opté pour une architecture n-tiers classique, pattern de base de NestJS. Au fur et à mesure du développement, j'ai progressivement fait évoluer certaines parties vers une approche inspirée de l'architecture hexagonale. Cette évolution répond à plusieurs motivations. D'une part, une volonté d'apprentissage de patterns architecturaux que je rencontre régulièrement dans les discussions techniques professionnelles. D'autre part, une anticipation des évolutions futures du projet où l'isolation de la logique métier pourrait faciliter des changements d'infrastructure (intégration matériel externe, sources de données tierces).
 
-Initialement, j'avais opté pour une architecture n-tiers classique, pattern de base de NestJS. Au fur et à mesure du développement, j'ai évolué vers une architecture hexagonale pour faciliter les tests unitaires de la logique métier (calculs de charges, progressions d'athlètes) en l'isolant des dépendances externes, tout en me permettant d'acquérir des patterns architecturaux répandus en entreprise et d'anticiper les évolutions futures du projet.
+Je reconnais que cette architecture n'est pas encore complètement aboutie. Mes entités domaine restent par exemple couplées à MikroORM plutôt que d'être des objets métier purs. Cette implémentation partielle reflète le compromis que j'ai dû faire entre exploration de nouveaux patterns et pragmatisme pour livrer un MVP fonctionnel dans les délais impartis. Cette expérience m'a néanmoins permis de comprendre concrètement les bénéfices et la complexité de mise en œuvre de l'architecture hexagonale, au-delà de la théorie.
 
-**Organisation métier (DDD)** : J'ai structuré l'application autour de modules correspondant aux domaines métier identifiés : le module `identity` gère les utilisateurs, organisations et permissions, le module `training` centralise la logique d'entraînement avec les exercices, programmes et séances, tandis que le module `athletes` se concentre sur la gestion des athlètes et de leurs performances.
+**Organisation métier (DDD)** : J'ai structuré l'application autour de modules correspondant aux domaines métier identifiés. Le module `identity` gère les utilisateurs, organisations et permissions, le module `training` centralise la logique d'entraînement avec les exercices, programmes et séances, tandis que le module `athletes` se concentre sur la gestion des athlètes et de leurs performances.
 
-**Organisation technique (Hexagonale)** : Chaque module respecte une séparation stricte en quatre couches distinctes qui isolent la logique métier des préoccupations techniques.
-
-Les détails de chacune des couches sont décrits dans la section [Architecture en couches et pattern Repository](/conception/acces-donnees/#architecture-en-couches-et-pattern-repository).
+Les détails de chacune des couches implémentées sont décrits dans la section [Architecture en couches et pattern Repository](/conception/acces-donnees/#architecture-en-couches-et-pattern-repository).
 
 ### ORM : MikroORM vs alternatives
 
