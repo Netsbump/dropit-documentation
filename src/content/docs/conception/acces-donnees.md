@@ -116,7 +116,7 @@ MikroORM s'intègre avec le système d'intercepteurs de NestJS pour fournir auto
 
 ### Gestion des suppressions en cascade
 
-La suppression d'entités avec des relations nécessite une gestion particulière pour respecter l'intégrité référentielle. J'ai opté pour une approche explicite qui donne le contrôle total sur l'ordre des opérations, permettant d'ajouter des logs, valider des règles métier ou implémenter une suppression "soft".
+La suppression d'entités avec des relations nécessite une gestion particulière pour respecter l'intégrité référentielle. J'ai configuré les relations avec `deleteRule: 'cascade'` au niveau de MikroORM pour que les suppressions se propagent automatiquement selon les règles métier identifiées (cf. [Stratégies de suppression](/annexes/conception-bdd-technique/#stratégies-de-suppression)). Cette approche garantit l'intégrité des données sans nécessiter de logique manuelle dans les use cases.
 
 ## Sécurité applicative et protection OWASP
 
