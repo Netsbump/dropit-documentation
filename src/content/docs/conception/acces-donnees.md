@@ -37,8 +37,8 @@ L'accès aux données dans DropIt respecte une séparation stricte des responsab
 
 L'architecture respecte une séparation stricte en quatre couches distinctes :
 
-- **Interface Layer** : Controllers REST, Guards, DTOs et Validators
-- **Application Layer** : Use Cases et Services applicatifs  
+- **Interface Layer** : Controllers REST, Guards, Mappers, Presenters
+- **Application Layer** : Use Cases et Services applicatifs
 - **Domain Layer** : Entités métier, règles business et ports/interfaces
 - **Infrastructure Layer** : Repositories MikroORM, services externes et adaptateurs
 
