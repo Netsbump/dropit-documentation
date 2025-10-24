@@ -11,7 +11,7 @@ L'architecture multi-plateforme de DropIt impose des contraintes spécifiques : 
 
 **Analyse technique détaillée :**
 
-Cette approche nécessiterait d'implémenter manuellement le hachage sécurisé, la génération de tokens, la gestion des sessions, les protections CSRF/XSS, le rate limiting et l'audit RGPD.
+Cette approche nécessiterait d'implémenter manuellement le hachage sécurisé, la génération de tokens, la gestion des sessions, les protections CSRF/XSS et le rate limiting.
 
 **Évaluation pour DropIt :**
 
@@ -410,7 +410,7 @@ export const authClient = createAuthClient({
 
 ## Mécanismes de sécurité avancés
 
-Cette section détaille les mécanismes de protection CSRF/XSS et d'audit mentionnés dans les pages conception et implémentation. Ces fonctionnalités automatiques de Better-Auth répondent aux exigences de sécurité et de conformité RGPD de DropIt.
+Cette section détaille les mécanismes de protection CSRF/XSS mentionnés dans les pages conception et implémentation. Ces fonctionnalités automatiques de Better-Auth renforcent la sécurité de l'authentification dans DropIt.
 
 ### Protection CSRF et XSS automatique
 
@@ -443,39 +443,10 @@ const securityMiddleware = createAuthMiddleware(async (ctx) => {
 - `X-Content-Type-Options: nosniff` empêche l'**injection de contenu** : force le navigateur à respecter le Content-Type déclaré et bloque l'exécution de fichiers JavaScript déguisés en images
 - `X-XSS-Protection: 1; mode=block` active la protection XSS native du navigateur qui bloque l'exécution de scripts suspects
 
-### Audit et conformité RGPD
+### Métadonnées de session pour le monitoring
 
-```typescript
-// Table d'audit automatique
-@Entity('auth_audit_log')
-export class AuthAuditLog {
-  @PrimaryKey()
-  id!: string;
+La table `Session` de Better-Auth stocke automatiquement certaines métadonnées utiles pour le monitoring de sécurité :
 
-  @Property()
-  userId?: string;
+**Détection d'anomalies :** Les métadonnées IP et User-Agent enregistrées dans chaque session permettent d'identifier des connexions suspectes (nouvelle localisation, nouveau navigateur) pour alerter l'utilisateur ou déclencher des vérifications additionnelles.
 
-  @Property()
-  action!: string; // login, logout, signup, etc.
-
-  @Property()
-  ipAddress!: string;
-
-  @Property()
-  userAgent!: string;
-
-  @Property()
-  success!: boolean;
-
-  @Property()
-  createdAt = new Date();
-}
-```
-
-**Fonctionnalités d'audit automatique :**
-
-**Traçabilité RGPD :** Better-Auth enregistre automatiquement chaque action d'authentification (connexion, déconnexion, changement de mot de passe, modification de permissions) avec l'horodatage, l'adresse IP et le User-Agent. Cette traçabilité répond aux obligations RGPD de preuve de consentement et facilite les enquêtes de sécurité.
-
-**Détection d'anomalies :** Les métadonnées IP/User-Agent permettent d'identifier des connexions suspectes (nouvelle localisation, nouveau navigateur) pour alerter l'utilisateur ou déclencher des vérifications additionnelles.
-
-**Conformité légale :** En cas d'audit de sécurité ou de demande RGPD, ces logs fournissent une preuve documentée de qui a accédé à quelles données et quand, respectant les obligations de transparence.
+**Informations stockées :** Chaque session enregistre l'adresse IP d'origine, le User-Agent du client, ainsi que les timestamps de création et d'expiration. Ces informations constituent une base pour implémenter des fonctionnalités de monitoring de sécurité.

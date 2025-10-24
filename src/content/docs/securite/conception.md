@@ -33,7 +33,7 @@ Le système de plugins permet d'ajouter progressivement des fonctionnalités sel
 
 Better-Auth implémente nativement plusieurs mécanismes de sécurité essentiels : le rate-limiting configure automatiquement des limites par IP (5 tentatives de connexion par minute) protégeant contre les attaques par force brute ; la protection CSRF utilise des tokens double-submit pour sécuriser les requêtes d'écriture ; les cookies de session sont automatiquement configurés avec les flags sécurisés appropriés (`SameSite=Lax`, `HttpOnly`, `Secure` en production).
 
-La librairie intègre des fonctionnalités de conformité RGPD essentielles : l'endpoint `/api/auth/user/export` génère automatiquement une archive contenant toutes les données utilisateur au format JSON, répondant aux obligations de portabilité (Article 20 RGPD) ; le système d'audit trace chaque action dans une table dédiée, servant trois objectifs RGPD cruciaux : preuve d'accès, détection d'anomalies, et preuve de suppression, particulièrement important pour les données de santé stockées dans DropIt.
+La librairie stocke dans ses sessions des métadonnées utiles (adresse IP, User-Agent, timestamps) qui constituent une base pour implémenter des fonctionnalités de monitoring de sécurité, permettant d'identifier des connexions suspectes et d'alerter les utilisateurs.
 
 Better-Auth expose également les standards d'authentification modernes : l'endpoint JWKS (`/.well-known/jwks.json`) publie les clés publiques permettant la vérification des JWT par des services externes, tandis qu'OIDC Discovery (`/.well-known/openid-configuration`) standardise la découverte des endpoints d'authentification.
 
@@ -45,6 +45,6 @@ L'ajout de providers OAuth (Google, Apple) pourrait faciliter l'onboarding des u
 
 ## Conclusion
 
-Le choix de Better-Auth comme solution d'authentification répond aux exigences techniques et réglementaires de mon application : gestion granulaire des permissions, révocation immédiate des droits, conformité RGPD, et extensibilité via le système de plugins.
+Le choix de Better-Auth comme solution d'authentification répond aux exigences techniques de mon application : gestion granulaire des permissions, révocation immédiate des droits, sécurité renforcée via les protections intégrées, et extensibilité via le système de plugins.
 
 La section suivante présente l'implémentation concrète de cette librairie dans le projet Dropit.
