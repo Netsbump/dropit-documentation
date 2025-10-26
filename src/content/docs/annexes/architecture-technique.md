@@ -75,7 +75,7 @@ Ces schémas servent pour la validation client ( formulaires React), serveur (Ne
 
 ## @dropit/permissions : Contrôle d'accès granulaire
 
-Ce package implémnte un système d'autorisation centralisé avec Better Auth définissant les permissions par rôle. Les mêmes règles s'appliquent côté client (UX) et serveur (sécurité).
+Ce package implémente un système d'autorisation centralisé avec Better Auth définissant les permissions par rôle. Les mêmes règles s'appliquent côté client (UX) et serveur (sécurité).
 
 Côté React, les contrôles d'accès servent principalement à améliorer l'expérience utilisateur en masquant les boutons ou sections non autorisés. Côté API, les contrôles constituent une barrière de sécurité critique qui empêche l'accès non autorisé aux données, indépendamment de ce qui est affiché côté client.
 
@@ -116,23 +116,3 @@ export const resources = {
   },
 };
 ```
-
-Couvre tous les aspects : authentification, gestion athlètes, planification, garantissant une expérience cohérente.
-
-## Gestion des dépendances et sécurité
-
-L'utilisation de bibliothèques externes à travers le monorepo (frontend, backend, packages partagés) nécessite une surveillance des mises à jour et vulnérabilités de sécurité.
-
-### Audit automatisé des vulnérabilités
-
-J'ai mis en place un système d'audit automatique via GitHub Actions qui exécute `pnpm audit` à chaque push et de manière hebdomadaire. Cette vérification détecte les vulnérabilités connues dans l'arbre de dépendances et génère des alertes par email en cas de faille critique. GitHub Security Advisories complète ce dispositif en surveillant automatiquement le repository et en proposant des pull requests de correction pour les vulnérabilités détectées.
-
-### Surveillance des mises à jour
-
-Pour les bibliothèques critiques (React, NestJS, MikroORM, PostgreSQL driver), je surveille également les annonces de sécurité via leurs canaux officiels (Twitter, newsletters, GitHub releases). Cette veille proactive me permet d'anticiper les migrations importantes et de planifier les mises à jour selon leur criticité.
-
-### Stratégie de mise à jour
-
-Dans le contexte d'un monorepo, une vulnérabilité dans un package partagé impacte potentiellement toutes les applications. Cette centralisation présente l'avantage de pouvoir corriger une faille en un seul endroit, mais nécessite une coordination des tests sur l'ensemble de l'écosystème avant déploiement.
-
-Cette approche préventive de la sécurité des dépendances s'inscrit dans une démarche de développement responsable, particulièrement importante dans un contexte applicatif gérant des données personnelles d'athlètes.

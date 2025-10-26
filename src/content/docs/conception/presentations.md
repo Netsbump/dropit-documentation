@@ -7,14 +7,14 @@ description: Architectures web et mobile
 
 ### Organisation modulaire
 
-L'architecture frontend adopte une organisation par features inspirée du Domain-Driven Design, structurant le code selon le vocabulaire métier ("athletes", "exercises", "workout", "planning") plutôt que par préoccupations techniques. Cette approche établit un langage commun avec les utilisateurs et facilite le développement parallèle.
+L'architecture frontend adopte une organisation par features structurant le code selon le vocabulaire métier (`athletes`, `exercises`, `workout`, `planning`) plutôt que par préoccupations techniques.
 
 ```markdown
 apps/web/src/
 ├── features/              # Modules métier isolés
 │   ├── athletes/          # Gestion des athlètes
 │   ├── exercises/         # Catalogue d'exercices  
-│   ├── workout/           # Création et édition programmes
+│   ├── workout/           # Création et édition d'entrainements
 │   ├── planning/          # Interface calendaire
 │   └── complex/           # Gestion des complexes
 ├── shared/                # Composants et logique partagés
@@ -24,84 +24,59 @@ apps/web/src/
 └── routes/                # Structure de routage Tanstack Router
 ```
 
-Chaque feature encapsule sa logique métier spécifique et ses règles de validation propres, respectant le principe de responsabilité unique. Cette isolation permet d'appliquer des règles business différenciées (données personnelles pour `athletes/`, règles biomécaniques pour `exercises/`) sans créer de couplage entre modules.
+Chaque feature encapsule ses composants UI et sa logique d'interface spécifique, respectant le principe de responsabilité unique.
 
 ### Gestion des formulaires avec React Hook Form
 
-React Hook Form fournit la validation en temps réel, la gestion des erreurs et l'optimisation des performances via des champs non contrôlés, me permettant de me concentrer sur la logique métier spécifique à l'haltérophilie.
+React Hook Form fournit la validation en temps réel, la gestion des erreurs et l'optimisation des performances de saisie dans les formulaires, me permettant de me concentrer sur la logique métier spécifique à l'haltérophilie.
 
 > **Exemple d'implémentation** : Voir l'annexe [Formulaires avec React Hook Form et validation Zod](/annexes/implementation-presentations/#formulaires-avec-react-hook-form-et-validation-zod) 
 
 ### Intégration de la validation Zod partagée
 
-L'un des aspects les plus enrichissants de cette implémentation a été l'intégration des schémas Zod définis dans le package partagé `@dropit/schemas`, également utilisés côté API dans la [couche d'accès aux données](/conception/acces-donnees#s%C3%A9curit%C3%A9-applicative-et-protection-owasp). Cette approche résout une problématique récurrente : maintenir la cohérence des règles de validation entre le frontend et le backend.
+J'utilise les schémas Zod définis dans le package partagé `@dropit/schemas`, également utilisés côté API dans la [couche d'accès aux données](/conception/acces-donnees#s%C3%A9curit%C3%A9-applicative-et-protection-owasp). Cette centralisation garantit qu'un exercice validé côté client sera nécessairement accepté par l'API, éliminant les divergences de validation qui pourraient générer des erreurs d'intégration.
 
-Cette définition commune permet d'exploiter les mêmes schémas côté serveur et client, garantissant une synchronisation parfaite des règles de validation. Avec cette approche centralisée, je garantis qu'un exercice respectant les contraintes côté client sera nécessairement accepté par l'API, réduisant drastiquement les erreurs d'intégration.
+### Synchronisation des données avec Tanstack Query
 
-### Stratégie de synchronisation des données avec Tanstack Query
+Dans DropIt, un coach qui crée un exercice dans le catalogue doit le voir apparaître immédiatement dans l'interface de création de programme, sans rechargement manuel. Cette synchronisation nécessite une gestion cohérente de l'état des données entre les différents écrans.
 
-Dans le contexte de DropIt, la question de la gestion d'état s'est posée rapidement : comment synchroniser efficacement les données entre les différents écrans de l'application ? Un coach qui crée un exercice dans le catalogue doit le voir apparaître immédiatement dans l'interface de création de programme, sans rechargement manuel.
-
-J'ai choisi Tanstack Query qui traite directement les requêtes HTTP comme source de vérité plutôt que de dupliquer les données serveur dans un store client. Cette approche correspond mieux à la réalité d'une application moderne où la majorité de l'état provient effectivement du backend.
-
-L'invalidation automatique du cache constitue un mécanisme particulièrement élégant : lorsqu'un coach crée un nouvel exercice, Tanstack Query invalide automatiquement toutes les requêtes liées aux exercices, garantissant leur rechargement transparent lors du prochain accès. Cette synchronisation élimine les incohérences que j'avais pu observer dans des projets antérieurs.
-
-Tanstack Query encapsule toute la logique complexe de gestion d'état dans ses hooks `useQuery` et `useMutation`, me permettant de me concentrer sur la logique métier plutôt que sur la plomberie de la synchronisation des données.
+J'ai choisi Tanstack Query qui traite les requêtes HTTP comme source de vérité, évitant de dupliquer les données serveur dans un store client. Quand un coach crée un nouvel exercice, Tanstack Query invalide automatiquement le cache des listes d'exercices, déclenchant leur rechargement transparent lors du prochain accès. Cette approche répond à mon besoin sans complexité supplémentaire : la majorité de l'état de l'application provient directement du backend.
 
 > **Exemple d'implémentation Tanstack Query** : Voir l'annexe [Synchronisation des données avec Tanstack Query](/annexes/implementation-presentations/#synchronisation-des-données-avec-tanstack-query)
 
 ### Routage typé avec Tanstack Router
 
-Dans le contexte d'une Single Page Application (SPA) comme DropIt, la gestion du routage devient cruciale pour offrir une expérience utilisateur fluide. Les coachs naviguent fréquemment entre la création de programmes, la gestion des athlètes et la planification des séances, nécessitant des transitions rapides sans interruption de leur workflow.
+L'application web est une Single Page Application (SPA) : toute la navigation se fait côté client sans rechargement de page, nécessitant un système de routage pour gérer les différents écrans.
 
-J'ai choisi d'explorer Tanstack Router plutôt que React Router principalement dans une démarche d'apprentissage d'une alternative moderne au routage classique. L'approche file-based routing où chaque route correspond à un fichier m'a semblé plus intuitive que la configuration centralisée de React Router, facilitant l'organisation et la maintenance du code.
-
-Cette structure hiérarchique reflète l'organisation logique de l'application et facilite la gestion des layouts imbriqués. Le préfixe `__home` indique les routes protégées par authentification.
+J'ai choisi Tanstack Router dans une démarche d'apprentissage, pour découvrir une alternative à React Router que je connaissais déjà. Le typage strict des paramètres de route évite les erreurs de navigation, et l'organisation en fichiers correspond bien à la structure modulaire du projet.
 
 ### Flux de données
 
-Pour mettre en perspectives tous ces élements voici un exemple de flux de données dans le client web:
+Pour mettre en perspective tous ces éléments, voici un exemple de flux de données lors de la création d'un programme d'entraînement :
 
 ```mermaid
 sequenceDiagram
-    participant Coach as 👨 Coach (Utilisateur)
-    participant Router as 🌐 Tanstack Router
-    participant Page as 📄 WorkoutCreatePage
-    participant Form as 📝 React Hook Form
-    participant Validation as ✅ Zod Schema
-    participant Query as 🔄 Tanstack Query
-    
-    Coach->>Router: Navigation vers /workouts/create
-    Router->>Page: Rendu du composant
-    
-    Coach->>Form: Saisie données programme
-    Form->>Validation: Validation temps réel
-    Validation-->>Form: Erreurs ou succès
-    Form-->>Page: Mise à jour état formulaire
-    
-    Coach->>Form: Soumission formulaire
-    Form->>Validation: Validation finale
-    Validation-->>Form: Données validées
-    Form->>Query: useMutation('createWorkout')
-    Query-->>Page: État de soumission
-    Page-->>Coach: Feedback utilisateur
-    
-    Query-->>Router: Redirection après succès
+    participant Coach as 👨 Coach
+    participant Router as 🌐 Router
+    participant Page as 📄 WorkoutCreatePage<br/>(Form + Validation Zod)
+    participant API as 🔌 API Backend
+
+    Coach->>Router: Clique sur "Créer un programme"
+    Router->>Page: Charge le composant
+    Page->>Coach: Affiche le formulaire vide
+
+    Coach->>Page: Saisit les données (titre, exercices...)
+    Note over Page: Validation temps réel avec Zod
+
+    Coach->>Page: Soumet le formulaire
+    Note over Page: Validation finale des données
+    Page->>API: POST /workouts (via Tanstack Query)
+    API->>Page: 201 Created + données workout
+    Page->>Router: Redirection vers /workouts
+    Router->>Coach: Affiche la liste des programmes
 ```
 
-L'application suit un flux de données unidirectionnel où Tanstack Query centralise la gestion de l'état serveur, tandis que React se charge de l'état local des composants. Cette séparation facilite la maintenance et le débogage et me permet d'isoler les problèmes selon leur nature.
-
-La structure respecte une séparation entre les différentes couches : présentation avec les composants UI, logique métier encapsulée dans des hooks personnalisés, et communication gérée par les clients API. Cette organisation facilite non seulement les tests unitaires en isolant chaque responsabilité, mais aussi l'évolution future du code en permettant de modifier une couche sans impacter les autres. Pour optimiser les performances de rendu, j'ai prévu d'implémenter une pagination progressive pour les longues listes d'athlètes et la technique de lazy loading pour les détails de programmes, évitant ainsi de charger l'intégralité des données au premier accès.
-
-### Gestion des dates avec date-fns
-
-Dans DropIt, la manipulation des dates intervient fréquemment : planification des séances, formatage des dates d'entraînement, calculs de périodes. J'ai choisi date-fns pour son approche fonctionnelle avec des fonctions pures qui ne mutent pas les dates originales, évitant les modifications involontaires. Sa modularité permet d'importer uniquement les fonctions nécessaires, optimisant la taille du bundle.
-
-### Drag-and-drop pour la composition
-
-Pour la réorganisation des exercices dans un programme, j'avais besoin d'une interface permettant de modifier facilement l'ordre des éléments. L'approche par champs numériques aurait fonctionné, mais j'ai préféré une interaction plus directe. J'ai donc choisi d'utiliser la bibliothèque dnd-kit qui me fournit tous les hooks et utilitaires nécessaires pour implémenter le drag-and-drop : gestion des événements, animations fluides, et support de l'accessibilité. Cette solution m'évite de réinventer la logique complexe de détection des zones de drop.
-
-L'implémentation utilise le hook `useSortable` qui fournit les événements, références DOM et animations nécessaires pour rendre les exercices déplaçables avec leurs paramètres.
+Ce flux illustre la séparation des responsabilités : les composants gèrent l'affichage, Tanstack Query gère la communication avec l'API, et la validation Zod garantit la cohérence des données avant envoi. Cette organisation facilite la maintenance en isolant chaque préoccupation.
 
 ### Internationalisation côté client
 
@@ -115,17 +90,15 @@ Les fichiers de traduction sont organisés par domaines métier, permettant une 
 
 ### TailwindCSS
 
-TailwindCSS adopte une approche CSS atomique avec des classes utilitaires correspondant directement aux propriétés CSS, permettant de composer les interfaces directement dans le JSX. Cette méthodologie élimine la navigation constante entre fichiers CSS et composants, optimisant le développement des formulaires et interfaces de planning.
+TailwindCSS fournit des classes utilitaires qui correspondent directement aux propriétés CSS (`flex`, `text-center`, `p-4`), permettant de styler les composants directement dans le JSX sans naviguer entre fichiers CSS et composants.
 
-L'intégration avec Vite utilise le compilateur JIT (Just-In-Time) qui génère uniquement les styles correspondant aux classes effectivement utilisées, optimisant drastiquement la taille du bundle final. Le système de purge automatique élimine les classes non utilisées, résultant en un fichier CSS de quelques kilooctets.
-
-L'approche responsive mobile-first utilise les préfixes `sm:`, `md:`, `lg:` pour adapter les interfaces aux différentes tailles d'écran sans media queries manuelles.
+L'approche responsive mobile-first utilise les préfixes `sm:`, `md:`, `lg:` pour adapter les interfaces aux différentes tailles d'écran (`sm:text-lg`, `md:grid-cols-2`) sans écrire de media queries manuelles. Vite génère automatiquement uniquement les styles effectivement utilisés, optimisant la taille du bundle final.
 
 > **Exemple d'implémentation Tailwind** : Voir l'annexe [Exemple d'implémentation Tailwind](/annexes/implementation-presentations/#exemple-dimplémentation-tailwind)
 
 ### Shadcn/ui
 
-Shadcn/ui s'appuie sur Radix UI pour implémenter nativement les recommandations WCAG 2.1 et respecter les critères RGAA (Référentiel Général d'Amélioration de l'Accessibilité). Cette conformité garantit l'utilisabilité par tous les athlètes, y compris ceux en situation de handicap.
+Shadcn/ui s'appuie sur Radix UI pour implémenter nativement les recommandations WCAG 2.1 et respecter les critères RGAA (Référentiel Général d'Amélioration de l'Accessibilité). Cette conformité facilite l'utilisation par tous les athlètes, y compris ceux en situation de handicap.
 
 L'implémentation respecte les critères RGAA essentiels : structure sémantique avec rôles ARIA appropriés, gestion du focus pour la navigation clavier, contrastes conformes (ratio 4.5:1 minimum), et messages d'erreur associés via `aria-describedby`. L'attribut `role="alert"` assure l'annonce immédiate des erreurs par les lecteurs d'écran.
 
@@ -135,17 +108,15 @@ L'approche "copy-paste" offre un contrôle total sur l'adaptation aux spécifici
 
 ### Système d'icônes avec Lucide React
 
-Lucide React, fork amélioré de Feather Icons, propose un style unifié avec des traits fins et des proportions harmonieuses qui s'intègrent parfaitement avec l'esthétique moderne de Tailwind. Cette cohérence visuelle facilite la reconnaissance et l'apprentissage de l'interface dans le contexte métier de DropIt.
+Lucide fournit des icônes sous forme de composants SVG React, permettant d'importer uniquement celles effectivement utilisées dans l'application. Cette approche s'inscrit dans une démarche d'écoconception en réduisant la taille du JavaScript téléchargé, donc la consommation de bande passante de l'application.
 
-Contrairement aux font-icons, Lucide permet un tree-shaking granulaire et des composants SVG natifs. Cette approche réduit la taille du JavaScript téléchargé, aspect crucial pour l'écoconception. Les icônes étant des composants SVG React natifs, elles bénéficient du rendu optimisé de React et peuvent être stylées dynamiquement.
-
-L'intégration respecte scrupuleusement les recommandations d'accessibilité, chaque icône étant implémentée avec les attributs ARIA appropriés selon son contexte d'usage.
+Chaque icône est implémentée avec les attributs ARIA appropriés selon son contexte d'usage (décoratif ou informatif), respectant les recommandations d'accessibilité.
 
 > **Exemple d'implémentation Lucide React** : Voir l'annexe [Exemple d'implémentation Lucide React](/annexes/implementation-presentations/#exemple-dimplémentation-lucide-react)
 
 ### Optimisations du build avec Vite
 
-Vite, bundler moderne remplaçant Webpack, automatise les optimisations essentielles sans configuration complexe. Il applique trois optimisations cruciales : le code splitting qui génère automatiquement des chunks séparés pour chaque route Tanstack Router, permettant aux utilisateurs de télécharger uniquement le JavaScript nécessaire à la page consultée ; le tree shaking qui élimine automatiquement le code non utilisé (composants Shadcn/ui non utilisés, fonctions d'internationalisation des langues non activées) ; et la compression des assets qui minifie le CSS et JavaScript tout en optimisant les images, améliorant les performances particulièrement critiques pour l'usage mobile en salle de sport.
+Vite est un bundler qui automatise trois optimisations sans configuration complexe : le **code splitting** génère des chunks séparés pour chaque route, permettant de télécharger uniquement le JavaScript nécessaire à la page consultée ; le **tree shaking** élimine le code non utilisé (composants Shadcn/ui, fonctions i18n non activées) ; et la **compression des assets** minifie le CSS et JavaScript. Ces optimisations améliorent les performances de l'application web.
 
 ## Architecture Mobile App
 
@@ -175,7 +146,7 @@ La structure mobile reste volontairement simple avec une séparation entre les c
 
 L'application mobile, développée avec React Native et Expo, bénéficie pleinement de l'architecture monorepo en réutilisant l'ensemble des packages partagés : `@dropit/schemas` pour la validation, `@dropit/contract` pour les appels API typés, `@dropit/permissions` pour les autorisations, et `@dropit/i18n` pour les traductions.
 
-Cette réutilisation garantit une cohérence parfaite des règles métier entre les plateformes web et mobile, éliminant les risques de divergence fonctionnelle.
+Cette réutilisation garantit une cohérence des règles métier entre les plateformes web et mobile, éliminant les risques de divergence fonctionnelle.
 
 > **Flux d'interaction mobile** : Voir l'annexe [Architecture mobile flux de données](/annexes/implementation-presentations/#architecture-mobile-flux-de-données)
 
@@ -194,10 +165,3 @@ J'ai appliqué plusieurs optimisations classiques du développement React modern
 Ces optimisations ciblent les problématiques courantes : chargement différé des composants lourds, évitement des calculs redondants, et limitation des appels réseau excessifs. Dans le contexte d'usage de DropIt (quelques dizaines d'utilisateurs par club), ces optimisations suffisent largement.
 
 > **Exemple d'optimisations React** : Voir l'annexe [Exemples d'optimisations React](/annexes/implementation-presentations/#exemple-doptimisations-react)
-
-
-## Conclusion
-
-L'architecture des couches de présentation illustre l'application des patterns architecturaux modernes, créant un écosystème cohérent où la logique métier reste centralisée tout en permettant des adaptations spécifiques à chaque plateforme.
-
-La section suivante détaille la conception des wireframes qui matérialisent ces choix techniques en expérience utilisateur concrète.

@@ -3,9 +3,7 @@ title: Accès aux données
 description: Implémentation de la couche d'accès aux données avec MikroORM
 ---
 
-## Approches d'implémentation de la couche de données
-
-Après avoir établi le modèle conceptuel avec la méthode Merise, plusieurs approches s'offraient à moi pour implémenter la couche d'accès aux données dans DropIt : Database First, Schema First et Code First.
+Après avoir établi le modèle conceptuel avec la méthode Merise, plusieurs approches s'offraient à moi pour implémenter la couche d'accès aux données: Database First, Schema First ou Code First.
 
 J'ai retenu l'approche **Code First** qui définit les entités directement en TypeScript avec les décorateurs MikroORM. Cette méthode s'intègre nativement dans l'écosystème du monorepo, permet la génération automatique des migrations et tire parti de l'auto-complétion TypeScript.
 
@@ -13,92 +11,70 @@ J'ai retenu l'approche **Code First** qui définit les entités directement en T
 
 ## Définition des entités MikroORM
 
-Les entités constituent la traduction directe du modèle logique de données en classes TypeScript annotées. Chaque entité encapsule à la fois la structure des données et les relations métier.
+Les entités constituent la traduction directe du modèle de données en classes TypeScript annotées. Chaque entité encapsule à la fois la structure des données et les relations métier.
 
-### Patterns adoptés
+### Traduction du modèle en code TypeScript
 
-J'ai adopté plusieurs patterns systématiquement :
-- **Identifiants UUID** : Évite les conflits lors des synchronisations entre environnements
-- **Relations typées** : Décorateurs `@ManyToOne` et `@OneToMany` avec typage strict TypeScript
-- **Collections MikroORM** : Type `Collection<T>` pour le chargement paresseux et les relations bidirectionnelles
-- **Timestamps automatiques** : Propriétés `createdAt` et `updatedAt` avec callbacks automatiques
+MikroORM utilise un système de décorateurs pour traduire mon modèle de données directement dans le code TypeScript. Chaque table devient une classe, et les relations entre tables sont définies avec des décorateurs comme `@ManyToOne` ou `@OneToMany` qui reflètent exactement les liens définis dans le MLD.
 
-### Gestion des relations polymorphes
-
-L'entité `WorkoutElement` illustre la résolution du pattern polymorphe avec un discriminant `element_type` et deux clés étrangères optionnelles. Le décorateur `@Check` garantit l'intégrité référentielle au niveau PostgreSQL.
+Cette approche me permet de garder une cohérence totale entre ma conception et l'implémentation réelle. Le code TypeScript devient la source de vérité, et MikroORM génère automatiquement les requêtes SQL correspondantes.
 
 > **Exemple d'entité** : Voir l'annexe [Exemple d'entité MikroORM](/annexes/implementation-acces-donnees/#exemple-dentité-mikroorm)
 
-## Architecture en couches et pattern Repository
+## Architecture en couches
 
-L'accès aux données dans DropIt respecte une séparation stricte des responsabilités via le pattern Repository et l'architecture hexagonale adoptée dans l'API NestJS.
+L'accès aux données respecte une séparation stricte des responsabilités en organisant le code en couches distinctes. Cette approche s'inspire de l'architecture hexagonale sans l'implémenter de manière puriste, privilégiant un compromis pragmatique entre les principes théoriques et les contraintes du projet.
 
 ### Séparation des responsabilités
 
-L'architecture respecte une séparation stricte en quatre couches distinctes :
+L'architecture respecte une séparation en quatre couches distinctes :
 
 - **Interface Layer** : Controllers REST, Guards, Mappers, Presenters
-- **Application Layer** : Use Cases et Services applicatifs
-- **Domain Layer** : Entités métier, règles business et ports/interfaces
-- **Infrastructure Layer** : Repositories MikroORM, services externes et adaptateurs
+- **Application Layer** : Use Cases et ports/interfaces
+- **Domain Layer** : Entités métier
+- **Infrastructure Layer** : Repositories MikroORM
 
-Cette approche donne la flexibilité de changer d'ORM, de base de données ou de services externes sans impacter la logique métier centrale.
+Cette séparation améliore l'organisation du code et facilite les tests en isolant les différentes responsabilités.
 
 > **Architecture détaillée** : Voir l'annexe [Architecture en couches détaillée](/annexes/implementation-acces-donnees/#architecture-en-couches-détaillée)
 
 ### Interface Layer : exposition HTTP
 
-Les **Controllers** gèrent le protocole HTTP et orchestrent les vérifications de sécurité : authentification, isolation organisationnelle, permissions granulaires et respect du contrat ts-rest. 
-Les **Mappers** transforment les entités en DTO pour l'API. 
-Enfin les **Presenters** standardisent le formatage des réponses et sécurisent les messages d'erreur.
+Les **Controllers** orchestrent toute la couche HTTP : vérifications de sécurité (authentification, isolation organisationnelle, permissions granulaires), respect du contrat ts-rest, transformation des entités en DTO via les **Mappers**, et formatage des réponses HTTP via les **Presenters**. Cette couche fait le pont entre le protocole HTTP et la logique métier pure.
 
 > **Exemple détaillé d'implémentation** : Voir l'annexe [Interface Layer : exposition HTTP](/annexes/implementation-acces-donnees/#interface-layer--exposition-http)
 
 
 ### Application Layer : orchestration métier
 
-**Use Cases** concentrent la logique applicative et les règles métier spécifiques à l'haltérophilie. Ils orchestrent les repositories en appliquant des vérifications métier critiques : autorisations organisationnelles, validation de l'existence des ressources, intégrité référentielle et combinaison de règles d'autorisation.
+Les **Use Cases** concentrent la logique applicative et les règles métier spécifiques en pur TypeScript, sans dépendance au framework web. Ils orchestrent les repositories en appliquant des vérifications métier critiques (autorisations organisationnelles, validation de l'existence des ressources, intégrité référentielle) et retournent des entités de domaine.
 
 > **Exemple de Use Case** : Voir l'annexe [Exemple de Use Cases](/annexes/implementation-acces-donnees/#application-layer--orchestration-métier)
 
 ### Domain Layer : modèle métier
 
-Les entités représentent les concepts métier avec leurs règles et contraintes, utilisant les décorateurs MikroORM (`@Entity()`, `@Property()`, `@ManyToOne()`, `@Check()`) pour le mapping vers PostgreSQL. Cette approche offre un bon compromis entre simplicité et maintenabilité.
+Les entités représentent les concepts métier avec leurs règles et contraintes, utilisant les décorateurs MikroORM (`@Entity()`, `@Property()`, `@ManyToOne()`, `@Check()`) pour le mapping vers PostgreSQL.
 Cette approche présente une limitation par rapport à l'architecture hexagonale pure, mais offre un bon compromis entre simplicité et maintenabilité.
 
 ### Infrastructure Layer : accès aux données
 
-L'Infrastructure Layer contient les **Repositories** qui assurent la persistance des données. MikroORM propose nativement des repositories automatiques pour chaque entité, accessibles via l'injection de dépendance.
+L'Infrastructure Layer contient les **Repositories** qui assurent la persistance des données. MikroORM fournit automatiquement des repositories de base avec les opérations CRUD standard (find, save, delete) pour chaque entité.
 
-Pour certains cas spécifiques, j'étends ces repositories automatiques avec des méthodes spécialisées comme `getOneWithDetails` qui nécessite un populate profond sur plusieurs niveaux de relations avec des conditions de filtrage organisationnel.
+Pour des besoins métier spécifiques, je crée des repositories personnalisés qui héritent du repository de base et ajoutent des méthodes spécialisées. Par exemple, `getOneWithDetails` charge un workout avec toutes ses relations imbriquées (exercices, complexes, catégories) en une seule requête optimisée, tout en appliquant les filtres d'isolation organisationnelle.
 
-Cette approche hybride conserve l'accès aux méthodes MikroORM optimisées tout en respectant les contrats métier définis dans l'Application Layer.
+Cette approche hybride me permet de conserver toutes les méthodes optimisées de MikroORM pour les cas simples, tout en ajoutant des méthodes métier pour les cas complexes.
 
 > **Exemple de Repository personnalisé** : Voir l'annexe [Repository personnalisé](/annexes/implementation-acces-donnees/#repository-personnalisé)
 
-### Gestion du multi-tenancy
+### Isolation des données
 
-DropIt présente une particularité importante : chaque coach possède son propre catalogue d'exercices personnalisés qu'il développe au fil du temps. Cette logique crée une double isolation : les données d'organisation (athlètes) et les données personnelles de coach (catalogue d'exercices, complexes, programmes).
+DropIt nécessite deux niveaux d'isolation des données distincts :
 
-J'ai opté pour une approche de "row-level security" logicielle via les `CoachFilterConditions` plutôt qu'une base de données séparée par organisation. Cette approche offre plus de flexibilité et évite les problèmes de scalabilité et de maintenance.
+**Isolation organisationnelle (multi-tenancy)** : Les clubs utilisent la même application mais ne doivent jamais voir les données des autres clubs. J'ai choisi une approche avec une base de données partagée où chaque requête filtre automatiquement les données selon l'organisation de l'utilisateur connecté.
 
-Chaque entité possède un champ `createdBy` qui référence l'utilisateur créateur. Les conditions de filtrage appliquent automatiquement les règles d'isolation organisationnelle, garantissant une défense en profondeur au niveau de la persistance des données.
+**Isolation par propriétaire** : Au sein d'un même club, chaque coach développe son propre catalogue d'exercices et de programmes personnalisés. Pour cela, j'utilise un champ `createdBy` sur les entités concernées (Exercise, Complex, Workout) qui référence le coach créateur.
 
-### Génération automatique des requêtes
-
-MikroORM s'appuie sur Knex.js pour transformer les opérations TypeScript en requêtes PostgreSQL optimisées. L'option `populate` génère automatiquement toutes les jointures nécessaires en une seule requête, évitant le "problème N+1" et améliorant les performances.
-
-Cette couche Infrastructure isole complètement la logique métier des détails techniques de persistence, permettant de changer d'ORM ou de base de données sans impacter les Use Cases.
-
-### Bénéfices de l'architecture en couches
-
-Cette séparation résout plusieurs problèmes : testabilité améliorée (chaque couche testable indépendamment), évolutivité naturelle (modification d'une couche n'impacte pas les autres), et réutilisabilité (Use Cases réutilisables par différentes interfaces d'exposition).
-
-### Flux de données
-
-Le trajet d'une requête illustre comment chaque couche a sa responsabilité spécifique : le Controller gère le protocole HTTP, le UseCase orchestre la logique métier et les permissions, le Repository abstrait l'accès aux données, et le Mapper/Presenter formatent les données pour le client.
-
-Cette approche technique avec MikroORM privilégie la productivité de développement et la sécurité du typage strict, tout en restant flexible pour des optimisations spécifiques via l'EntityManager.
+Les `CoachFilterConditions` combinent ces deux niveaux : elles filtrent d'abord par organisation, puis permettent l'accès aux ressources soit créées par le coach, soit partagées (exercices officiels avec `createdBy = null`). Cette approche logicielle offre plus de flexibilité qu'une séparation physique des données tout en garantissant l'isolation au niveau de la persistance.q
 
 ## Pattern Unit of Work et gestion transactionnelle
 
@@ -128,38 +104,18 @@ L'architecture intègre des mesures de sécurité spécifiques pour contrer les 
 
 Cette approche centralisée évite les disparités de validation qui pourraient créer des failles de sécurité.
 
-## Configuration et optimisations
+## Seeders et données de test
 
-### Configuration MikroORM adaptée aux environnements
+J'ai implémenté un système de seeders qui crée automatiquement des données de test lors du démarrage en développement. Ces seeders servent un double objectif : me fournir un environnement de développement reproductible avec des données cohérentes (utilisateurs, exercices, programmes), et créer un catalogue commun d'exercices officiels d'haltérophilie.
 
-La configuration centralisée dans `mikro-orm.config.ts` s'adapte selon l'environnement d'exécution avec plusieurs optimisations importantes :
+Les ressources partagées utilisent `createdBy = null` pour indiquer qu'elles sont accessibles à tous les clubs, évitant ainsi que chaque coach doive recréer les exercices de base (arraché, épaulé-jeté, squat, etc.).
 
-- **Découverte automatique des entités** : Via l'analyse des patterns de fichiers
-- **Analyse statique performante** : Le `TsMorphMetadataProvider` analyse le code TypeScript à la compilation
-- **Cohérence temporelle** : `forceUtcTimezone: true` garantit que toutes les dates sont en UTC
+## Évolution du schéma de base de données
 
-### Gestion des migrations en production
+Pour l'instant, j'utilise la synchronisation automatique de MikroORM en développement : quand je modifie une entité, le schéma de la base est automatiquement mis à jour. Cette approche accélère le développement, mais elle n'est pas viable en production car elle pourrait écraser des données utilisateurs.
 
-La stratégie de migration privilégie la sécurité et la traçabilité :
-
-- **Génération automatique** : Le processus `pnpm run db:migration:create` génère automatiquement les fichiers
-- **Application atomique** : `allOrNothing: true` encapsule toutes les migrations en attente dans une transaction unique
-- **Préservation des contraintes** : `disableForeignKeys: false` maintient l'intégrité référentielle
-- **Traçabilité complète** : Chaque migration appliquée est enregistrée dans une table système
+Avant le passage en production, je migrerai vers le système de migrations de MikroORM, même en développement. Chaque modification du schéma générera un fichier de migration versionné qui transforme le schéma existant sans perdre les données. Cette approche garantit la traçabilité des changements et permet de les appliquer de manière contrôlée en production.
 
 > **Exemple de migration** : Voir l'annexe [Exemple de migration générée](/annexes/implementation-acces-donnees/#exemple-de-migration-générée)
 
-### Stratégie différenciée selon l'environnement
-
-En développement, j'ai privilégié une approche de reconstruction complète via les seeders pour tester rapidement les modifications de schéma. En production, le système de migrations devient indispensable pour faire évoluer le schéma tout en préservant l'intégrité des données.
-
-## Seeders et données de test
-
-J'ai implémenté un système de seeders servant un double objectif : environnement de développement reproductible et catalogue commun d'exercices d'haltérophilie. Les ressources partagées (`createdBy = null`) constituent un socle d'exercices officiels accessible à tous les clubs, évitant la duplication des données de base.
-
-## Conclusion
-
-Cette implémentation de la couche d'accès aux données avec Nest.js et MikroORM résout les défis spécifiques de DropIt tout en posant les bases d'une architecture évolutive.
-
-La section suivante sur les couches de présentation présente comment ces données sont consommées et présentées aux utilisateurs via les clients web et mobile.
 

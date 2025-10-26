@@ -49,7 +49,7 @@ Certaines fonctionnalités concernent les deux profils d'utilisateurs :
 
 L'analyse des dysfonctionnements actuels a révélé un périmètre fonctionnel conséquent pour répondre aux problèmes les plus critiques : accès difficile aux programmes, dispersion de l'information, absence de suivi structuré des progressions.
 
-Face à cette ampleur et aux contraintes de mon projet de formation, j'ai choisi d'adopter une approche MVP (Minimum Viable Product). Cette stratégie me permet de valider rapidement la pertinence des fonctionnalités essentielles auprès des utilisateurs de mon club, tout en créant une alternative fonctionnelle immédiate à la messagerie instantanée actuelle. Dans un second temps, l'application évoluera selon les retours d'usage réels pour intégrer progressivement les fonctionnalités complémentaires.
+Face à cette ampleur, j'ai choisi d'adopter une approche MVP (Minimum Viable Product). Cette stratégie me permet de valider rapidement la pertinence des fonctionnalités essentielles auprès des utilisateurs de mon club, tout en créant une alternative fonctionnelle immédiate à la messagerie instantanée actuelle. Dans un second temps, l'application évoluera selon les retours d'usage réels pour intégrer progressivement les fonctionnalités complémentaires.
 
 ### Périmètre retenu pour le MVP
 

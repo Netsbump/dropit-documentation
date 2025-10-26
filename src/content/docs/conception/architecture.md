@@ -15,7 +15,7 @@ Cette architecture répond aux contraintes identifiées lors de l'analyse des be
 
 ## Organisation en monorepo
 
-Pour structurer ce projet multi-plateformes, j'ai choisi une architecture monorepo utilisant pnpm workspaces.
+Pour structurer ce projet, j'ai choisi une architecture monorepo utilisant pnpm workspaces.
 
 Le monorepo est organisé en deux catégories principales :
 
@@ -40,11 +40,11 @@ Les détails techniques d'implémentation et des explications plus détaillées 
 
 ## Client Web (Back Office) : React et TypeScript
 
-Pour le back office destiné aux coachs, j'ai choisi **React** associé à **TypeScript**. Cette technologie offre une architecture basée sur des composants réutilisables adaptée aux interfaces de gestion. TypeScript apporte une sécurité de typage critique pour la manipulation des données d'entraînement, détectant les erreurs dès la compilation et garantissant la précision nécessaire aux calculs de charges et progressions d'athlètes.
+Pour le back office destiné aux coachs, j'ai choisi **React** associé à **TypeScript**. Cette technologie offre une architecture basée sur des composants réutilisables adaptée aux interfaces de gestion. TypeScript apporte une sécurité de typage pour la manipulation des données d'entraînement, détectant les erreurs dès la compilation.
 
 ### Écosystème technique et bibliothèques
 
-Mon architecture frontend s'appuie sur un ensemble de bibliothèques sélectionnées pour leurs avantages spécifiques : **Tanstack Router** pour le routage typé, **Tanstack Query** pour la synchronisation des données, **React Hook Form** intégré aux schémas **Zod** partagés, **Shadcn/ui** avec **Tailwind CSS** pour l'interface, et des solutions spécialisées pour le planning comme le drag-and-drop (dnd-kit).
+Mon architecture frontend s'appuie sur un ensemble de bibliothèques sélectionnées pour leurs avantages spécifiques : **Tanstack Router** pour le routage typé, **Tanstack Query** pour la synchronisation des données, **React Hook Form** intégré aux schémas **Zod** partagés et **Shadcn/ui** avec **Tailwind CSS** pour l'interface.
 
 La justification de ces choix, l'implémentation détaillée et leur intégration concrète dans les composants React est présentée dans la section [couches de présentation](/conception/presentations).
 
@@ -64,7 +64,7 @@ Pour en savoir plus sur l'implémentation spécifique à l'application mobile re
 
 ## API REST : NestJS
 
-Le backend repose sur **NestJS**, un framework **Node.js** que j'ai déjà utilisé en projets et en entreprise. NestJS fournit des patterns d'architecture éprouvés (modules, services, guards, interceptors) avec un écosystème mature et une maintenance active. Son système d'injection de dépendances facilite les tests unitaires en favorisant l'inversion de contrôle, permettant d'isoler la logique métier des préoccupations techniques.
+Le backend repose sur **NestJS**, un framework **Node.js** que j'ai déjà utilisé en entreprise. NestJS fournit des patterns d'architecture éprouvés (modules, services, guards, interceptors) avec un écosystème mature et une maintenance active. Son système d'injection de dépendances facilite les tests unitaires en favorisant l'inversion de contrôle, permettant d'isoler la logique métier des préoccupations techniques.
 
 ### Architecture hexagonale et Domain-Driven Design
 
@@ -86,7 +86,9 @@ J'ai opté pour MikroORM après avoir identifié des différences techniques ave
 
 Le choix d'une base de données relationnelle s'impose naturellement au regard de la nature des données manipulées dans DropIt. L'application gère des entités fortement structurées (utilisateurs, organisations, exercices, programmes, séances) avec des relations et des contraintes d'intégrité strictes. Les relations many-to-many entre exercices et programmes, ainsi que les associations entre athlètes et séances d'entraînement, nécessitent des jointures fréquentes et des requêtes que SQL maîtrise parfaitement.
 
-Les alternatives NoSQL comme MongoDB auraient pu être envisagées, mais la dénormalisation des données aurait créé des problèmes de cohérence. Dans le contexte de l'haltérophilie, où la précision des données conditionne la sécurité des utilisateurs, maintenir l'intégrité référentielle via les contraintes de clés étrangères devient indispensable. Les propriétés ACID garantissent que les modifications de programmes d'entraînement restent cohérentes même en cas de modifications simultanées par plusieurs coachs. Pour optimiser les performances, j'ai prévu l'ajout d'index sur les colonnes fréquemment interrogées (user_id, organization_id, created_at) afin d'accélérer les requêtes de consultation des programmes et historiques d'entraînement si l'usage le necessite.
+Les alternatives NoSQL comme MongoDB auraient pu être envisagées, mais la dénormalisation des données aurait créé des problèmes de cohérence. De plus, la précision des données conditionne la sécurité des utilisateurs, maintenir l'intégrité référentielle via les contraintes de clés étrangères devient indispensable. 
+
+Les propriétés ACID garantissent que les modifications de programmes d'entraînement restent cohérentes même en cas de modifications simultanées par plusieurs coachs. Pour optimiser les performances, j'ai prévu l'ajout d'index sur les colonnes fréquemment interrogées (user_id, organization_id, created_at) afin d'accélérer les requêtes de consultation des programmes et historiques d'entraînement si l'usage le necessite.
 
 Mon choix s'est porté vers PostgreSQL pour son caractère open-source et sa maturité dans l'écosystème Node.js.
 
@@ -94,9 +96,9 @@ Mon choix s'est porté vers PostgreSQL pour son caractère open-source et sa mat
 
 Redis, bien que non implémenté dans le MVP, constitue une solution de cache côté serveur envisagée pour optimiser les performances de l'API.
 
-Les catalogues d'exercices et programmes récurrents sont fréquemment consultés par l'API lors des requêtes des clients web et mobile. Redis permettrait de mettre en cache ces données côté serveur, réduisant les accès à PostgreSQL et améliorant les temps de réponse de l'API. Cette stratégie de cache multi-niveaux (AsyncStorage mobile → API → Redis → PostgreSQL) optimiserait le parcours complet des données.
+Les catalogues d'exercices et programmes récurrents sont fréquemment consultés par l'API lors des requêtes des clients web et mobile. Redis permettrait de mettre en cache ces données côté serveur, réduisant les accès à PostgreSQL et améliorant les temps de réponse de l'API.
 
-Le choix de Redis répond à des contraintes techniques spécifiques. Contrairement aux bases de données relationnelles optimisées pour la persistance, Redis privilégie la performance avec son stockage en mémoire et ses structures de données natives (strings, hashes, sets, lists). Cette architecture NoSQL clé-valeur s'avère particulièrement adaptée aux besoins de cache où la rapidité d'accès prime sur la complexité relationnelle.
+Redis stocke les données en mémoire (RAM) plutôt que sur disque, ce qui le rend particulièrement rapide. Cette architecture **clé-valeur** s'avère adaptée aux besoins de cache où la rapidité d'accès prime sur la complexité des relations.
 
 ## Stockage de médias : MinIO
 
@@ -118,8 +120,6 @@ Dans ce cas, l'ajout d'un moteur de recherche dédié comme Typesense (solution 
 
 ## Communication inter-composants et protocoles
 
-L'architecture distribuée que j'ai mise en place nécessite une communication fiable entre les différents composants de l'application.
-
 Le diagramme suivant illustre les interactions entre les clients (mobile et web), l'API REST, et les couches de cache et de persistance :
 
 ```mermaid
@@ -136,13 +136,12 @@ sequenceDiagram
     API->>Cache: Vérification cache
     
     alt Cache miss
-        Note over Cache: Cache invalide
+        Cache-->>API: Cache invalide
         API->>DB: Requête SQL
         DB-->>API: Données
         API->>Cache: Mise en cache
         Cache-->>API: Ok
     else Cache hit
-        Note over Cache: Donnée en cache
         Cache-->>API: Donnée en cache
     end
     
@@ -150,24 +149,23 @@ sequenceDiagram
     API-->>Mobile: Réponse JSON
 ```
 
-L'ensemble des communications repose sur HTTP/HTTPS pour garantir la sécurité des échanges entre les applications frontend et l'API. Le chiffrement HTTPS protège la confidentialité des données sensibles échangées.
+L'ensemble des communications repose sur le **protocole HTTP** pour les échanges entre les applications frontend et l'API. Le **chiffrement HTTPS** protège la confidentialité des données sensibles échangées.
 
-Au niveau des couches de persistance, PostgreSQL et Redis utilisent leurs protocoles natifs optimisés, tous deux construits sur TCP/IP.
+Au niveau des couches de persistance, PostgreSQL et Redis utilisent leurs protocoles natifs optimisés, tous deux construits sur **TCP/IP**.
 
-Le format JSON structure l'ensemble des échanges de données, offrant un équilibre optimal entre lisibilité humaine et performance machine. Cette standardisation facilite considérablement le débogage pendant le développement et simplifie l'intégration de nouveaux clients dans l'écosystème.
+Le **format JSON** structure l'ensemble des échanges de données, offrant un équilibre optimal entre lisibilité humaine et performance machine.
 
 ## Sécurité architecturale
 
-L'architecture adopte une approche "security by design" en intégrant les considérations de sécurité dès la phase d'architecture plutôt que de les traiter comme des ajouts a posteriori. Cette approche se concrétise par un chiffrement HTTPS, une authentification centralisée, une autorisation granulaire par rôles, et une séparation des responsabilités entre services.
-
+L'architecture intégre les considérations de sécurité dès la phase d'architecture plutôt que de les traiter comme des ajouts a posteriori. Cette approche se concrétise par un chiffrement HTTPS, une authentification centralisée, une autorisation granulaire par rôles, et une séparation des responsabilités entre services.
 
 Les détails d'implémentation sont présentés dans la section [Conception sécurisée](/securite/conception).
 
 ## Stratégie de gestion d'erreurs
 
-L'architecture distribuée adopte une approche défensive multi-niveaux : Error Boundaries React pour isoler les pannes d'interface, exception filters NestJS pour standardiser les erreurs API, et patterns de résilience pour les services externes.
+Les erreurs peuvent survenir à plusieurs niveaux : problème de connexion réseau, données invalides envoyées par un utilisateur, panne d'un service externe. Plutôt que de laisser ces erreurs remonter brusquement vers l'utilisateur, l'application doit les gérer de manière gracieuse.
 
-Les détails d'implémentation sont présentés dans les sections [Gestion des erreurs React](/conception/presentations#gestion-des-formulaires-avec-react-hook-form) et [Architecture en couches](/conception/acces-donnees#architecture-en-couches-et-pattern-repository).
+Au niveau de l'API, le backend NestJS transforme les erreurs techniques en messages d'erreur standardisés et exploitables par les clients. Sur le frontend React, les erreurs réseau sont capturées et affichées sous forme de messages utilisateur compréhensibles plutôt qu'en codes d'erreur techniques.
 
 ## Perspectives d'évolution et scalabilité
 
@@ -175,17 +173,10 @@ L'une des préoccupations constantes lors de la conception de cette architecture
 
 Du point de vue de la scalabilité horizontale, l'architecture stateless de l'API facilite grandement la réplication et le déploiement de nouvelles instances selon l'évolution des besoins de charge. Les choix technologiques (protocoles standardisés, API S3-compatible, containerisation) anticipent une migration progressive vers des solutions cloud managées.
 
-Cette flexibilité architecturale ouvre la voie à plusieurs enrichissements fonctionnels envisagés comme l'import automatique de programmes `PDF/Excel`, un module chronomètre intégré** pour les athlètes, et des dashboards d'analyse des performances** pour les coachs.
+Cette flexibilité architecturale ouvre la voie à plusieurs enrichissements fonctionnels envisagés comme l'import automatique de programmes PDF/Excel, un module chronomètre intégré pour les athlètes, et des dashboards d'analyse des performances pour les coachs.
 
 ## Gestion des dépendances et sécurité
 
-L'utilisation de bibliothèques externes à travers le monorepo (frontend, backend, packages partagés) nécessite une surveillance des mises à jour et vulnérabilités de sécurité. Cette maintenance s'appuie sur trois piliers : surveillance des mises à jour via Dependabot, audit automatisé des vulnérabilités avec GitHub Actions, et stratégie de mise à jour coordonnée entre toutes les applications. Cette approche préventive garantit la sécurité des données personnelles d'athlètes.
+L'utilisation de bibliothèques externes nécessite une surveillance des mises à jour et vulnérabilités de sécurité. Pour l'instant, je gère cette veille manuellement en étant abonné par email aux repositories des bibliothèques critiques, ce qui me permet d'être notifié des nouvelles releases et d'effectuer les mises à jour nécessaires selon leur criticité. J'envisage prochainement d'automatiser cette surveillance en intégrant `pnpm audit` dans la CI, et en activant Dependabot ou GitHub Security Advisories pour détecter automatiquement les vulnérabilités.
 
-Les détails d'implémentation sont documentés dans la section annexe [Architecture technique](/annexes/architecture-technique/#gestion-des-dépendances-et-sécurité).
-
-## Conclusion
-
-Cette architecture répond aux exigences spécifiques d'une application de gestion de club sportif : cohérence des données d'entraînement, expérience adaptée à chaque contexte d'usage, et maintenabilité pour un usage associatif. L'approche monorepo et l'architecture hexagonale apportent des bénéfices concrets : synchronisation automatique des types, réduction des erreurs d'intégration, et évolutivité technique.
-
-La section suivante détaille l'implémentation concrète de la couche d'accès aux données avec Nest.js et MikroORM, transformant cette architecture en code fonctionnel.
 

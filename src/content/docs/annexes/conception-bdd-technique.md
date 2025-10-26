@@ -5,26 +5,19 @@ description: Détails techniques et décisions d'implémentation pour la base de
 
 ## Décisions de normalisation
 
-La normalisation consiste à organiser les données pour éviter les redondances et garantir la cohérence. J'ai appliqué la **troisième forme normale (3NF)**, qui élimine les dépendances transitives entre les données.
+Dans la conception de la base de données, j'ai cherché à éviter un problème classique : imaginez qu'un coach renomme l'exercice "Squat" en "Back Squat" pour plus de précision. Si le nom de l'exercice était dupliqué dans chaque programme d'entraînement qui l'utilise, il faudrait modifier toutes ces occurrences manuellement, avec le risque d'oublier certaines entrées et de créer des incohérences dans les données historiques.
 
-### Principe appliqué
+Pour résoudre ce problème, j'ai appliqué la **troisième forme normale (3NF)**, un principe de structuration qui garantit que chaque donnée n'existe qu'à un seul endroit dans la base. Concrètement, cela signifie que les informations descriptives d'un exercice (son nom, sa description, sa catégorie) sont stockées uniquement dans la table `Exercise`. Les autres tables comme `WorkoutElement` ou `PersonalRecord` ne contiennent que la référence à cet exercice via `exercise_id`, sans dupliquer ses caractéristiques.
 
-Chaque information n'est stockée qu'à un seul endroit. Les caractéristiques d'un exercice (nom, description, catégorie) sont uniquement dans la table `Exercise`, et les autres tables y font simplement référence via `exercise_id`. Cette approche évite les incohérences et facilite les modifications.
+### Bénéfices dans mon contexte
 
-### Exceptions pour l'optimisation des performances
-
-J'ai accepté quelques exceptions pour optimiser les performances :
-
-- Les `PersonalRecord` stockent directement la référence vers l'exercice ET l'athlète, ce qui évite des jointures complexes lors du calcul automatique des charges d'entraînement
-- Cette duplication contrôlée accélère une opération critique : quand un coach crée un programme, l'application peut immédiatement calculer les charges recommandées sans requête supplémentaire
-
-Les informations de base restent centralisées (un exercice = une seule définition), mais les données de performance sont optimisées pour un accès rapide lors de l'utilisation quotidienne de l'application.
+D'abord, la maintenance devient plus simple : modifier un exercice se fait en un seul endroit et se répercute automatiquement partout où il est utilisé. Ensuite, l'intégrité des données est garantie : impossible d'avoir des versions contradictoires du même exercice dans différentes parties de l'application.
 
 ## Gestion des clés et contraintes
 
 ### Choix des clés primaires UUID
 
-J'ai opté pour des clés primaires UUID plutôt que des entiers auto-incrémentés pour faciliter le développement : éviter les conflits d'identifiants lors de la synchronisation entre environnements (dev, test, prod) et simplifier les imports de données de test. L'overhead de stockage (16 vs 4 bytes) reste négligeable pour un club avec quelques centaines d'utilisateurs maximum.
+J'ai choisi d'utiliser des identifiants UUID (comme `a3bb189e-8bf9-3888-9912-ace4e6543002`) plutôt que de simples numéros incrémentés pour une raison de sécurité : les IDs séquentiels facilitent les attaques par énumération. Un utilisateur malveillant repérant une faille peut facilement avoir accès à des informations en essayant les différents incréments. Les UUID rendent ce type d'attaque difficile en utilisant des identifiants imprévisibles. Le surcoût en stockage reste négligeable pour un club de cette taille.
 
 ### Stratégies de suppression
 
@@ -41,9 +34,7 @@ Une table unique avec un discriminant `element_type` et deux clés étrangères 
 
 ### Alternative considérée
 
-**Tables séparées** (`WorkoutExercise` et `WorkoutComplex`) : Structure plus claire mais duplication des colonnes communes (sets, reps, weight) et du code applicatif, plus complexité pour l'affichage ordonné d'éléments mixtes.
-
-Le pattern polymorphe choisi mutualise les colonnes communes dans `WorkoutElement` et facilite l'affichage ordonné. Le polymorphisme est contrôlé par une contrainte CHECK garantissant qu'exactement une référence est renseignée selon le type.
+**Tables séparées** (`WorkoutElementExercise` et `WorkoutElementComplex`) : Structure plus claire mais duplication de certaines colonnes communes (sets, reps, etc...).
 
 ## Contraintes d'intégrité spécifiques
 
@@ -73,13 +64,13 @@ const WorkoutElementSchema = z.object({
 });
 ```
 
-Les avantages de cette approche sont la validation immédiate côté client et serveur, des messages d'erreur clairs pour les utilisateurs et une évolutivité sans migration de base de données.
+Les avantages de cette approche sont la validation immédiate côté client et serveur et des messages d'erreur clairs pour les utilisateurs.
 
 **Contraintes temporelles dans les use cases** :
 
-Les contraintes temporelles comme `recorded_at <= NOW()` pour l'entité `PersonalRecord` sont gérées dans les use cases qui contrôlent le contexte métier de création et modification des enregistrements. Cette logique appartient naturellement à la couche applicative qui maîtrise les règles business.
+Les contraintes temporelles comme `recorded_at <= NOW()` pour l'entité `PersonalRecord` sont gérées dans les uses cases qui contrôlent le contexte métier de création et modification des enregistrements. Cette logique appartient naturellement à la couche applicative qui maîtrise les règles business.
 
-Cette stratification respecte le principe de défense en profondeur : validation early avec Zod pour l'expérience utilisateur, validation métier dans les use cases, contraintes structurelles en base pour l'intégrité finale des données.
+Cette stratification respecte le principe de défense en profondeur : validation early avec Zod pour l'expérience utilisateur, validation métier dans les uses cases, contraintes structurelles en base pour l'intégrité finale des données.
 
 ## Stratégie d'optimisation par indexation
 
@@ -87,7 +78,7 @@ Dans l'état actuel du MVP, je me contente des index automatiques sur les clés 
 
 ### Principe de base
 
-Un index accélère les requêtes SELECT mais ralentit les écritures (INSERT, UPDATE, DELETE) car il doit être maintenu à jour. Pour un club avec quelques dizaines d'athlètes, cette optimisation n'est pas nécessaire au lancement.
+Un index accélère les requêtes de lecture mais ralentit les écritures : chaque fois qu'une donnée est ajoutée, modifiée ou supprimée, la base de données doit mettre à jour l'index en plus de la table principale, ce qui représente un travail supplémentaire. Pour un club avec quelques dizaines d'athlètes, ce compromis n'est pas nécessaire au lancement.
 
 ### Requêtes identifiées pour optimisation future
 
@@ -97,22 +88,16 @@ J'ai identifié les requêtes qui pourraient devenir problématiques si le volum
 - **Calcul des charges d'entraînement** : L'application récupère le record personnel le plus récent pour un exercice donné lors de la création d'un programme
 - **Liste des programmes publiés** : Les athlètes consultent leurs programmes actifs depuis l'application mobile
 
-Si les temps de réponse deviennent problématiques, j'ajouterai les index correspondants en me basant sur les requêtes lentes identifiées via les logs PostgreSQL.
-
-Cette approche pragmatique privilégie la simplicité initiale avec une possibilité d'optimisation guidée par les métriques réelles.
+Si les temps de réponse deviennent problématiques, j'ajouterai les index correspondants en me basant sur les requêtes lentes identifiées.
 
 ## Préparation pour la mise en cache
 
 La structure que j'ai conçue anticipe l'intégration future de Redis comme système de cache. Cette solution me permettra d'améliorer les temps de réponse lorsque le nombre d'utilisateurs augmentera, sans modifier l'architecture de base de données existante.
 
-Les données qui bénéficieraient le plus de cette optimisation sont potentiellement les catalogue d'exercices et complex complets qui changent rarement ou encore les records personnels récents utilisés pour calculer les charges d'entraînement
-
-### Stratégie évolutive
-
-Cette approche évolutive me convient parfaitement : commencer avec PostgreSQL seul pour le MVP, puis ajouter Redis si les métriques de performance le justifient en production.
+Les données qui bénéficieraient le plus de cette optimisation sont potentiellement les catalogue d'exercices et complexes qui changent rarement.
 
 ## Stratégie de migration
 
-L'évolution de ce modèle de données nécessitera une approche méthodique pour préserver l'intégrité des données existantes. J'ai prévu d'utiliser le système de migrations de MikroORM pour gérer ces évolutions de schéma de façon sécurisée.
+Le modèle de données évoluera nécessairement au fil du projet : ajout de nouvelles fonctionnalités, modification de contraintes, optimisations. Pour gérer ces changements sans casser les données existantes, j'utilise le système de migrations de MikroORM.
 
-Cette stratégie inclut le versioning des modifications avec historique complet, la possibilité de rollback en cas de problème, la validation des migrations avant déploiement en production, et la migration des données existantes lors des changements de structure, garantissant ainsi la continuité du service et la préservation des données utilisateur.
+Chaque modification du schéma sera versionnée et historisée, ce qui me permet de savoir précisément quels changements ont été appliqués à chaque environnement. Si une migration pose problème en production, je peux revenir en arrière (rollback) vers l'état précédent. Avant tout déploiement, je teste les migrations sur des copies de la base de données pour vérifier qu'elles fonctionnent correctement et préservent les données utilisateur.

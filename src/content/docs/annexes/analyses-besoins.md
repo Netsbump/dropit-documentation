@@ -29,14 +29,14 @@ L'analyse de ces flux a permis d'identifier les entités principales du système
 - **Athlète** : profil, catégories de compétition, historique des maximums
 - **Coach** : profil, liste des athlètes suivis
 - **Exercice** : nom, type (haltérophilie, musculation, cardio), description, vidéo
-- **Bloc d'exercices** : type (AMRAP, TABATA, Complex), composition d'exercices, ordre d'exécution
-- **Entraînement** : composition d'exercices et blocs avec paramètres
+- **Complex** : composition d'exercices selon un ordre d'exécution
+- **Entraînement** : composition d'exercices et complexes avec paramètres
 - **Maximum** : valeur en kilos par exercice et athlète, historisé
 - **Programmation** : assignation d'entraînements à des dates et athlètes
 
 ### Entités de paramétrage
 - **Type d'exercice** : haltérophilie, musculation, cardio, mobilité
-- **Type de bloc** : AMRAP, TABATA, Complex d'arraché, Complex épaulé-jetté
+- **Type de complex** : Complex d'arraché, Complex épaulé-jetté, Complex de renforcement
 - **Catégorie de poids** : classifications officielles de compétition
 - **Niveau athlète** : rookie, régional, national
 

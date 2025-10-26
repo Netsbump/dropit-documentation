@@ -11,16 +11,15 @@ L'analyse fonctionnelle détaillée précédemment m'a permis d'identifier deux 
 - Créer et gérer le catalogue d'exercices personnalisé
 - Composer des programmes d'entraînement
 - Planifier les séances
-- Analyser les performances et ajuster les programmations
 
 **L'athlète** utilise exclusivement l'application mobile en salle de sport pour :
 - Consulter son programme du jour
 - Enregistrer ses records personnels
-- Communiquer avec son coach via des notes sur les entrainements
+- Communiquer avec son coach via des notes sur les sessions d'entrainement
 
 ## Conception des wireframes
 
-Pour la conception des interfaces, j'ai choisi de commencer par des wireframes basse fidélité qui se concentrent sur la structure informationnelle et les flux utilisateurs, sans me préoccuper des aspects visuels. Cette phase me permet de valider l'organisation de l'information et les flux utilisateurs avant de passer aux aspects visuels.
+Pour la conception des interfaces, j'ai choisi de commencer par des wireframes qui se concentrent sur la structure informationnelle et les flux utilisateurs. Cette phase me permet de valider l'organisation de l'information et les flux utilisateurs avant de passer aux aspects visuels.
 
 L'architecture de DropIt se décline en deux interfaces distinctes : une application web pour les coachs (back office) et une application mobile pour les athlètes (front office), chacune adaptée à son contexte d'usage spécifique.
 
@@ -37,13 +36,13 @@ La vue générale présente l'interface globale avec une navigation latérale pe
 <img src="/assets/wireframe-web-form-training.png" alt="Wireframe page création exercice" width="800" />
 
 Le wireframe révèle les éléments structurants :
-- Etape du formulaire dans lequel on peut composer l'entrainement avec un des exercices et/ou des complexS
-- **Sidebar gauche** : catalogue d'exercices et complexes avec recherche
-- **Zone centrale** : programme en construction avec éléments drag-and-drop
+- Etape du formulaire dans lequel on peut composer l'entrainement avec un des exercices et/ou des complexes
+- Sidebar gauche pour le catalogue d'exercices et complexes avec recherche
+- Zone centrale qui permet la construction du programme d'entrainement
 
 #### Contraintes responsive
 
-Dans le MVP, j'ai fait le choix de ne pas optimiser l'interface web pour les mobiles. Les coachs utilisent principalement des ordinateurs de bureau ou tablettes pour créer leurs programmes, contexte qui permet une interface riche en interactions complexes. Cette décision me permet de concentrer l'effort sur une expérience optimale desktop plutôt que de multiplier les compromis.
+Dans le MVP, j'ai fait le choix de ne pas optimiser l'interface web pour les mobiles. Les coachs utilisent principalement des ordinateurs de bureau ou tablettes pour créer leurs programmes. Cette décision me permet de concentrer l'effort sur une expérience optimale desktop plutôt que de multiplier les compromis.
 
 ### Wireframe mobile athlète (Front office)
 
@@ -52,17 +51,23 @@ Dans le MVP, j'ai fait le choix de ne pas optimiser l'interface web pour les mob
 L'interface mobile privilégie la simplicité avec trois écrans principaux optimisés pour l'usage en salle de sport :
 
 <img src="/assets/wireframe-dashboard-mobile.png" alt="Wireframe page accueil mobile" width="300" />
-<img src="/assets/wireframe-mobile-training.png" alt="Wireframe visualisation programme mobile" width="300" />
+
+Page d'accueil
+
+<img src="/assets/wireframe-mobile-training.png" alt="Wireframe visualisation entrainement mobile" width="300" />
+
+Visualisation d'un entrainement
+
 <img src="/assets/wireframe-mobile-training-detail.png" alt="Wireframe visualisation détail exercice mobile" width="300" />
 
-La page d'accueil présente un carousel central pour l'entraînement du jour, l'actualité du club et l'historique, avec un menu bottom pour la navigation (compte, accueil, records). La visualisation d'entraînement affiche les exercices de manière séquentielle avec accès aux détails par clic. L'interface détaillée permet de visualiser les paramètres spécifiques et d'enregistrer les performances réalisées.
+Visualisation du détail d'un exercice
+
+La page d'accueil présente un carousel central pour l'entraînement du jour, l'actualité du club et l'historique, avec un menu en bas pour la navigation (compte, accueil, records). La visualisation d'entraînement affiche les exercices de manière séquentielle avec accès aux détails par clic. L'interface détaillée permet de visualiser les paramètres spécifiques et d'enregistrer les performances réalisées.
 
 ## Design system
 
 Pour le design system, j'ai choisi Shadcn/ui (pour l'interface web) après avoir analysé les enjeux d'accessibilité et de maintenabilité que présentait DropIt. Cette décision s'appuie sur plusieurs arguments techniques détaillés dans la partie [présentations](/conception/presentations#shadcnui).
 
 ## Conclusion
-
-Ces wireframes achèvent la conception technique de DropIt. L'ensemble de cette démarche établit les fondations nécessaires à l'implémentation de l'application.
 
 La section suivante aborde les aspects sécuritaires, avec un zoom sur l'accès aux données (authentification et autorisation).
