@@ -54,7 +54,7 @@ Cette évolution architecturale n'a pas posé de problème de migration en prati
 
 ## Endpoints d'autorisation
 
-Comme pour l'authentification, Better-Auth expose automatiquement des endpoints dédiés à la gestion des organisations et permissions sur le préfixe `/auth/organization`, évitant le développement manuel de ces routes critiques.
+Comme pour l'authentification, Better-Auth expose automatiquement des endpoints dédiés à la gestion des organisations et permissions sur le préfixe `/auth/organization`, évitant le développement manuel de ces routes spécifiques.
 
 ```html
 |                    Route                     | Méthode |        Description        |       Usage dans DropIt         |
@@ -68,7 +68,7 @@ Comme pour l'authentification, Better-Auth expose automatiquement des endpoints 
 | `/auth/organization/set-active`              | POST    | Organisation active       | Changement de club actif        |
 ```
 
-Ces endpoints intègrent automatiquement les vérifications de permissions : seuls les utilisateurs autorisés peuvent effectuer ces actions selon leur rôle dans l'organisation. La documentation complète de ces APIs est générée automatiquement via le plugin openAPI() de Better-Auth.
+Ces endpoints intègrent automatiquement les vérifications de permissions : seuls les utilisateurs autorisés peuvent effectuer ces actions selon leur rôle dans l'organisation. La documentation complète de ces APIs est générée automatiquement via le plugin `openAPI()` de Better-Auth.
 
 ## Définition des permissions métier
 
@@ -96,7 +96,11 @@ Cette déclaration limite les actions possibles à celles définies, évitant le
 
 ### Rôles et permissions
 
-Better-Auth propose trois rôles par défaut correspondant aux besoins des clubs d'haltérophilie. Le rôle **Admin (Coach)** illustre la gestion complète des ressources d'entraînement et des athlètes :
+J'ai défini trois rôles organisationnels correspondant aux besoins des clubs d'haltérophilie :
+
+**Owner (Propriétaire)** : Rôle d'administration technique réservé à la maintenance de l'application. Dispose de tous les droits sur l'organisation, y compris la gestion des membres et la configuration du club.
+
+**Admin (Coach)** : Rôle métier principal pour les coachs. Gestion complète des ressources d'entraînement (programmes, exercices, performances) et consultation des données athlètes :
 
 ```typescript
 export const admin = ac.newRole({
@@ -108,7 +112,9 @@ export const admin = ac.newRole({
 });
 ```
 
-Ce modèle RBAC (Role-Based Access Control) assure la cohérence des permissions entre toutes les parties de l'application. Les détails complets sur les trois rôles (Member, Admin, Owner) sont disponibles ([Annexes permissions](/annexes/permissions/#étude-comparative-des-modèles-de-permissions)).
+**Member (Athlète)** : Rôle d'accès limité pour les athlètes. Consultation uniquement de ses propres données d'entraînement et performances, sans pouvoir créer ou modifier les programmes.
+
+Ce modèle RBAC (Role-Based Access Control) assure la cohérence des permissions entre toutes les parties de l'application.
 
 ## Décorateurs de permissions
 
