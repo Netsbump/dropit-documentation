@@ -24,19 +24,21 @@ Cette approche nécessiterait d'implémenter manuellement le hachage sécurisé,
 - **Temps de développement** : 3-4 semaines estimées vs 1 semaine avec librairie
 - **Maintenance continue** : veille sécuritaire et mises à jour à ma charge
 
-### Solution 2 : Librairie externe (Better-Auth)
+### Solution 2 : Librairie (Better-Auth)
 
 **Analyse technique détaillée :**
 
-Better-Auth propose une architecture hybride sessions + JWT résolvant les limitations des approches pures, avec support multi-plateforme natif, sécurité intégrée et extensibilité via plugins.
+Better-Auth implémente une gestion de sessions persistantes en base de données, répondant directement au besoin de révocation immédiate. La librairie s'adapte automatiquement aux plateformes (cookies pour web, bearer tokens pour mobile) tout en maintenant les sessions en base PostgreSQL. Cette approche garantit qu'une session supprimée invalide instantanément l'accès, sans délai d'expiration.
+
+Better-Auth propose également des fonctionnalités avancées optionnelles (plugin JWT pour authentification stateless, cookie cache pour optimiser les performances) mais l'implémentation par défaut avec sessions en base suffit aux besoins de DropIt.
 
 **Évaluation pour DropIt :**
 
 **Avantages :**
-- **Réponse aux contraintes** : révocation immédiate + multi-plateforme
+- **Réponse aux contraintes** : révocation immédiate via sessions en base + support multi-plateforme natif
 - **Sécurité éprouvée** : protection contre les vulnérabilités courantes (injection, XSS, CSRF), communauté active
 - **Productivité** : 1 semaine d'implémentation vs 3-4 semaines from scratch
-- **Évolutivité** : plugins pour futures fonctionnalités (OAuth, 2FA)
+- **Évolutivité** : plugins pour futures fonctionnalités (OAuth, 2FA, JWT si besoin)
 
 **Points d'attention :**
 - **Dépendance externe** : mais librairie open-source avec communauté active
@@ -62,13 +64,61 @@ Les IdP externes offrent sécurité enterprise, fonctionnalités avancées et sc
 
 ### Décision retenue
 
-Au regard de l'analyse comparative, Better-Auth répond de manière optimale aux contraintes spécifiques de DropIt. La solution from scratch présenterait des risques sécuritaires importants et un coût de développement disproportionné pour un projet de cette envergure. Les Identity Providers externes, bien que techniquement excellents, introduisent des coûts récurrents incompatibles avec le budget d'un club de sport et des fonctionnalités surdimensionnées.
+Au regard de l'analyse comparative, Better-Auth répond aux contraintes spécifiques de DropIt. La solution from scratch présenterait des risques sécuritaires importants et un coût de développement disproportionné pour un projet de cette envergure. Les Identity Providers externes, bien que techniquement excellents, introduisent des coûts récurrents incompatibles avec le budget d'un club de sport et des fonctionnalités surdimensionnées.
 
-Better-Auth offre le niveau de sécurité requis tout en répondant précisément aux contraintes identifiées : révocation immédiate via l'architecture hybride, support natif multi-plateforme pour React et React Native, et extensibilité via le système de plugins pour les évolutions futures (2FA, OAuth). Le temps d'implémentation réduit (1 semaine) me permet de me concentrer sur la valeur métier de l'application plutôt que sur l'infrastructure d'authentification.
+Better-Auth offre le niveau de sécurité requis tout en répondant précisément aux contraintes identifiées : révocation immédiate via les sessions en base PostgreSQL, support natif multi-plateforme pour React et React Native, et extensibilité via le système de plugins pour les évolutions futures (2FA, OAuth). Le temps d'implémentation réduit (1 semaine) me permet de me concentrer sur la valeur métier de l'application plutôt que sur l'infrastructure d'authentification.
 
 Cette décision s'appuie sur une évaluation pragmatique du rapport bénéfice/coût/risque dans le contexte spécifique de DropIt, privilégiant la sécurité et la productivité sans sur-ingénierie.
 
 ---
+
+### Implémentation DropIt : Sessions persistantes
+
+Dans l'implémentation actuelle de DropIt, j'utilise l'approche par défaut de Better-Auth : des **sessions persistantes stockées en base**. À chaque requête, le serveur interroge la base de données pour vérifier la validité de la session, garantissant qu'une session supprimée invalide instantanément l'accès.
+
+**Configuration dans DropIt :**
+```typescript
+export const auth = betterAuth({
+  cookies: {
+    enabled: true,
+    httpOnly: true, // Protection XSS
+    secure: config.env === "production",
+    maxAge: 60 * 60 * 24 * 7, // 7 jours
+  },
+  bearerToken: {
+    enabled: true, // Pour l'application mobile
+  },
+  session: {
+    // Configuration par défaut : vérification DB à chaque requête
+  }
+});
+```
+
+Cette approche répond directement au besoin de révocation immédiate identifié pour DropIt : un coach doit pouvoir suspendre instantanément l'accès d'un athlète. Le coût de vérification en base est acceptable dans le contexte d'un club de sport (nombre d'utilisateurs limité, volume de requêtes modéré).
+
+**Alternatives disponibles dans Better-Auth :**
+
+Better-Auth propose des optimisations pour des contextes nécessitant de meilleures performances :
+- **Cookie Cache** : stocke les données de session dans un cookie signé, réduisant les appels DB
+- **Plugin JWT** : génère des tokens stateless (15 min d'expiration) pour services externes
+
+Ces fonctionnalités ne sont pas activées dans l'implémentation actuelle car les sessions pures suffisent aux besoins de DropIt. L'activation future du cookie cache pourrait améliorer les performances si le nombre d'utilisateurs augmente significativement.
+
+---
+
+## Modèle Logique de Données Better-Auth
+
+Bien que Better-Auth génère automatiquement ses structures de base de données, cette modélisation MLD selon la méthode Merise démontre ma compréhension de l'architecture relationnelle sous-jacente et ma capacité à analyser un schéma existant.
+
+![Modèle Logique de Données](../../../assets/mld-authentication.png)
+
+**Analyse des relations :**
+- **User** : Entité centrale stockant identifiants et données de profil
+- **Session** : Relation (1,n) avec User, stocke token, expiration et métadonnées de sécurité
+- **Verification** : Tokens temporaires (1,n) pour vérification email et réinitialisation
+- **Account** : Support OAuth futurs, relation (0,n) avec User
+
+--- 
 
 ## Implémentation des décorateurs
 
@@ -105,6 +155,8 @@ export const CurrentUser = createParamDecorator(
 ```
 
 Ces décorateurs permettent d'annoter les routes avec des métadonnées de sécurité (`@Public()`, `@Optional()`) et d'injecter directement les données d'authentification dans les paramètres de méthode (`@CurrentUser()`, `@Session()`).
+
+---
 
 ## Implémentation du Guard
 
@@ -152,6 +204,8 @@ export class AuthGuard implements CanActivate {
 
 Le Guard utilise le service `Reflector` de NestJS pour lire les métadonnées ajoutées par les décorateurs et adapter son comportement selon le niveau de sécurité requis pour chaque route.
 
+--- 
+
 ## Exemple d'usage concret
 
 Cet exemple illustre l'utilisation concrète des décorateurs et Guards dans un contrôleur de l'API DropIt.
@@ -172,173 +226,6 @@ export class WorkoutController {
 Cet exemple montre l'`AuthGuard` global vérifiant l'authentification, le décorateur `@CurrentUser()` injectant l'utilisateur connecté, et l'absence de `@Public()` rendant l'authentification obligatoire pour cette route.
 
 ---
-
-## Étude comparative des solutions d'authentification
-
-Cette section détaille la comparaison technique JWT vs Sessions mentionnée dans la page d'implémentation. Bien que Better-Auth impose une architecture hybride, cette analyse démontre ma compréhension des différentes approches d'authentification moderne et justifie pourquoi l'hybride constitue la meilleure solution.
-
-### Sessions
-
-L'authentification par sessions constitue l'approche classique où le serveur maintient l'état de connexion de chaque utilisateur. Cette méthode **stateful** implique que le serveur stocke les informations de session en mémoire ou en base de données, créant un état persistant côté serveur.
-
-```mermaid
-sequenceDiagram
-    participant C as Client (Web/Mobile)
-    participant S as Serveur DropIt
-    participant DB as Base de données
-
-    C->>S: 1. Connexion (email/mot de passe)
-    S->>DB: 2. Vérification identifiants
-    DB-->>S: 3. Validation utilisateur
-    S->>DB: 4. Création session
-    S-->>C: 5. Cookie de session
-    C->>S: 6. Requête avec cookie
-    S->>DB: 7. Validation session
-    S-->>C: 8. Réponse autorisée
-```
-
-**Analyse technique détaillée :**
-
-**Avantages :**
-- **Révocation immédiate** : suppression de la session en base = déconnexion instantanée
-- **Sécurité renforcée** : les données sensibles restent côté serveur
-- **Contrôle total** : gestion fine des sessions actives, détection d'activités suspectes
-- **Simplicité conceptuelle** : mécanisme bien maîtrisé et documenté
-
-**Limitations pour DropIt :**
-
-L'architecture multi-plateforme pose un défi majeur car React Native ne gère pas nativement les cookies HttpOnly, rendant difficile la sécurisation des sessions mobiles.
-
-La scalabilité horizontale nécessite de résoudre le problème du partage d'état entre serveurs. Deux solutions existent : les "sticky sessions" qui forcent un utilisateur à toujours utiliser le même serveur (créant un point de défaillance unique), ou un stockage de sessions partagé comme Redis (ajoutant une couche d'infrastructure).
-
-Les performances sont impactées par la nécessité de vérifier chaque session en base de données à chaque requête, contrairement aux JWT qui se valident localement. Enfin, la gestion des sessions expirées requiert un mécanisme de nettoyage automatique pour éviter l'accumulation de données obsolètes.
-
-### JWT
-
-Les JSON Web Tokens représentent une approche **stateless** où le serveur ne stocke aucune information de session. Chaque token contient toutes les données nécessaires à sa validation, signées cryptographiquement pour garantir leur intégrité.
-
-**Structure technique d'un JWT :**
-Un JWT se compose de trois parties séparées par des points :
-- **Header** : algorithme de signature (HMAC SHA256, RSA256)
-- **Payload** : données utilisateur (userId, rôles, expiration)
-- **Signature** : hash cryptographique pour vérifier l'intégrité 
-
-```mermaid
-sequenceDiagram
-    participant C as Client (Web/Mobile)
-    participant S as Serveur DropIt
-    participant DB as Base de données
-
-    C->>S: 1. Connexion (email/mot de passe)
-    S->>DB: 2. Vérification identifiants
-    DB-->>S: 3. Validation utilisateur
-    S->>S: 4. Génération JWT signé
-    S-->>C: 5. Token JWT
-    C->>S: 6. Requête avec Bearer token
-    S->>S: 7. Validation signature JWT
-    S-->>C: 8. Réponse autorisée
-```
-
-**Analyse technique détaillée :**
-
-**Avantages :**
-- **Performance optimale** : validation locale sans requête en base de données
-- **Scalabilité horizontale** : aucun état partagé entre serveurs
-- **Multi-plateforme natif** : compatible web et mobile via header Authorization
-- **Transport d'informations** : payload inclut rôles et permissions, réduisant les appels API
-- **Standard ouvert** : RFC 7519, interopérabilité garantie
-
-**Exemple de payload DropIt :**
-```json
-{
-  "userId": "123",
-  "role": "coach",
-  "organizationId": "club-paris",
-  "permissions": ["read:workouts", "write:athletes"],
-  "exp": 1609459200,
-  "iat": 1609455600
-}
-```
-
-**Limitations :**
-
-Le problème majeur des JWT réside dans l'impossibilité de révocation avant l'expiration naturelle. Une fois émis, un token reste valide même si l'utilisateur doit être immédiatement déconnecté, ce qui pose un risque sécuritaire inacceptable pour DropIt.
-
-Le stockage côté client introduit des vulnérabilités : localStorage expose les tokens aux attaques XSS, tandis que les cookies sans HttpOnly restent accessibles au JavaScript malveillant. La taille des tokens peut également impacter les performances réseau, particulièrement sur mobile avec des payloads volumineux contenant de nombreuses permissions.
-
-Enfin, la rotation des clés de signature nécessite une infrastructure complexe pour maintenir la compatibilité avec les tokens existants tout en renouvelant régulièrement les secrets cryptographiques.
-
-### Architecture hybride JWT/Sessions
-
-L'architecture hybride de Better-Auth combine intelligemment les avantages des deux approches pour résoudre leurs limitations respectives. Cette solution constitue l'évolution logique des systèmes d'authentification modernes.
-
-Better-Auth génère simultanément :
-1. **Un JWT** pour la validation rapide des requêtes API
-2. **Une session en base** pour permettre la révocation immédiate
-
-Le JWT contient les informations nécessaires à l'autorisation (rôles, permissions) tandis que la session en base maintient l'état de validité du token. À chaque requête, le serveur vérifie d'abord la signature JWT puis contrôle l'existence de la session associée.
-
-Better-Auth optimise les performances en ne vérifiant pas systématiquement la session en base à chaque requête. La vérification s'effectue selon plusieurs critères configurables :
-
-**Critères de vérification en base :**
-- **Intervalle temporel** : par défaut toutes les 5 minutes depuis la dernière vérification
-- **Actions sensibles** : changement de mot de passe, modification de permissions
-- **Premier accès** : à la connexion initiale pour valider l'existence de la session
-
-**Implémentation dans Better-Auth :**
-```typescript
-// Configuration de la fréquence de vérification
-export const auth = betterAuth({
-  session: {
-    maxAge: 7 * 24 * 60 * 60, // 7 jours
-    updateAge: 5 * 60, // Vérification DB toutes les 5 minutes
-  }
-});
-
-// Dans le Guard NestJS
-const session = await this.authService.api.getSession({
-  headers: fromNodeHeaders(request.headers),
-  // Better-Auth vérifie automatiquement selon updateAge
-});
-```
-
-Cette approche combine la rapidité des JWT (validation locale de la signature) avec la sécurité des sessions (vérification périodique en base). Entre les vérifications, seule la signature cryptographique est contrôlée, garantissant des performances optimales tout en conservant la capacité de révocation.
-
-### Séquences d'authentification Better-Auth
-
-**1. Processus de connexion (Login)**
-
-![Diagramme de séquence Better Auth Login](../../../assets/better-auth-login.png)
-
-Ce diagramme illustre la génération simultanée du JWT et de la session en base. Better-Auth gère automatiquement la vérification des credentials, la création de la session en PostgreSQL, et la génération du token signé renvoyé au client. L'architecture hybride se met en place dès cette étape.
-
-**2. Processus de déconnexion (Logout)**
-
-![Diagramme de séquence Better Auth Logout](../../../assets/better-auth-logout.png)
-
-La déconnexion démontre l'avantage de l'architecture hybride : la suppression de la session en base invalide immédiatement l'accès, même si le JWT reste techniquement valide côté client. Cette révocation immédiate répond à l'exigence critique identifiée pour DropIt.
-
-**3. Accès à une ressource protégée**
-
-![Diagramme de séquence Accès Ressource Protégée](../../../assets/better-auth-ressource-prot.png)
-
-Ce diagramme illustre l'optimisation des performances : Better-Auth vérifie d'abord la signature JWT (rapide, local) puis contrôle la session en base uniquement selon les critères configurés (intervalle de 5 minutes, actions sensibles). Cette approche combine rapidité et sécurité.
-
----
-
-## Modèle Logique de Données Better-Auth
-
-Bien que Better-Auth génère automatiquement ses structures de base de données, cette modélisation MLD selon la méthode Merise démontre ma compréhension de l'architecture relationnelle sous-jacente et ma capacité à analyser un schéma existant.
-
-![Modèle Logique de Données](../../../assets/mld-authentication.png)
-
-**Analyse des relations :**
-- **User** : Entité centrale stockant identifiants et données de profil
-- **Session** : Relation (1,n) avec User, stocke token, expiration et métadonnées de sécurité
-- **Verification** : Tokens temporaires (1,n) pour vérification email et réinitialisation
-- **Account** : Support OAuth futurs, relation (0,n) avec User
-
---- 
 
 ## Configuration côté clients de Better-Auth
 
@@ -373,80 +260,63 @@ export function useAuth() {
 
 **Configuration web :** `credentials: 'include'` pour l'envoi automatique des cookies HttpOnly. Better-Auth sécurise automatiquement les cookies (Secure, SameSite).
 
-### Client mobile (Expo)
+### Client mobile (React Native)
 
 ```typescript
 // Configuration client mobile
-import { createAuthClient } from "@better-auth/react";
-import { expoClient } from "@better-auth/expo/client";
-import * as SecureStore from "expo-secure-store";
+import { createAuthClient } from 'better-auth/react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const authClient = createAuthClient({
   baseURL: process.env.EXPO_PUBLIC_API_URL,
 
-  plugins: [
-    expoClient({
-      scheme: "dropit",
-      storagePrefix: "dropit-auth",
-      storage: SecureStore,
+  // Configuration AsyncStorage pour React Native
+  storage: {
+    get: async (key: string) => {
+      const value = await AsyncStorage.getItem(key);
+      return value ? JSON.parse(value) : null;
+    },
+    set: async (key: string, value: any) => {
+      await AsyncStorage.setItem(key, JSON.stringify(value));
+    },
+    remove: async (key: string) => {
+      await AsyncStorage.removeItem(key);
+    },
+  },
 
-      // Configuration deep linking
-      linking: {
-        prefixes: ["dropit://"],
-        config: {
-          screens: {
-            AuthCallback: "auth/callback",
-          },
-        },
-      },
-    }),
-  ],
+  fetchOptions: {
+    credentials: 'include',
+  },
 });
 ```
 
-**Configuration mobile :** Plugin `expoClient` avec stockage sécurisé via `expo-secure-store` (Keychain iOS/EncryptedSharedPreferences Android). Deep linking `dropit://` pour futures redirections OAuth.
+**Configuration mobile :** Utilise AsyncStorage pour la persistance du token. Les données sont protégées par le sandboxing de l'OS (isolation par application). Une amélioration future serait de migrer vers `expo-secure-store` pour ajouter un chiffrement matériel (Keychain iOS / EncryptedSharedPreferences Android).
 
 ---
 
 ## Mécanismes de sécurité avancés
 
-Cette section détaille les mécanismes de protection CSRF/XSS mentionnés dans les pages conception et implémentation. Ces fonctionnalités automatiques de Better-Auth renforcent la sécurité de l'authentification dans DropIt.
+Better-Auth implémente automatiquement plusieurs protections essentielles pour sécuriser l'authentification dans DropIt.
 
-### Protection CSRF et XSS automatique
+### Protection CSRF (Cross-Site Request Forgery)
 
-```typescript
-// Middleware de sécurité personnalisé
-const securityMiddleware = createAuthMiddleware(async (ctx) => {
-  // Vérification origin pour CSRF
-  const origin = ctx.headers.get('origin');
-  const referer = ctx.headers.get('referer');
+Better-Auth génère automatiquement des tokens double-submit pour chaque requête POST/PUT/DELETE. Un token est envoyé dans le cookie HttpOnly (inaccessible au JavaScript), et un autre dans le header de la requête. Le serveur valide que les deux correspondent, empêchant un site malveillant de forger des requêtes au nom de l'utilisateur.
 
-  if (origin && !config.betterAuth.trustedOrigins.includes(origin)) {
-    throw new Error('Invalid origin');
-  }
+### Protection XSS (Cross-Site Scripting)
 
-  // Headers de sécurité
-  ctx.responseHeaders.set('X-Content-Type-Options', 'nosniff');
-  ctx.responseHeaders.set('X-Frame-Options', 'DENY');
-  ctx.responseHeaders.set('X-XSS-Protection', '1; mode=block');
-});
-```
+Les cookies HttpOnly rendent le token de session inaccessible au JavaScript côté client. Même si un attaquant injecte du code malveillant dans la page, il ne peut pas voler le token de session.
 
-**Détail des protections implémentées :**
+### Headers de sécurité
 
-**Protection CSRF automatique :** Better-Auth génère automatiquement des tokens double-submit pour chaque requête POST/PUT/DELETE. Un token est envoyé dans le cookie (inaccessible en JavaScript grâce à HttpOnly) et un autre dans le header de la requête. Le serveur valide que les deux tokens correspondent, empêchant un site malveillant de forger des requêtes au nom de l'utilisateur.
+Better-Auth configure automatiquement les cookies avec les flags de sécurité appropriés :
+- **`HttpOnly`** : empêche l'accès JavaScript au cookie
+- **`Secure`** : transmission uniquement en HTTPS en production
+- **`SameSite=Lax`** : protection de base contre CSRF
 
-**Protection XSS via cookies HttpOnly :** Les tokens de session ne sont accessibles qu'au serveur, pas au JavaScript côté client. Même si un attaquant injecte du code malveillant dans la page, il ne peut pas voler le token de session.
+Des headers HTTP complémentaires renforcent la sécurité :
+- **`X-Frame-Options: DENY`** : empêche l'intégration dans une iframe (prévient le clickjacking)
+- **`X-Content-Type-Options: nosniff`** : force le respect du Content-Type (prévient l'injection de contenu malveillant)
 
-**Headers de sécurité complémentaires :**
-- `X-Frame-Options: DENY` prévient le **clickjacking** : empêche l'intégration de DropIt dans une iframe malveillante où l'attaquant pourrait superposer des éléments invisibles pour tromper l'utilisateur
-- `X-Content-Type-Options: nosniff` empêche l'**injection de contenu** : force le navigateur à respecter le Content-Type déclaré et bloque l'exécution de fichiers JavaScript déguisés en images
-- `X-XSS-Protection: 1; mode=block` active la protection XSS native du navigateur qui bloque l'exécution de scripts suspects
+### Métadonnées de session
 
-### Métadonnées de session pour le monitoring
-
-La table `Session` de Better-Auth stocke automatiquement certaines métadonnées utiles pour le monitoring de sécurité :
-
-**Détection d'anomalies :** Les métadonnées IP et User-Agent enregistrées dans chaque session permettent d'identifier des connexions suspectes (nouvelle localisation, nouveau navigateur) pour alerter l'utilisateur ou déclencher des vérifications additionnelles.
-
-**Informations stockées :** Chaque session enregistre l'adresse IP d'origine, le User-Agent du client, ainsi que les timestamps de création et d'expiration. Ces informations constituent une base pour implémenter des fonctionnalités de monitoring de sécurité.
+Chaque session stocke automatiquement l'adresse IP, le User-Agent, et les timestamps de création/expiration. Ces métadonnées constituent une base pour implémenter du monitoring de sécurité : détection de connexions depuis une nouvelle localisation, nouveau navigateur, ou patterns suspects.

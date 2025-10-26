@@ -27,7 +27,7 @@ Le schéma détaillé de ces entités est disponible dans la section [Modèle Lo
 
 ### Entités clés : Session et Verification
 
-L'entité **Session** gère les sessions actives des utilisateurs en stockant les métadonnées essentielles : ID utilisateur, token de session, date d'expiration, ainsi que l'adresse IP et le User-Agent pour le monitoring de sécurité. Cette approche me permet de détecter facilement les activités suspectes.
+L'entité **Session** gère les sessions actives des utilisateurs en stockant les métadonnées essentielles : ID utilisateur, token de session, date d'expiration, ainsi que l'adresse IP et le User-Agent pour le monitoring de sécurité. Cette approche me permet de détecter les activités suspectes.
 
 L'entité **Verification** s'occupe des tokens temporaires utilisés pour la vérification d'email et la réinitialisation de mot de passe. Chaque token a une durée de vie limitée, gérant automatiquement l'expiration pour renforcer la sécurité.
 
@@ -65,7 +65,7 @@ sequenceDiagram
     NestJS->>BetterAuth: Délégation à Better-Auth
     BetterAuth->>Database: Vérification credentials
     Database-->>BetterAuth: User data
-    BetterAuth-->>NestJS: Session + JWT
+    BetterAuth-->>NestJS: Session créée
     NestJS-->>Client: 200 + cookies
 ```
 
@@ -75,15 +75,11 @@ La configuration se fait dans le point d'entrée de l'API via un middleware cond
 
 ### Décorateurs
 
-Un décorateur en TypeScript est une fonction qui permet d'annoter et de modifier des classes, méthodes ou propriétés. Dans le contexte de NestJS, les décorateurs me permettent d'ajouter des métadonnées à mes routes pour indiquer leur niveau de sécurité.
+Un décorateur en TypeScript est une fonction qui permet d'annoter et de modifier des classes, méthodes ou propriétés. Dans le contexte de NestJS, j'utilise des décorateurs pour marquer le niveau de sécurité des routes (`@Public()`, `@Optional()`) et injecter les données d'authentification dans les paramètres de méthode (`@CurrentUser()`, `@Session()`).
 
-Concrètement, au lieu d'écrire de la logique conditionnelle dans chaque contrôleur, j'annote simplement mes routes avec `@Public()` ou `@Optional()` pour indiquer leur niveau de sécurité. Je peux aussi injecter directement l'utilisateur connecté ou sa session dans les paramètres de mes méthodes.
-
-Dans mon projet, j'ai configuré l'authentification comme étant globale : par défaut, toutes les routes nécessitent une authentification, sauf si je les marque explicitement avec `@Public()`. Cette configuration se fait via un système de Guards que je vais présenter juste après.
+J'ai configuré l'authentification comme étant globale : par défaut, toutes les routes nécessitent une authentification, sauf si je les marque explicitement avec `@Public()`. Cette approche évite d'oublier de protéger une route sensible. La logique de vérification se fait via un système de Guards présenté dans la section suivante.
 
 > **Exemple d'implémentation des décorateurs** : Voir l'annexe [Implémentation des décorateurs](/annexes/authentifications/#implémentation-des-décorateurs)
-
-Ces décorateurs me permettent d'annoter mes routes avec des métadonnées de sécurité (`@Public()`, `@Optional()`) et d'injecter directement les données d'authentification dans les paramètres de méthode (`@CurrentUser()`, `@Session()`).
 
 ### Guards
 
@@ -99,33 +95,25 @@ L'utilisation concrète de ces décorateurs et Guards dans un contrôleur illust
 
 > **Exemple d'implémentation** : Voir l'annexe [Exemple d'usage concret](/annexes/authentifications/#exemple-dusage-concret)
 
-## Gestion des sessions et sécurité
-
-Better-Auth implémente une approche hybride combinant JWT et sessions persistantes, répondant au besoin de révocation immédiate identifié dans mes contraintes.
-
-Lors de la connexion, Better-Auth génère un JWT pour la validation rapide côté serveur et enregistre une session en base de données pour permettre la révocation instantanée (départ d'un utilisateur, changement de rôle).
-
-Cette architecture combine la performance des tokens stateless avec la flexibilité des sessions traditionnelles. Les détails techniques et la comparaison JWT vs Sessions sont disponibles dans la section [Étude comparative des solutions d'authentification](/annexes/authentifications/#étude-comparative-des-solutions-dauthentification).
-
 ## Stratégie de sécurisation côté client
 
 ### Stockage sécurisé selon la plateforme
 
-La sécurisation du stockage des tokens varie selon la plateforme d'accès. Pour le backoffice web, j'utilise les cookies HttpOnly qui protègent contre les attaques XSS (vulnérabilité permettant l'injection de code JavaScript malveillant). Cette protection est cruciale car les coachs accèdent parfois au backoffice depuis des postes partagés.
+La sécurisation du token de session diffère selon la plateforme :
 
-Pour l'application mobile, Better-Auth utilise automatiquement le stockage sécurisé natif via `expo-secure-store` : Keychain sur iOS et EncryptedSharedPreferences sur Android. Le plugin gère aussi le deep linking (redirection automatique vers l'app après authentification externe) pour les eventuelles futures intégrations OAuth.
+**Sur le web**, j'utilise des cookies HttpOnly. Le flag HttpOnly empêche le code JavaScript d'accéder au cookie : même si un attaquant injecte du code malveillant dans la page (attaque XSS), il ne peut pas lire le token de session. Seul le navigateur envoie automatiquement le cookie à chaque requête.
+
+**Sur mobile**, les cookies ne fonctionnent pas de la même manière. Better-Auth stocke le token dans AsyncStorage, un système de stockage persistant de React Native. Les données sont protégées par le sandboxing de l'OS : chaque application dispose d'un espace de stockage isolé inaccessible aux autres applications. Une amélioration future consisterait à migrer vers `expo-secure-store` pour ajouter un chiffrement matériel (Keychain sur iOS, EncryptedSharedPreferences sur Android), renforçant la protection contre les scénarios d'appareils compromis.
 
 ### Configuration des sessions
 
-J'ai adapté la durée des sessions selon les habitudes d'usage : 7 jours pour le web avec renouvellement automatique, et 30 jours pour le mobile pour éviter les reconnexions fréquentes. Cette configuration équilibre sécurité et expérience utilisateur.
+Les sessions ont une durée de 7 jours configurée via `cookies.maxAge` côté serveur. Cette durée s'applique aux deux plateformes. Better-Auth renouvelle automatiquement l'expiration lorsque l'utilisateur utilise l'application, ce qui équilibre sécurité et expérience utilisateur : un utilisateur actif reste connecté, tandis qu'une session inactive expire après 7 jours.
 
-Les détails d'implémentation et les spécificités techniques sont disponibles dans les sections [Configuration côté clients](/annexes/authentifications/#configuration-côté-clients-de-better-auth) et [Mécanismes de sécurité avancés](/annexes/authentifications/#mécanismes-de-sécurité-avancés).
+Les détails d'implémentation sont disponibles dans la section [Configuration côté clients](/annexes/authentifications/#configuration-côté-clients-de-better-auth).
 
 ## Implémentation côté clients
 
-### Protection unifiée API et interface
-
-L'un des avantages de Better-Auth est sa capacité à sécuriser à la fois l'accès aux APIs et le rendu conditionnel des interfaces utilisateur. Cette approche unifiée permet de maintenir une cohérence de sécurité entre le backend et le frontend.
+L'un des avantages de Better-Auth est sa capacité à sécuriser à la fois l'accès aux APIs et le rendu conditionnel des interfaces utilisateur. Cette approche unifiée permet de maintenir une cohérence entre le backend et le frontend.
 
 Côté backend, mes APIs sont protégées par les Guards comme nous l'avons vu. Côté frontend, Better-Auth fournit des hooks React pour conditionner l'affichage des composants selon l'état d'authentification :
 
@@ -143,12 +131,6 @@ function WorkoutForm() {
   return <CreateWorkoutForm user={session.user} />;
 }
 ```
-
-### Configuration multi-plateforme
-
-Better-Auth s'adapte automatiquement aux spécificités de chaque plateforme. Pour l'application mobile Expo, j'utilise le plugin dédié qui gère le stockage sécurisé et les redirections. Pour le backoffice web, la configuration standard avec cookies HttpOnly suffit.
-
-Cette approche unifie l'expérience de sécurité entre web et mobile tout en respectant les bonnes pratiques spécifiques à chaque plateforme. Les détails de configuration sont disponibles dans la section [Configuration côté clients de Better-Auth](/annexes/authentifications/#configuration-côté-clients-de-better-auth).
 
 ## Conclusion
 
