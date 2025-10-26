@@ -15,7 +15,7 @@ L'infrastructure repose sur Jest pour l'API backend avec une base de données Po
 
 J'ai configuré une infrastructure Docker dédiée via `docker-compose.test.yml` qui isole complètement l'environnement de test. Cette séparation utilise un port différent (5433) et un stockage en mémoire pour optimiser les performances.
 
-L'exécution se fait via un script disponible depuis la racine du projet ainsi qu'au niveau de l'api `pnpm run test:integration:docker` qui démarre l'infrastructure, exécute les tests, puis nettoie automatiquement.
+L'exécution se fait via un script disponible depuis la racine du projet ainsi qu'au niveau de l'api `pnpm run test:integration:docker` qui démarre l'infrastructure, exécute les tests, puis nettoie automatiquement la base.
 
 ### Seeders et données de test
 
@@ -40,7 +40,7 @@ L'`AuthGuard` teste la logique d'authentification Better-Auth avec différents s
 
 ### PermissionsGuard
 
-Le `PermissionsGuard` fait l'objet d'une batterie de tests extensive validant les règles RBAC selon chaque rôle (member, admin, owner) et ressource métier (workout, exercise, athlete). J'ai testé les logiques d'accès granulaires, comme l'autorisation pour un member de gérer son profil mais l'interdiction de créer des programmes.
+Le `PermissionsGuard` fait l'objet d'une batterie de tests extensive validant les règles RBAC selon chaque rôle (member, admin, owner) et ressource métier (workout, exercise, athlete). J'ai testé les logiques d'accès granulaires, comme l'autorisation pour un athlète de gérer son profil mais l'interdiction de créer des programmes.
 
 ```typescript
 it('should allow access when user has required permissions', async () => {
@@ -63,7 +63,7 @@ Cette approche couvre environ 40 tests unitaires validant les cas d'usage du sys
 
 ## Tests d'intégration
 
-Les tests d'intégration valident les interactions réelles entre modules avec une base de données PostgreSQL. J'ai concentré mes efforts sur trois domaines critiques : exercices, complexes d'exercices, et programmes d'entraînement complets.
+Les tests d'intégration valident les interactions réelles entre modules avec une base de données PostgreSQL. J'ai concentré mes efforts sur trois domaines critiques : exercices, complexes et programmes d'entraînement complets.
 
 ### Tests des exercices
 
@@ -126,9 +126,9 @@ export class TestUseCaseFactory {
 
 ### Workflow automatisé
 
-L'infrastructure s'intègre dans un workflow GitHub Actions qui s'exécute automatiquement à chaque push et pull request. Ce pipeline valide systématiquement la qualité du code via Biome (linting et formatage), puis exécute la suite complète des tests avec génération des métriques de couverture.
+L'infrastructure s'intègre dans un workflow GitHub Actions qui s'exécute automatiquement à chaque push et pull request. Ce pipeline valide systématiquement la qualité du code via Biome (linting et formatage), puis exécute la suite complète des tests d'intégration.
 
-Cette approche de **Continuous Integration** me permet de détecter immédiatement les régressions sans intervention manuelle, garantissant que seul du code validé atteint la branche principale. Les développeurs reproduisent exactement l'environnement de CI localement via `pnpm test` et `pnpm test:integration:docker`.
+Cette approche me permet de détecter immédiatement les régressions sans intervention manuelle, garantissant que seul du code validé atteint la branche principale.
 
 ### Métriques actuelles
 

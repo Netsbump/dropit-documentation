@@ -31,22 +31,9 @@ Les développeurs utilisent les issues GitHub pour rapports de bugs, demandes de
 
 Le développement d'un compte de démonstration faciliterait l'adoption par les clubs d'haltérophilie. Cet environnement sandbox permettrait aux entraîneurs d'évaluer l'application avec des données réalistes sans compromettre leurs informations.
 
-Cette démonstration inclurait des profils d'athlètes fictifs représentatifs (débutants, intermédiaires, compétiteurs), des programmes types pour différents objectifs (force, technique, compétition), et des historiques simulés. Cette approche permet aux entraîneurs de découvrir concrètement les bénéfices dans leur contexte.
+Cette démonstration inclurait des profils d'athlètes fictifs représentatifs (débutants, intermédiaires, compétiteurs), des programmes types pour différents objectifs (force, technique, compétition), et des historiques simulés.
 
-### Parcours guidés
+### Tutoriels vidéos
 
-L'implémentation future de guided tours lors des premières connexions s'inspire des meilleures pratiques UX modernes. Ces parcours présenteront progressivement les fonctionnalités selon le rôle (athlète vs entraîneur), évitant la surcharge cognitive.
-
-Les tutoriels intégreront des mini-vidéos pour les processus complexes : création de programmes personnalisés, analyse des progressions, configuration des notifications. Cette approche multimédia réduit la courbe d'adoption.
-
-## Amélioration continue
-
-### Cycle de feedback
-
-Les canaux de support alimenteront l'amélioration continue de la documentation et UX, basée sur les besoins réels des clubs. Cette approche data-driven garantit la pertinence des ressources d'aide.
-
-L'analyse des demandes identifiera les points de friction récurrents et orientera les priorités de développement vers les améliorations à fort impact.
-
-Cette stratégie centrée utilisateur vise à maximiser l'adoption et la satisfaction des clubs, objectifs essentiels pour la réussite de DropIt.
-
+L'implémentation future de mini-tutoriels vidéo pour les processus complexes est également envisagée, notamment pour la création de programmes personnalisés, d'exercices ou de complexes d'exercices. 
 

@@ -5,52 +5,20 @@ description: Analyse comparative des stratégies de déploiement et choix techni
 
 ## Analyse des stratégies de déploiement
 
-Pour le déploiement de l'application, plusieurs approches techniques étaient envisageables selon les contraintes budgétaires et les objectifs d'apprentissage du projet.
-
-Le déploiement manuel sur VPS avec orchestration via PM2 représentait l'option la plus économique et directe. Cette approche aurait consisté à installer directement Node.js, PostgreSQL et les dépendances système, puis utiliser PM2 pour la gestion des processus et le restart automatique. Cependant, cette méthode présente des risques significatifs : configuration non reproductible entre les environnements, gestion complexe des dépendances système, absence d'isolation des services, et difficulté de rollback en cas de problème.
-
-Les solutions cloud managées (Vercel, Railway, Render) auraient simplifié le déploiement mais introduisent des coûts récurrents incompatibles avec le budget étudiant. Ces plateformes masquent également les mécanismes de déploiement, limitant l'apprentissage des concepts d'infrastructure et d'orchestration.
-
-Dokploy sur VPS personnel résout ces contraintes en proposant une interface de gestion moderne s'appuyant sur Docker. Cette solution combine les avantages économiques du VPS avec les bonnes pratiques de containerisation, garantissant la reproductibilité des déploiements entre développement et production. L'isolation des services via conteneurs élimine les conflits de dépendances et facilite la maintenance.
+Le déploiement de DropIt impose deux contraintes principales : un budget limité (contexte étudiant) et un objectif d'apprentissage des pratiques DevOps modernes. J'ai comparé trois approches pour identifier celle qui répond le mieux à ces besoins : déploiement manuel sur VPS, solutions cloud managées, et PaaS auto-hébergé.
 
 ## VPS traditionnel avec PM2
 
-### Avantages
+Le déploiement manuel sur VPS offre un contrôle total et un coût prévisible (environ 5-10€/mois). Cette approche consiste à installer directement Node.js, PostgreSQL et les dépendances système, puis utiliser PM2 pour gérer les processus et le restart automatique. Cependant, cette méthode implique une responsabilité complète sur la maintenance système (sécurité, mises à jour, monitoring) et nécessite une expertise DevOps significative. La configuration manuelle présente aussi des risques : non-reproductibilité entre environnements, absence d'isolation des services, et difficulté de rollback en cas de problème.
 
-L'approche VPS offre un contrôle total et un coût prévisible avantageux. La liberté de configuration permet d'adapter l'infrastructure aux spécificités des clubs.
+## PaaS commerciales (Vercel, Railway, Render)
 
-### Contraintes
-
-Cette approche implique une responsabilité complète sur la maintenance système et nécessite une expertise DevOps significative, constituant un apprentissage enrichissant mais chronophage.
-
-## PaaS commerciales
-
-### Avantages
-
-Simplicité remarquable : déploiement en quelques clics, HTTPS automatique, monitoring intégré, permettant de se concentrer exclusivement sur le développement.
-
-### Contraintes
-
-Coût récurrent contraignant pour un projet étudiant et dépendance à un fournisseur externe limitant les possibilités de personnalisation.
+Les solutions cloud managées simplifient radicalement le déploiement : quelques clics suffisent, avec HTTPS automatique et monitoring intégré. Cette approche permet de se concentrer exclusivement sur le développement applicatif. Toutefois, les coûts récurrents (50-100€/mois pour un usage modéré) sont incompatibles avec un budget étudiant. Ces plateformes introduisent aussi une dépendance à un fournisseur externe et masquent les mécanismes de déploiement, limitant l'apprentissage des concepts d'infrastructure et d'orchestration.
 
 ## PaaS auto-hébergé : Dokploy
 
-### Équilibre optimal
+Dokploy représente un compromis entre les deux approches : la simplicité d'un PaaS avec le contrôle économique d'un VPS auto-géré. Cette solution s'appuie sur Docker et Docker Swarm pour proposer une approche conteneurisée facilitant déploiements, rollbacks, et gestion multi-environnements via une interface web moderne. L'isolation des services via conteneurs élimine les conflits de dépendances et garantit la reproductibilité entre développement et production. Cette approche permet d'acquérir une compréhension pratique des concepts DevOps modernes (conteneurisation, orchestration, CI/CD) sans la complexité de Kubernetes.
 
-Compromis adapté combinant la simplicité d'un PaaS avec le contrôle d'un VPS auto-géré, s'appuyant sur Docker Swarm pour une approche conteneurisée qui facilite déploiements, rollbacks, et gestion multi-environnements.
+## Solution retenue
 
-### Apprentissages
-
-Permet d'acquérir une compréhension pratique des concepts DevOps modernes sans la complexité de Kubernetes, démocratisant l'accès à ces technologies via une interface web.
-
-## Décision finale : VPS + Dokploy
-
-Cette combinaison répond optimalement aux contraintes du projet : budget étudiant limité, besoin de contrôle technique pour l'apprentissage, et volonté de mettre en place une infrastructure moderne et évolutive.
-
-Le VPS chez `Infomaniak` offre un excellent rapport qualité-prix avec une infrastructure européenne respectant les contraintes de souveraineté des données. Dokploy apporte la modernité et simplicité de gestion nécessaires sans expertise système approfondie.
-
-### Bénéfices pédagogiques
-
-Cette approche me permet d'expérimenter l'ensemble de la chaîne de déploiement : configuration serveur, orchestration des services, monitoring, sauvegardes.
-
-Cette stratégie de déploiement étant définie, l'étape suivante consiste à implémenter concrètement cette infrastructure et configurer les processus de mise en production.
+J'ai donc déployé DropIt sur un VPS Infomaniak avec Dokploy, combinant contrôle technique et simplicité de gestion pour un coût limité (environ 10€/mois). Cette approche me permet d'expérimenter l'ensemble de la chaîne de déploiement : configuration serveur, orchestration des services, monitoring et sauvegardes. La section suivante détaille l'implémentation concrète de cette infrastructure.

@@ -41,7 +41,7 @@ describe('PermissionsGuard', () => {
 });
 ```
 
-Les tests couvrent systématiquement permissions accordées, refusées, utilisateurs sans organisation, sessions expirées, et tentatives d'escalade de privilèges. Cette batterie de plus de 40 tests unitaires valide la robustesse du système RBAC.
+Les tests couvrent systématiquement permissions accordées, refusées, utilisateurs sans organisation, sessions expirées, et tentatives d'escalade de privilèges.
 
 ### AuthGuard
 
@@ -110,12 +110,6 @@ expect(workout.elements[1].reps).toBe(8);
 ```
 
 Cette stratégie valide l'orchestration via des programmes réalistes avec éléments mixtes. Les vérifications en cascade détectent rapidement les problèmes d'intégration entre domaines Exercise, Complex et Workout.
-
-### Validation complète des domaines métier
-
-Les tests d'intégration couvrent les trois domaines critiques (exercices, complexes, workouts) avec des patterns uniformes : nettoyage de base, création du contexte organisationnel via les seeders, puis validation des interactions entre modules. Cette approche garantit que les spécificités métier de l'haltérophilie sont correctement implémentées et que les relations entre entités fonctionnent de manière cohérente.
-
-Les fonctions de recherche font l'objet de tests particuliers car elles constituent des points d'entrée critiques pour les entraîneurs lors de la conception des programmes. Cette validation me donne confiance dans la robustesse des fonctionnalités de base.
 
 ## Conclusion
 

@@ -15,7 +15,7 @@ Cette licence copyleft garantit que toute modification reste open source, même 
 
 L'environnement repose entièrement sur Docker Compose, garantissant la reproductibilité entre postes. Cette approche résout les problèmes classiques de différences d'environnement et facilite l'onboarding des contributeurs.
 
-La stack complète (PostgreSQL, PgAdmin, Redis, Typesense) s'initialise via `docker-compose up`, créant un environnement isolé et fonctionnel en quelques minutes.
+La stack complète (PostgreSQL, PgAdmin) s'initialise via `docker-compose up`, créant un environnement isolé et fonctionnel en quelques secondes.
 
 ### Données et seeders
 
@@ -27,7 +27,7 @@ Le système de seeders automatiques peuple la base avec des données réalistes 
 
 Le README détaille la procédure d'installation :
 
-1. **Prérequis** : Node.js v20+, pnpm, Docker
+1. **Prérequis** : Node.js v22+, pnpm, Docker
 2. **Setup** : Clone, `pnpm install`, `pnpm build`, configuration `.env`
 3. **Démarrage** : `docker-compose up -d` puis `pnpm dev`
 
@@ -59,9 +59,7 @@ Cette discipline assure la traçabilité et prépare l'évolution collaborative.
 
 ### README modulaires
 
-La documentation s'organise autour de README spécialisés par public. Le README principal fournit vue d'ensemble et installation rapide, chaque module (frontend, backend, mobile) dispose de sa documentation détaillée.
-
-Cette approche modulaire maintient une documentation pertinente sans duplication. Les développeurs frontend trouvent rapidement les informations React/TypeScript, les contributeurs backend accèdent aux spécificités NestJS et MikroORM.
+La documentation s'organise autour de README spécialisés. Le README principal fournit vue d'ensemble et installation rapide, et chaque module (frontend, backend, mobile) dispose également de sa documentation détaillée.
 
 ### Documentation API Swagger
 

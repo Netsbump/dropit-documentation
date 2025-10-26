@@ -35,7 +35,7 @@ J'ai opté pour des services Dokploy indépendants plutôt qu'un stack unique, o
 
 - **PostgreSQL** : Service natif Dokploy optimisé, évitant les rate limits Docker Hub
 - **API Backend** : Service Docker avec Dockerfile multi-stage optimisé
-- **Frontend** : Site statique avec build Vite et Nginx automatique
+- **Frontend** : Service Docker avec Dockerfile multi-stage (build Vite + Nginx pour servir les fichiers statiques)
 - **Reverse Proxy** : Traefik intégré avec SSL automatique Let's Encrypt
 
 Cette architecture permet de gérer chaque composant indépendamment, facilitant debugging, monitoring, et scalabilité. L'absence de dépendances simplifie déploiements et rollbacks.
@@ -48,11 +48,9 @@ Le Dockerfile multi-stage intègre plusieurs optimisations pour la production :
 
 **Cache BuildKit pour pnpm** : L'utilisation de cache mounts accélère les rebuilds de 2-3 minutes à 30 secondes en réutilisant le store pnpm entre builds. Cette optimisation s'avère cruciale pour les itérations de développement et CI/CD.
 
-**Sécurité via utilisateur non-root** : L'exécution sous un utilisateur `nestjs` dédié (UID 1001) respecte le principe du moindre privilège et réduit la surface d'attaque en cas de compromission du container.
+**Déploiement optimisé avec pnpm deploy** : La commande `pnpm deploy` crée un dossier de déploiement contenant uniquement les dépendances de production nécessaires, réduisant encore la taille de l'image finale et éliminant les packages de développement inutiles.
 
-**Gestion des signaux avec dumb-init** : L'intégration de dumb-init garantit la propagation correcte des signaux SIGTERM/SIGINT, permettant un arrêt gracieux des containers lors des redémarrages Dokploy.
-
-**Health checks intégrés** : Un health check HTTP sur `/api/health` permet à Docker et Dokploy de détecter automatiquement les défaillances et déclencher des redémarrages, améliorant la résilience.
+**Synchronisation automatique de la base** : La commande de démarrage exécute `db:sync` qui synchronise automatiquement le schéma de base de données depuis les entités TypeScript. Cette approche convient à la phase actuelle du projet (pré-production, données de test), mais sera remplacée par le système de migrations versionnées de MikroORM avant le passage en production pour garantir un contrôle précis des changements de schéma et éviter toute perte de données. Un système de seeding optionnel (via `SEED_DB=true`) permet d'initialiser les données si nécessaire.
 
 ## Pipeline CI/CD
 
@@ -61,13 +59,10 @@ Le Dockerfile multi-stage intègre plusieurs optimisations pour la production :
 Ma stratégie Git repose sur un workflow GitFlow à deux branches : `develop` pour l'intégration continue des fonctionnalités et `main` pour la production.
 
 Branche `develop` - Intégration continue :
-Chaque pull request déclenche automatiquement un workflow CI complet : linting avec Biome, build du monorepo, vérification et application des migrations MikroORM sur une base PostgreSQL de
-test, puis exécution des tests unitaires et d'intégration. Cette validation systématique garantit que `develop` reste toujours stable et déployable.
+Chaque pull request déclenche automatiquement un workflow CI complet : linting avec Biome, build du monorepo, puis exécution des tests unitaires et d'intégration sur une base PostgreSQL de test. La CI vérifie également la présence de migrations MikroORM et les applique si elles existent, mais cette étape est actuellement skippée (phase de prototypage avec `db:sync`). Cette validation systématique garantit que `develop` reste toujours stable et déployable.
 
 Branche `main` - Livraison continue :
-Le merge manuel de `develop` vers `main` active un webhook GitHub qui notifie Dokploy. La plateforme orchestre alors le déploiement complet : build des images Docker, déploiement avec rolling
-updates Docker Swarm pour un zero-downtime, et conservation automatique des versions précédentes permettant un rollback manuel via l'interface si nécessaire. Les health checks HTTP
-post-déploiement garantissent le bon fonctionnement avant de router le trafic utilisateur.
+Le merge manuel de `develop` vers `main` active un webhook GitHub qui notifie Dokploy. La plateforme orchestre alors le déploiement complet : build des images Docker, déploiement avec rolling updates Docker Swarm pour un zero-downtime, et conservation automatique des versions précédentes permettant un rollback manuel via l'interface si nécessaire. Les health checks HTTP post-déploiement garantissent le bon fonctionnement avant de router le trafic utilisateur.
 
 Cette approche automatise les vérifications et le déploiement tout en maintenant un contrôle explicite sur le passage en production.
 
@@ -75,11 +70,7 @@ Cette approche automatise les vérifications et le déploiement tout en maintena
 
 ### Logging centralisé
 
-Dokploy agrège automatiquement les logs de tous les services dans son interface, facilitant debugging et surveillance. Cette solution basique capturant les sorties stdout/stderr permet un premier niveau de débogage mais reste limitée : absence de structuration des logs, recherche difficile, pas de corrélation entre les événements.
-
-L'implémentation d'une solution de logging structuré via Pino dans NestJS améliorerait la qualité des traces avec des logs JSON performants et des niveaux appropriés. Cette approche nécessiterait l'ajout d'une stack ELK ou similaire pour l'agrégation et la visualisation.
-
-Pour l'évolution future, j'envisage l'intégration de SignOz (alternative open-source complète avec support OpenTelemetry) ou Grafana pour un monitoring avancé avec métriques customisées et alerting automatisé.
+Dokploy agrège automatiquement les logs de tous les services dans son interface, facilitant le debugging et la surveillance. Cette solution basique suffit pour l'instant, mais l'intégration future d'outils comme SignOz permettrait un monitoring plus avancé avec métriques et alertes automatisées.
 
 ### Surveillance performances
 
@@ -99,9 +90,9 @@ L'implémentation reposera sur les fonctionnalités natives de Dokploy pour gén
 
 ### Plan de continuité
 
-En cas d'incident majeur, le plan prévoit la reconstruction complète sur un nouveau VPS en moins de 4 heures, incluant restauration des données et redirection DNS. Les objectifs de continuité sont un RTO (Recovery Time Objective) de 4 heures maximum et un RPO (Recovery Point Objective) de 1 heure maximum, adaptés aux contraintes opérationnelles d'un club sportif.
+En cas d'incident majeur, le plan prévoit la reconstruction complète sur un nouveau VPS incluant restauration des données et redirection DNS. Les objectifs de continuité sont un RTO (Recovery Time Objective) de 4 heures maximum et un RPO (Recovery Point Objective) de 1 heure maximum, adaptés aux contraintes opérationnelles d'un club sportif.
 
-L'anonymisation des données sensibles respecte les obligations RGPD en situation de crise. La procédure complète est documentée dans le code source de l'application.
+L'anonymisation des données sensibles respectera les obligations RGPD en situation de crise. La procédure complète est documentée dans le code source de l'application.
 
 ### Configuration DNS
 
@@ -112,13 +103,7 @@ La configuration DNS pour `dropit-app.fr` structure l'infrastructure :
 - `api.dropit-app.fr` (A) → API NestJS containerisée
 - `dokploy.dropit-app.fr` (A) → Interface d'administration
 
-Cette segmentation facilite la gestion des certificats SSL automatiques et prépare l'évolution architecturale. Le TTL à 300 secondes offre un compromis entre performances et flexibilité.
-
-### Défis techniques rencontrés
-
-**Rate limits Docker Hub** : Les builds fréquents ont atteint la limite de 100 pulls anonymes/6h. Un compte Docker Hub gratuit (200 pulls/6h) et l'authentification ont résolu cette contrainte.
-
-**Firewall Infomaniak** : Le port 3000 du panel d'administration Dokploy était inaccessible depuis Internet. La configuration via le panel Infomaniak (VPS → Firewall → TCP 3000) a corrigé le problème, soulignant l'importance de vérifier les firewalls à tous les niveaux.
+Cette segmentation facilite la gestion des certificats SSL automatiques et prépare l'évolution architecturale.
 
 ## Architecture de production déployée
 
@@ -130,10 +115,8 @@ Cette architecture VPS avec services containerisés (API NestJS, Frontend Nginx,
 
 ### Scaling horizontal
 
-L'architecture Docker Swarm facilite l'évolution vers un clustering multi-nodes si la charge augmente. Cette transition s'effectuerait en ajoutant des workers au swarm existant, permettant la répartition automatique des services.
+Si la charge augmente, l'architecture conteneurisée permet de facilement répliquer les services (API, base de données) via l'interface Dokploy. Docker Swarm gère automatiquement la répartition de ces réplicas, permettant d'absorber plus de trafic sans reconfiguration complexe.
 
 ### Optimisations futures
 
-L'implémentation de CDN pour les assets statiques, Redis Cluster pour la haute disponibilité, et un environnement de staging complet constituent les prochaines étapes d'amélioration.
-
-Cette infrastructure de production opérationnelle me permet maintenant de me concentrer sur les aspects organisationnels et collaboratifs du projet. La section suivante détaille comment j'ai structuré le développement pour faciliter la contribution et la maintenance à long terme. 
+Des optimisations comme l'ajout d'un système de cache (Redis) ou d'un CDN pour accélérer le chargement des fichiers statiques pourraient être ajoutées si le besoin se présente avec l'augmentation du trafic.
