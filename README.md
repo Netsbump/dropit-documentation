@@ -7,15 +7,17 @@
     <img src="public/assets/logo-dropit.png" alt="Logo DropIt" width="300" height="300">
   </a>
 
-<h3 align="center">DropIt Documentation : Application de Club d'Haltérophilie</h3>
+<h3 align="center">DropIt : Application de Club d'Haltérophilie</h3>
 
   <p align="center">
-    La documentation officielle du projet DropIt, une application web et mobile dédiée à la gestion des clubs d'haltérophilie.
-    Ce projet est développé dans le cadre de la préparation du titre professionnel
-    "Concepteur Développeur d'Applications" (RNCP Niveau 6).
+    Landing page et documentation technique complète du projet DropIt, une application web et mobile dédiée à la gestion des clubs d'haltérophilie.
+    <br />
+    Développé dans le cadre du titre professionnel "Concepteur Développeur d'Applications" (RNCP Niveau 6).
     <br />
     <br />
-    <a href="https://docs-dropit.pages.dev/">Voir la Documentation</a>
+    <a href="https://docs-dropit.pages.dev/">Landing Page</a>
+    ·
+    <a href="https://docs-dropit.pages.dev/introduction/presentation/">Documentation Technique</a>
     ·
     <a href="https://github.com/Netsbump/dropit-documentation/issues">Signaler un Manque</a>
     ·
