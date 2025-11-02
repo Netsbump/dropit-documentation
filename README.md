@@ -4,7 +4,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/Netsbump/dropit-documentation">
-    <img src="chemin-vers-votre-logo-si-disponible" alt="Logo" width="80" height="80">
+    <img src="public/assets/logo-dropit.png" alt="Logo DropIt" width="300" height="300">
   </a>
 
 <h3 align="center">DropIt Documentation : Application de Club d'Haltérophilie</h3>
